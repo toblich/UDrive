@@ -12,16 +12,25 @@ Server::~Server() {
 }
 
 int Server::eventHandler(mg_connection* connection, mg_event event) {
-	cout << "eventHandler" << endl;
 	switch (event) {
 		case MG_AUTH: return MG_TRUE;
-		case MG_REQUEST:
-			mg_printf_data(connection, "Hello! Requested URI is [%s]", connection->uri);
-		return MG_TRUE;
+		case MG_REQUEST: {
+			string uri = string(connection->uri);
+			mg_printf_data(connection, "Hola!: [%s]", Server::mensajeSegunURI(uri).c_str());
+			return MG_TRUE;
+		}
 		default: return MG_FALSE;
 	}
 }
 
 void Server::pollServer(int milliseconds) {
 	mg_poll_server(server, milliseconds);
+}
+
+string Server::mensajeSegunURI(string uri) {
+	if (uri == "/")
+		return "Root";
+	if (uri == "/santi")
+		return "Roro";
+	else return "Te equivocaste MUAJAJAJAJA";
 }
