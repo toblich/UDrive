@@ -16,6 +16,6 @@ install:
 
 
 script:
-  - g++ src/main.cpp -o holaMundo
-  - ./holaMundo
+  - g++ src/main.cpp -o UDrive
+
 
