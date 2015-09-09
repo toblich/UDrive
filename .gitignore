@@ -37,3 +37,5 @@ CTestTestfile*
 build/*
 Testing/*
 files/*
+.cproject
+.project
