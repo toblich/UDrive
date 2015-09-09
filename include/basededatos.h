@@ -21,9 +21,12 @@ private:
 public:
 	BaseDeDatos();
 	~BaseDeDatos();
-	void put(std::string key, std::string value);
+	bool put(std::string key, std::string value);
 	std::string get(std::string key);
 	void erase(std::string key);
+	void modify(std::string key, std::string value);
+	void deleteBD();
+
 };
 
 #endif /* BASEDEDATOS_H_ */
