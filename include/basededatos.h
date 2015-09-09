@@ -8,31 +8,21 @@
 #include <rocksdb/slice.h>
 #include <rocksdb/options.h>
 
+using namespace rocksdb;
 
-
-std::string kDBPath = "DB/basededatos";
+std::string DBPath = "DB/basededatos";
 
 class BaseDeDatos {
 
 private:
-	  rocksdb::DB* db;
-	  rocksdb::Options options;
+	  DB* db;
+	  Options options;
 
 public:
 	BaseDeDatos();
-//	{
-//		  // Optimize RocksDB. This is the easiest way to get RocksDB to perform well
-//		  options.IncreaseParallelism();
-//		  options.OptimizeLevelStyleCompaction();
-//		  // create the DB if it's not already present
-//		  options.create_if_missing = true;
-//
-//		  // open DB
-//		  Status s = DB::Open(options, kDBPath, &db);
-//		  std::cout << s.ToString() << std::endl;
-//		  assert(s.ok());
-//	}
 	~BaseDeDatos();
+	void put(std::string key, std::string value);
+	std::string get(std::string key);
 
 };
 
