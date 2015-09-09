@@ -16,6 +16,6 @@ install:
 
 
 script:
-  - g++ src/main.cpp -o UDrive
+  - g++ src/*.cpp -I./src -o UDrive
 
 
