@@ -10,7 +10,7 @@
 
 using namespace rocksdb;
 
-std::string DBPath = "DB/basededatos";
+const std::string path = "DB";
 
 class BaseDeDatos {
 
@@ -23,7 +23,7 @@ public:
 	~BaseDeDatos();
 	void put(std::string key, std::string value);
 	std::string get(std::string key);
-
+	void erase(std::string key);
 };
 
 #endif /* BASEDEDATOS_H_ */

@@ -1,15 +1,14 @@
 #include "basededatos.h"
 
 BaseDeDatos::BaseDeDatos(){
-	// Optimize RocksDB. This is the easiest way to get RocksDB to perform well
+	// Para optimizar RocksDB.
 	options.IncreaseParallelism();
 	options.OptimizeLevelStyleCompaction();
-	// create the DB if it's not already present
+
 	options.create_if_missing = true;
 
-	// open DB
-	Status s = DB::Open(options, kDBPath, &db);
-	if(!s.ok()) std::cout << s.ToString() << std::endl;
+	Status s = DB::Open(options, path, &db);
+	if(!s.ok()) std::cout << "Constructor: " << s.ToString() << std::endl;
 }
 
 BaseDeDatos::~BaseDeDatos(){
@@ -18,12 +17,20 @@ BaseDeDatos::~BaseDeDatos(){
 
 void BaseDeDatos::put(std::string key, std::string value) {
 	Status s = db->Put(WriteOptions(), key, value);
-	if(!s.ok()) std::cout << s.ToString() << std::endl;
+	if (!s.ok()) std::cout << "Put: " << s.ToString() << std::endl;
 }
 
 std::string BaseDeDatos::get(std::string key) {
 	std::string value;
 	Status s = db->Get(ReadOptions(), key, &value);
-	if(!s.ok()) std::cout << s.ToString() << std::endl;
-	return value;
+	if (!s.ok()) std::cout << "Get: " << s.ToString() << std::endl;
+	if (s.IsNotFound()) {
+		std::cout << "No se encontro la clave " << key << " en la base de datos." << std::endl;
+		return "";
+	} else return value;
+}
+
+void BaseDeDatos::erase(std::string key) {
+	Status s = db->Delete(WriteOptions(), key);
+	if (!s.ok()) std::cout << "Erase: " << s.ToString() << std::endl;
 }
