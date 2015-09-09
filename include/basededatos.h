@@ -1,14 +1,21 @@
 #ifndef BASEDEDATOS_H_
 #define BASEDEDATOS_H_
 
-#include <string>
-#include <iostream>
+#include "logger.h"
+//#include <string>
+//#include <iostream>
 
 #include <rocksdb/db.h>
 #include <rocksdb/slice.h>
 #include <rocksdb/options.h>
 
-using namespace rocksdb;
+//using namespace rocksdb;
+
+using rocksdb::DB;
+using rocksdb::Options;
+using rocksdb::Status;
+using rocksdb::WriteOptions;
+using rocksdb::ReadOptions;
 
 const std::string path = "DB";
 
