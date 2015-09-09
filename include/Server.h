@@ -19,6 +19,8 @@ public:
 
 private:
 	mg_server* server;
+
+	static void requestHandler(mg_connection* connection);
 };
 
 #endif /* SERVER_H_ */
