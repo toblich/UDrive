@@ -3,6 +3,7 @@
 
 #include <string>
 #include <iostream>
+#include <fstream>
 #include "mongoose.h"
 
 using namespace std;
@@ -21,6 +22,10 @@ private:
 	mg_server* server;
 
 	static void requestHandler(mg_connection* connection);
+	static void GETHandler(mg_connection* connection);
+	static void PUTHandler(mg_connection* connection);
+	static void POSTHandler(mg_connection* connection);
+	static void DELETEHandler(mg_connection* connection);
 };
 
 #endif /* SERVER_H_ */
