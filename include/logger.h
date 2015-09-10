@@ -18,6 +18,7 @@ const int INFO 	= 2;
 const int DEBUG = 3;
 const int TRACE = 4;
 
+const char* NOMBRE_ARCH_LOG = "files/log.txt";
 
 class Logger {
 

@@ -1,0 +1,23 @@
+{ 
+	"imagen_fondo": "imagenes/fog_nyc_2.jpg",
+	"personaje": {
+		"x": 42.0,
+		"y": 35.0
+	},
+	"objetos": [
+		{
+			"tipo": "rect",
+			"alto": 5.0, 
+			"rot": 45, 
+			"estatico": false 
+		}, 
+		{
+			"tipo": "rect",
+			"alto": 5.0, 
+			"rot": 90, 
+			"estatico": false 
+		} 
+	],
+	"altopx": 600,
+	"anchoun": 80.0
+}

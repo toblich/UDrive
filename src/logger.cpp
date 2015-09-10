@@ -1,7 +1,5 @@
 #include "logger.h"
 
-const char* NOMBRE_ARCH_LOG = "files/logger/log.txt";
-
 Logger::Logger() {
 	nivelLogger = NIVEL_LOGGER;
 }
