@@ -3,7 +3,6 @@
 
 #include <string.h>
 #include <iostream>
-#include <stdio.h>
 #include <fstream>
 #include <ctime>
 
@@ -17,7 +16,6 @@ const int WARN 	= 1;
 const int INFO 	= 2;
 const int DEBUG = 3;
 const int TRACE = 4;
-
 
 class Logger {
 

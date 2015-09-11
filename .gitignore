@@ -40,3 +40,6 @@ files/*
 Debug/*
 .*project
 /Debug/
+.cproject
+.project
+DB/*
