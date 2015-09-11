@@ -1,4 +1,5 @@
 #include "parserJson.h"
+#include "logger.h"
 
 using std::string;
 using namespace Json;
@@ -17,8 +18,9 @@ string ParserJson::verificarString(string key, Value raiz) {
 	if (not parametro.isNull() and (parametro.isString() and parametro.asString() != "NO")){
 		value = parametro.asString();
 	} else {
-		//TODO: Loguear como warning de valor vacio/invalido
-		std::cout << "Parametro " << key << " invalido." << std::endl;
+		Logger logger;
+		string error = "Parametro de tipo string  \"" + key + "\" invalido o inexistente en un Json. Se asigna el valor \"\" (vacio) para esta key.";
+		logger.loggear(error, WARN);
 		value = "";
 	}
 	return value;
@@ -30,8 +32,9 @@ double ParserJson::verificarDouble(string key, Value raiz){
 	if (not parametro.isNull() and parametro.isDouble()){
 		value = parametro.asDouble();
 	} else {
-		//TODO: Loguear como warning de valor vacio
-		std::cout << "Parametro " << key << " invalido." << std::endl;
+		Logger logger;
+		string error = "Parametro de tipo double \"" + key + "\" invalido o inexistente en un Json. Se asigna el valor \"0\" (cero) para esta key.";
+		logger.loggear(error, WARN);
 		value = 0;
 	}
 	return value;
@@ -111,8 +114,9 @@ MetadatoArchivo ParserJson::deserializarMetadatoArchivo(string json) {
 				etiquetas.push_back(etiq[i].asString());
 			}
 		} else {
-			//TODO: Loguear como warning de invalido
-			std::cout << "Parametro etiquetas invalido." << std::endl;
+			Logger logger;
+			string error = "Parametro \"etiquetas\" de un metadato de archivo invalido o inexistente en un Json. No se le asignan etiquetas al mismo.";
+			logger.loggear(error, WARN);
 		}
 		metadatos.etiquetas = etiquetas;
 
@@ -126,13 +130,15 @@ MetadatoArchivo ParserJson::deserializarMetadatoArchivo(string json) {
 				usuarios.push_back(usu[i].asString());
 			}
 		} else {
-			//TODO: Loguear como warning de invalido
-			std::cout << "Parametro usuarios invalido." << std::endl;
+			Logger logger;
+			string error = "Parametro \"usuarios habilitados\" de un metadato de archivo invalido o inexistente en un Json. No se le asignan usuarios habilitados al mismo.";
+			logger.loggear(error, WARN);
 		}
 		metadatos.usuariosHabilitados = usuarios;
 	} else {
-		//TODO: Loguear como warning de invalido
-		std::cout << "Fallo el parseo del json" << std::endl;
+		Logger logger;
+		string error = "Fallo el parseo de un Json metadato de archivo.";
+		logger.loggear(error, WARN);
 	}
 	return metadatos;
 }
@@ -153,8 +159,16 @@ MetadatoUsuario ParserJson::deserializarMetadatoUsuario(string json) {
 			metadatos.ultimaUbicacion.latitud = this->verificarDouble("latitud", ubicacion);
 			metadatos.ultimaUbicacion.longitud = this->verificarDouble("longitud", ubicacion);
 		} else {
-			//TODO: Loguear como warning de invalido
+			Logger logger;
+			string error = "Parametro \"ultima ubicacion\" de un metadato de usuario invalido o inexistente en un Json. Se le asigna la ubicacion (0,0) al mismo.";
+			logger.loggear(error, WARN);
+			metadatos.ultimaUbicacion.latitud = 0;
+			metadatos.ultimaUbicacion.longitud = 0;
 		}
+	} else {
+		Logger logger;
+		string error = "Fallo el parseo de un Json metadato de usuario.";
+		logger.loggear(error, WARN);
 	}
 	return metadatos;
 }
