@@ -1,11 +1,13 @@
-#include <iostream>
-#include "basededatos.h"
-
 #include "basededatos.h"
 
 using namespace std;
 
 int main(int argc, char* argv[]) {
+	Logger* logger = new Logger();
+	logger->escribirHoraEnElLog();
+	delete logger;
+
+
 	BaseDeDatos *bd = new BaseDeDatos();
 
 	bd->put("key1", "value");

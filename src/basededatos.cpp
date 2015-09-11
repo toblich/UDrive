@@ -2,7 +2,6 @@
 
 BaseDeDatos::BaseDeDatos(){
 	Logger logger;
-	logger.escribirHoraEnElLog();
 	// Para optimizar RocksDB.
 	options.IncreaseParallelism();
 	options.OptimizeLevelStyleCompaction();

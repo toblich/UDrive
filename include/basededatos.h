@@ -2,8 +2,6 @@
 #define BASEDEDATOS_H_
 
 #include "logger.h"
-//#include <string>
-//#include <iostream>
 
 #include <rocksdb/db.h>
 #include <rocksdb/slice.h>
