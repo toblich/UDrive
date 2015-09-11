@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 
 # Options. Turn on with 'cmake -Dmyvarname=ON'.
-option(testRocks "Build all tests." OFF) # Makes boolean 'test' available.
+option(test "Build all tests." OFF) # Makes boolean 'test' available.
 
 project(UDrive)
 
@@ -11,14 +11,12 @@ include_directories(include/)
 #Agrego todos los archivos de SOURCE
 file(GLOB SOURCE "src/*" )
 
-#Agrego todos los archivos de SOURCE
-#file(GLOB SOURCEC "src/*.c")
-
 add_executable(udrive ${SOURCE})
 
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAG} -g -std=c++11 -pthread")
 
+#Agrego librerias externas
 include_directories(librocksdb)
 add_library(librocksdb STATIC IMPORTED)
 set_property(TARGET librocksdb PROPERTY IMPORTED_LOCATION /usr/local/lib/librocksdb.a)
@@ -39,14 +37,17 @@ include_directories(libgflags)
 add_library(libgflags STATIC IMPORTED)
 set_property(TARGET libgflags PROPERTY IMPORTED_LOCATION /usr/lib/x86_64-linux-gnu/libgflags.a)
 
+#Linkeo librerias externas al ejecutable
 target_link_libraries(udrive librocksdb libz libsnappy libbz2 libgflags)
 
 if(test)
 	enable_testing()
 
-	set (SOURCE_TEST Addition.cpp Multiply.cpp Addition_Test.cpp Multiply_Test.cpp)
+	#Agrego todos los archivos de TEST
+	file(GLOB SOURCE_TEST "test/*" )
 	add_executable(unitTest ${SOURCE_TEST})
 
+	#Agrego librerias externas
 	find_package(GTest REQUIRED)
 	include_directories(/usr/include/gtest)
 
@@ -58,5 +59,6 @@ if(test)
 	add_library(libgtest STATIC IMPORTED)
 	set_property(TARGET libgtest PROPERTY IMPORTED_LOCATION /usr/lib/libgtest.a)
 
+	#Linkeo librerias externas al ejecutable de test
 	target_link_libraries(unitTest libgtest libgtest_main libsnappy)
 endif()
