@@ -7,11 +7,12 @@ project(UDrive)
 
 #Incluyo las librerias de headers
 include_directories(include/)
+file(GLOB INCLUDES "include/*" )
 
 #Agrego todos los archivos de SOURCE
 file(GLOB SOURCE "src/*" )
 
-add_executable(udrive ${SOURCE})
+add_executable(udrive ${SOURCE} ${INCLUDES})
 
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAG} -g -std=c++11 -pthread")
@@ -43,9 +44,15 @@ target_link_libraries(udrive librocksdb libz libsnappy libbz2 libgflags)
 if(test)
 	enable_testing()
 
+	#Incluyo las librerias de headers
+	include_directories(include/)
+
 	#Agrego todos los archivos de TEST
 	file(GLOB SOURCE_TEST "test/*" )
-	add_executable(unitTest ${SOURCE_TEST})
+	set(SOURCE2 src/basededatos.cpp src/jsoncpp.cpp src/logger.cpp src/mongoose.c src/parserJson.cpp src/Server.cpp)
+	#file(GLOB SOURCE2 "src/*" )
+	#list(REMOVE_ITEM SOURCE2 src/main.cpp)
+	add_executable(unitTest ${SOURCE2} ${SOURCE_TEST} ${INCLUDES})
 
 	#Agrego librerias externas
 	find_package(GTest REQUIRED)
@@ -60,5 +67,5 @@ if(test)
 	set_property(TARGET libgtest PROPERTY IMPORTED_LOCATION /usr/lib/libgtest.a)
 
 	#Linkeo librerias externas al ejecutable de test
-	target_link_libraries(unitTest libgtest libgtest_main libsnappy)
+	target_link_libraries(unitTest libgtest libgtest_main librocksdb libz libsnappy libbz2 libgflags)
 endif()
