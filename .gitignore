@@ -43,3 +43,4 @@ Debug/*
 .cproject
 .project
 DB/*
+.settings
