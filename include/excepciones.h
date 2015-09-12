@@ -12,6 +12,7 @@ class KeyNotFound : public std::exception {
     std::string err_msg;
 
   public:
+    KeyNotFound() : err_msg("") {};
     KeyNotFound(const char *msg) : err_msg(msg) {};
     KeyNotFound(std::string msg) { err_msg = msg; };
     KeyNotFound(const KeyNotFound& original) : err_msg(original.what()) {};

@@ -11,9 +11,10 @@ BaseDeDatos::BaseDeDatos(){
 
 	Status s = DB::Open(options, path, &db);
 	if(!s.ok()) {
-		logger.loggear("No se pudo crear la Base de Datos." + s.ToString(), ERROR);
+		logger.loggear("No se pudo crear la Base de Datos con path " + path + ". " + s.ToString(), ERROR);
+		throw runtime_error("No se pudo crear la base de datos con path: " + path);
 	} else {
-		logger.loggear("Se creo satisfactoriamente la Base de Datos.", INFO);
+		logger.loggear("Se creo satisfactoriamente la Base de Datos con path " + path, INFO);
 	}
 }
 
@@ -61,13 +62,13 @@ void BaseDeDatos::erase(string key) {
 	string value;
 	Status s = db->Get(ReadOptions(), key, &value);
 	if (s.IsNotFound()) {
-		logger.loggear("Se quiso borrar la clave " + key + " inexistente en la base de datos", WARN);
+		logger.loggear("Se quiso borrar la clave \"" + key + "\" inexistente en la base de datos", WARN);
 		throw KeyNotFound("erase: " + key);
 	}
 	s = db->Delete(WriteOptions(), key);
 	if (!s.ok()) {
 		std::cout << "Erase: " << s.ToString() << std::endl;
-		logger.loggear("No se pudo borrar la clave " + key + " de la base de datos", ERROR);
+		logger.loggear("No se pudo borrar la clave \"" + key + "\" de la base de datos", ERROR);
 		throw runtime_error("erase " + key);
 	}
 	logger.loggear("Se borro la clave (" + key + ") de la base de datos." , TRACE);
@@ -78,7 +79,7 @@ void BaseDeDatos::modify(string key, string value) {
 	string valor;
 	Status s = db->Get(ReadOptions(), key, &valor);
 	if(s.IsNotFound()) {
-		logger.loggear("No se encontra la clave (" + key + ") en la base de dattos. Se intentaba modificar el valor (" + valor + ")." , WARN);
+		logger.loggear("No se encuentra la clave (" + key + ") en la base de datos. Se intentaba modificar el valor (" + valor + ")." , WARN);
 		throw KeyNotFound("modifiy: " + key);
 	} else if (not s.ok()){
 		logger.loggear("No se pudo modificar el valor en la clave " + key + " de la base de datos", ERROR);
