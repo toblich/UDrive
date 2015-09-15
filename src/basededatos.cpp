@@ -2,21 +2,24 @@
 
 using std::string;
 
-BaseDeDatos::BaseDeDatos(){
+BaseDeDatos::BaseDeDatos() : BaseDeDatos(path) {}
+
+BaseDeDatos::BaseDeDatos(string nombre) {
 	Logger logger;
 	// Para optimizar RocksDB.
 	options.IncreaseParallelism();
 	options.OptimizeLevelStyleCompaction();
 	options.create_if_missing = true;
 
-	Status s = DB::Open(options, path, &db);
+	Status s = DB::Open(options, nombre, &db);
 	if(!s.ok()) {
-		logger.loggear("No se pudo crear la Base de Datos con path " + path + ". " + s.ToString(), ERROR);
-		throw runtime_error("No se pudo crear la base de datos con path: " + path);
+		logger.loggear("No se pudo crear la Base de Datos con path " + nombre + ". " + s.ToString(), ERROR);
+		throw runtime_error("No se pudo crear la base de datos con path: " + nombre);
 	} else {
-		logger.loggear("Se creo satisfactoriamente la Base de Datos con path " + path, INFO);
+		logger.loggear("Se creo satisfactoriamente la Base de Datos con path " + nombre, INFO);
 	}
 }
+
 
 BaseDeDatos::~BaseDeDatos(){
 	Logger logger;

@@ -26,6 +26,7 @@ private:
 
 public:
 	BaseDeDatos();
+	BaseDeDatos(string nombre);
 	~BaseDeDatos();
 	bool put(std::string key, std::string value);	/* Throws: runtime_error */
 	std::string get(std::string key);				/* Throws: runtime_error, KeyNotFound */
