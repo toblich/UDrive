@@ -11,8 +11,8 @@ class ManejadorDeUsuariosTest : public ::testing::Test {
 	  passwords = new BaseDeDatos("passwords");
 	  manejador = new ManejadorDeUsuarios(perfiles, sesiones, passwords);
 	  username = "tobi";
-	  password = "pancho";
-	  perfil = "{\"pablo\": \"santi\"}";
+	  password = "pancheitor";
+	  perfil = "{\"pablo\": \"santi\"}";	// TODO: cambiar a perfil completo
 	  manejador->registrarUsuario(username, password, perfil);
   }
 
@@ -70,4 +70,23 @@ TEST_F(ManejadorDeUsuariosTest, noDeberiaCerrarSesionDeTokenErroneo) {
 TEST_F(ManejadorDeUsuariosTest, noDeberiaCerrarSesionConTokenDeOtroUsuario) {
 	string token = manejador->iniciarSesion(username);
 	EXPECT_FALSE(manejador->cerrarSesion(token, "otro"));
+}
+
+TEST_F(ManejadorDeUsuariosTest, noDeberiaPermitirCrearUsuarioConUsernameConBarra) {
+	string uname1 = "santi/tobi";
+	string uname2 = "/";
+	EXPECT_FALSE(manejador->registrarUsuario(uname1, password, perfil));
+	EXPECT_FALSE(manejador->registrarUsuario(uname2, password, perfil));
+}
+
+TEST_F(ManejadorDeUsuariosTest, noDeberiaPermitirCrearUsuarioConUsernameConEspacio) {
+	string uname1 = "santi tobi";
+	string uname2 = " ";
+	EXPECT_FALSE(manejador->registrarUsuario(uname1, password, perfil));
+	EXPECT_FALSE(manejador->registrarUsuario(uname2, password, perfil));
+}
+
+TEST_F(ManejadorDeUsuariosTest, noDeberiaPermitirCrearUsuarioConPasswordCorta) {
+	string passw = "corta";
+	EXPECT_FALSE(manejador->registrarUsuario(username, passw, perfil));
 }
