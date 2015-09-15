@@ -16,17 +16,18 @@ using rocksdb::Status;
 using rocksdb::WriteOptions;
 using rocksdb::ReadOptions;
 
-const std::string path = "DB";
+const std::string defaultPath = "DB";
 
 class BaseDeDatos {
 
 private:
 	  DB* db;
+	  std::string path;
 	  Options options;
 
 public:
-	BaseDeDatos();
-	BaseDeDatos(string nombre);
+	BaseDeDatos();									/* Throws: runtime_error */
+	BaseDeDatos(std::string path);					/* Throws: runtime_error */
 	~BaseDeDatos();
 	bool put(std::string key, std::string value);	/* Throws: runtime_error */
 	std::string get(std::string key);				/* Throws: runtime_error, KeyNotFound */

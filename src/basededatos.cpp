@@ -2,21 +2,22 @@
 
 using std::string;
 
-BaseDeDatos::BaseDeDatos() : BaseDeDatos(path) {}
+BaseDeDatos::BaseDeDatos() : BaseDeDatos(defaultPath) {}
 
-BaseDeDatos::BaseDeDatos(string nombre) {
+BaseDeDatos::BaseDeDatos(string path) {
+	this->path = path;
 	Logger logger;
 	// Para optimizar RocksDB.
 	options.IncreaseParallelism();
 	options.OptimizeLevelStyleCompaction();
 	options.create_if_missing = true;
 
-	Status s = DB::Open(options, nombre, &db);
+	Status s = DB::Open(options, path, &db);
 	if(!s.ok()) {
-		logger.loggear("No se pudo crear la Base de Datos con path " + nombre + ". " + s.ToString(), ERROR);
-		throw runtime_error("No se pudo crear la base de datos con path: " + nombre);
+		logger.loggear("No se pudo crear la Base de Datos con path " + path + ". " + s.ToString(), ERROR);
+		throw runtime_error("No se pudo crear la base de datos con path: " + path);
 	} else {
-		logger.loggear("Se creo satisfactoriamente la Base de Datos con path " + nombre, INFO);
+		logger.loggear("Se creo satisfactoriamente la Base de Datos con path " + path, INFO);
 	}
 }
 
@@ -93,7 +94,8 @@ void BaseDeDatos::modify(string key, string value) {
 }
 
 void BaseDeDatos::deleteBD() {
-	system("exec rm -r DB");
+	string command = "exec rm -r " + path;
+	system(command.c_str());
 	Logger logger;
 	logger.loggear("Se eliminaron los datos persistentes de la base de datos." , TRACE);
 
