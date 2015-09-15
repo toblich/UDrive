@@ -28,6 +28,12 @@ TEST_F(DBTest, deberiaDevolverFalseAlRepetirPutDeMismaClave) {
 	EXPECT_FALSE(db->put("key", "2"));
 }
 
+TEST_F(DBTest, deberiaPoderModificarElValueDeUnaKeyExistente) {
+	db->put("key", "value");
+	db->modify("key", "hola");
+	EXPECT_EQ("hola", db->get("key"));
+}
+
 
 /* Tests de Excepciones */
 
@@ -42,5 +48,3 @@ TEST_F(DBTest, deberiaLanzarKeyNotFoundAlEliminarClaveInexistente) {
 TEST_F(DBTest, deberiaLanzarKeyNotFoundAlModificarClaveInexistente) {
 	EXPECT_THROW(db->modify("key", "value2"), KeyNotFound);
 }
-
-
