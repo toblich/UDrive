@@ -23,7 +23,9 @@ bool ManejadorDeUsuarios::validarLogin(string username, string password) {
 }
 
 bool ManejadorDeUsuarios::registrarUsuario(string username, string password, string perfil) {
-	//TODO validar datos de entrada
+	if (not esUsernameValido(username)) return false;
+	if (not esPasswordValida(password)) return false;
+	if (not esPerfilValido(perfil)) return false;
 	return passwords->put(username, password) and perfiles->put(username, perfil);
 }
 
@@ -57,4 +59,26 @@ string ManejadorDeUsuarios::generarToken(string username, time_t timestamp) {
 	string time = to_string(timestamp);
 	hash<string> funcionHash;
 	return to_string(funcionHash(username + time));
+}
+
+bool ManejadorDeUsuarios::esPerfilValido(string perfil) {
+	return true; //TODO: implementar
+}
+
+bool ManejadorDeUsuarios::esUsernameValido(string username) {
+	for (int i = 0; i < username.size(); i++){
+		char c = username[i];
+		if (esCaracterInvalido(c))
+			return false;
+	}
+	return true;
+}
+
+bool ManejadorDeUsuarios::esCaracterInvalido(char c) {
+	return c == '/' or c == ' ';
+}
+
+bool ManejadorDeUsuarios::esPasswordValida(string password) {
+	// TODO: forzar Alfanumerica?
+	return (password.size() >= 8);
 }

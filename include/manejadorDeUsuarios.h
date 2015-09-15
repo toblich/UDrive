@@ -29,6 +29,10 @@ private:
 	BaseDeDatos* sesiones;
 	BaseDeDatos* passwords;
 	string generarToken(string username, time_t timestamp);
+	bool esCaracterInvalido(char c);
+	bool esPerfilValido(string perfil);
+	bool esUsernameValido(string username);
+	bool esPasswordValida(string password);
 };
 
 #endif /* INCLUDE_MANEJADORDEUSUARIOS_H_ */
