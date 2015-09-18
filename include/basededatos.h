@@ -1,8 +1,8 @@
 #ifndef BASEDEDATOS_H_
 #define BASEDEDATOS_H_
 
+#include "bd.h"
 #include "logger.h"
-#include "excepciones.h"
 
 #include <rocksdb/db.h>
 #include <rocksdb/slice.h>
@@ -18,7 +18,7 @@ using rocksdb::ReadOptions;
 
 const std::string defaultPath = "DB";
 
-class BaseDeDatos {
+class BaseDeDatos : public BD {
 
 private:
 	  DB* db;
