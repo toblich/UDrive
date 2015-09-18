@@ -28,11 +28,11 @@ private:
 	BaseDeDatos* passwords;
 
 	static void closeHandler(mg_connection* connection);
-	static void requestHandler(mg_connection* connection);
-	static void GETHandler(mg_connection* connection);
-	static void PUTHandler(mg_connection* connection);
-	static void POSTHandler(mg_connection* connection);
-	static void DELETEHandler(mg_connection* connection);
+	static enum mg_result requestHandler(mg_connection* connection);
+	static enum mg_result GETHandler(mg_connection* connection);
+	static enum mg_result PUTHandler(mg_connection* connection);
+	static enum mg_result POSTHandler(mg_connection* connection);
+	static enum mg_result DELETEHandler(mg_connection* connection);
 };
 
 #endif /* SERVER_H_ */
