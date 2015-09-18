@@ -3,7 +3,7 @@
 
 #include "server.h"
 #include "parserJson.h"
-#include <queue>
+#include <vector>
 #include <unistd.h>
 #include <sys/stat.h>
 
@@ -12,7 +12,7 @@ class ManejadorArchivosYMetadatos {
 private:
 	BaseDeDatos* dbMetadatos;
 	char homeDirectory[1024];
-	std::queue<std::string> parsearDirectorios(std::string pathCompleto);
+	std::vector<std::string> parsearDirectorios(std::string pathCompleto);
 
 public:
 	ManejadorArchivosYMetadatos(BaseDeDatos* dbMetadatos);

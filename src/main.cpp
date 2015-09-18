@@ -17,6 +17,9 @@ int main(int argc, char** argv) {
 
 	cout << "Terminado el creado de carpetas." << endl;
 
+	cout << endl;
+	manejador.subirArchivo("pablo", "hola/puto/juan.txt", "hola mi amor", 12);
+
 	delete db;
 
 
