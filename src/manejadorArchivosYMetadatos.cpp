@@ -2,10 +2,12 @@
 
 //TODO: LOGUEAR!!!!!
 
-ManejadorArchivosYMetadatos::ManejadorArchivosYMetadatos(BaseDeDatos* dbMetadatos) {
+ManejadorArchivosYMetadatos::ManejadorArchivosYMetadatos(BaseDeDatos* dbMetadatos): ManejadorArchivosYMetadatos(dbMetadatos, defaultFileSystem){}
+
+ManejadorArchivosYMetadatos::ManejadorArchivosYMetadatos(BaseDeDatos* dbMetadatos, std::string path) {
 	this->dbMetadatos = dbMetadatos;
+	this->pathFileSystem = path;
     getcwd(homeDirectory, sizeof(homeDirectory));
-    cout << "Home del proyecto: " << homeDirectory << endl;
 }
 
 ManejadorArchivosYMetadatos::~ManejadorArchivosYMetadatos() {
@@ -39,17 +41,19 @@ std::vector<std::string> ManejadorArchivosYMetadatos::parsearDirectorios(std::st
 void ManejadorArchivosYMetadatos::crearCarpeta(std::string path) {
 	struct stat sb;
 	// Agrego el FileSystem para que sea la "raiz"
-	string pathCompleto = "FileSystem/" + path;
+	string pathCompleto = this->pathFileSystem + "/" + path;
 	std::vector<std::string> directorios = parsearDirectorios(pathCompleto);
-	std::string acum = "";
+	std::string directorioAcumulado = "";
 	int size = directorios.size();
 	for (int i = 0; i < size; i++){
 		std::string directorio = directorios[i];
-		acum += (directorio + "/");
+		std::string directorioPadre = directorioAcumulado;
+		directorioAcumulado += (directorio + "/");
 		// Me fijo si existe la carpeta, sino la creo
-		if (! (stat(acum.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode)) ){
-			cout << "El directorio " << directorio << " no existe. Creandolo ..." << endl;
-			mkdir(acum.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+		if (! (stat(directorioAcumulado.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode)) ){
+			mkdir(directorioAcumulado.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+			Logger logger;
+			logger.loggear("La carpeta " + directorio + " no existe dentro de " + directorioPadre +" por lo que ha sido creada.", INFO);
 		}
 	}
 }
@@ -71,9 +75,16 @@ void ManejadorArchivosYMetadatos::subirArchivo(std::string username,
 	}
 	//Verifico que existan todas las carpetas y sino las creo
 	crearCarpeta(pathSinArchivo);
-	std::string pathConFileSystem = "FileSystem/" + pathCompleto;
+	std::string pathConFileSystem = this->pathFileSystem + "/" + pathCompleto;
 
 	ofstream outFile(pathConFileSystem, std::ofstream::binary);
 	outFile.write(data, dataLen);
 	outFile.close();
+}
+
+void ManejadorArchivosYMetadatos::deleteFileSystem() {
+	string command = "exec rm -r " + this->pathFileSystem;
+	system(command.c_str());
+	Logger logger;
+	logger.loggear("Se eliminaron los datos persistentes del file system." , TRACE);
 }

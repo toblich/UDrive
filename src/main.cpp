@@ -4,10 +4,17 @@
 using namespace std;
 
 int main(int argc, char** argv) {
+	// LOG
+	Logger* logger = new Logger();
+	logger->escribirHoraEnElLog();
+	delete logger;
+
+
 	cout << "Hola Mundo!" << endl;
 
+
 	BaseDeDatos* db = new BaseDeDatos();
-	ManejadorArchivosYMetadatos manejador(db);
+	ManejadorArchivosYMetadatos manejador(db, "fileSystem_test");
 
 	string directorio = "hola/puto/como estas";
 	manejador.crearCarpeta(directorio);
@@ -22,11 +29,6 @@ int main(int argc, char** argv) {
 
 	delete db;
 
-
-	// LOG
-	Logger* logger = new Logger();
-	logger->escribirHoraEnElLog();
-	delete logger;
 
 	// SERVER
 	string puerto = "8080";
