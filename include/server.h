@@ -5,6 +5,8 @@
 #include <iostream>
 #include <fstream>
 #include "mongoose.h"
+#include "basededatos.h"
+#include "manejadorDeUsuarios.h"
 
 using namespace std;
 
@@ -20,6 +22,10 @@ public:
 
 private:
 	mg_server* server;
+	ManejadorDeUsuarios* manejador;
+	BaseDeDatos* perfiles;
+	BaseDeDatos* sesiones;
+	BaseDeDatos* passwords;
 
 	static void closeHandler(mg_connection* connection);
 	static void requestHandler(mg_connection* connection);

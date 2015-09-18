@@ -6,22 +6,39 @@ Server::Server(std::string listeningPort) {
 	server = mg_create_server(NULL, Server::eventHandler);
 	mg_set_option(server, "listening_port", listeningPort.c_str());
 	mg_set_option(server, "document_root", ".");
+
+	perfiles = new BaseDeDatos("perfiles");
+	sesiones = new BaseDeDatos("sesiones");
+	passwords = new BaseDeDatos("passwords");
+	manejador = new ManejadorDeUsuarios(perfiles, sesiones, passwords);
 }
 
 Server::~Server() {
 	mg_destroy_server(&server);
+	delete manejador;
+	//TODO: Sacar estas instrucciones para que despues persistan los datos.
+	perfiles->deleteBD(); //
+	sesiones->deleteBD(); //
+	passwords->deleteBD(); //
+	delete perfiles;
+	delete sesiones;
+	delete passwords;
 }
 
 int Server::eventHandler(mg_connection* connection, mg_event event) {
 	switch (event) {
 
-		case MG_AUTH:  return MG_TRUE;
+		case MG_AUTH:
+			cout << "entro en auth" << endl;
+			return MG_TRUE;
 
 		case MG_REQUEST:
+			cout << "entro en request" << endl;
 			requestHandler(connection);
 			return MG_TRUE;
 
 		case MG_CLOSE:
+			cout << "entro en close" << endl;
 			closeHandler(connection);
 			return MG_TRUE;
 

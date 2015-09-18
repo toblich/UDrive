@@ -1,6 +1,5 @@
 #include <iostream>
 #include "server.h"
-#include "basededatos.h"
 
 using namespace std;
 
