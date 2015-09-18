@@ -21,6 +21,7 @@ public:
 private:
 	mg_server* server;
 
+	static void closeHandler(mg_connection* connection);
 	static void requestHandler(mg_connection* connection);
 	static void GETHandler(mg_connection* connection);
 	static void PUTHandler(mg_connection* connection);

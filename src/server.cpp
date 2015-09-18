@@ -5,6 +5,7 @@ using namespace std;
 Server::Server(std::string listeningPort) {
 	server = mg_create_server(NULL, Server::eventHandler);
 	mg_set_option(server, "listening_port", listeningPort.c_str());
+	mg_set_option(server, "document_root", ".");
 }
 
 Server::~Server() {
@@ -13,13 +14,25 @@ Server::~Server() {
 
 int Server::eventHandler(mg_connection* connection, mg_event event) {
 	switch (event) {
-		case MG_AUTH: return MG_TRUE;
+
+		case MG_AUTH:  return MG_TRUE;
+
 		case MG_REQUEST:
 			requestHandler(connection);
 			return MG_TRUE;
-		case MG_RECV:
+
+		case MG_CLOSE:
+			closeHandler(connection);
+			return MG_TRUE;
 
 		default: return MG_FALSE;
+	}
+}
+
+void Server::closeHandler(mg_connection* connection){
+	if(connection){
+		free(connection->connection_param);
+		connection->connection_param = NULL;
 	}
 }
 
