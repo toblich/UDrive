@@ -5,6 +5,7 @@
 #include <iostream>
 #include <fstream>
 #include "mongoose.h"
+#include "basededatos.h"
 
 using namespace std;
 

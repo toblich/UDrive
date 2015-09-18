@@ -1,11 +1,24 @@
 #include <iostream>
-#include "server.h"
-#include "basededatos.h"
+#include "manejadorArchivosYMetadatos.h"
 
 using namespace std;
 
 int main(int argc, char** argv) {
 	cout << "Hola Mundo!" << endl;
+
+	BaseDeDatos* db = new BaseDeDatos();
+	ManejadorArchivosYMetadatos manejador(db);
+
+	string directorio = "hola/puto/como estas";
+	manejador.crearCarpeta(directorio);
+
+	directorio = "hola/puto/como estas/bien vos?/bien";
+	manejador.crearCarpeta(directorio);
+
+	cout << "Terminado el creado de carpetas." << endl;
+
+	delete db;
+
 
 	// LOG
 	Logger* logger = new Logger();

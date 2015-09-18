@@ -49,7 +49,7 @@ if(test)
 
 	#Agrego todos los archivos de TEST
 	file(GLOB SOURCE_TEST "test/*" )
-	set(SOURCE2 src/basededatos.cpp src/jsoncpp.cpp src/logger.cpp src/mongoose.c src/parserJson.cpp src/server.cpp)
+	set(SOURCE2 src/basededatos.cpp src/jsoncpp.cpp src/logger.cpp src/mongoose.c src/parserJson.cpp src/server.cpp src/manejadorArchivosYMetadatos.cpp)
 	#file(GLOB SOURCE2 "src/*" )
 	#list(REMOVE_ITEM SOURCE2 src/main.cpp)
 	add_executable(unitTest ${SOURCE2} ${SOURCE_TEST} ${INCLUDES})
