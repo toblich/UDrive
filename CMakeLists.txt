@@ -1,7 +1,8 @@
 cmake_minimum_required(VERSION 2.8)
 
-# Options. Turn on with 'cmake -Dmyvarname=ON'.
+# Optiones. Pasar valor con 'cmake -Dmyvarname=ON'.
 option(test "Build all tests." OFF) # Makes boolean 'test' available.
+option(rocksdb "Build with RocksDB." ON) 
 
 project(UDrive)
 
@@ -47,12 +48,19 @@ if(test)
 	#Incluyo las librerias de headers
 	include_directories(include/)
 
+	set(PROJ ${CMAKE_CURRENT_LIST_DIR})
+	
 	#Agrego todos los archivos de TEST
 	file(GLOB SOURCE_TEST "test/*" )
 
 	file(GLOB SOURCE2 "src/*" )
-	list(FIND SOURCE2 src/main.cpp indice)
-	list(REMOVE_AT SOURCE2 indice)
+	list(REMOVE_ITEM SOURCE2 ${PROJ}/src/main.cpp)
+
+	if (NOT rocksdb)
+		list(REMOVE_ITEM SOURCE2 ${PROJ}/src/basededatos.cpp)
+		list(REMOVE_ITEM SOURCE_TEST ${PROJ}/test/basededatos_test.cpp)
+	endif()
+
 	add_executable(unitTest ${SOURCE2} ${SOURCE_TEST} ${INCLUDES})
 
 	#Agrego librerias externas
