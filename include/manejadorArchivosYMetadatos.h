@@ -13,15 +13,15 @@ class ManejadorArchivosYMetadatos {
 
 private:
 	BaseDeDatos* dbMetadatos;
-	char homeDirectory[1024];
+//	char homeDirectory[1024];
 	std::string pathFileSystem;
-	std::vector<std::string> parsearDirectorios(std::string pathCompleto);
 
 public:
 	ManejadorArchivosYMetadatos(BaseDeDatos* dbMetadatos);
 	ManejadorArchivosYMetadatos(BaseDeDatos* dbMetadatos, std::string path);
 	virtual ~ManejadorArchivosYMetadatos();
 
+	std::vector<std::string> parsearDirectorios(std::string pathCompleto);
 	void crearUsuario(std::string username);
 	void crearCarpeta(std::string path);
 	void subirArchivo(std::string username, std::string filename, const char* data, int dataLen);

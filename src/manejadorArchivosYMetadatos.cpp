@@ -7,7 +7,7 @@ ManejadorArchivosYMetadatos::ManejadorArchivosYMetadatos(BaseDeDatos* dbMetadato
 ManejadorArchivosYMetadatos::ManejadorArchivosYMetadatos(BaseDeDatos* dbMetadatos, std::string path) {
 	this->dbMetadatos = dbMetadatos;
 	this->pathFileSystem = path;
-    getcwd(homeDirectory, sizeof(homeDirectory));
+//    getcwd(homeDirectory, sizeof(homeDirectory));
 }
 
 ManejadorArchivosYMetadatos::~ManejadorArchivosYMetadatos() {
