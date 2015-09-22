@@ -35,7 +35,33 @@ TEST_F(DBTest, deberiaPoderModificarElValueDeUnaKeyExistente) {
 }
 
 
-/* Tests de Excepciones */
+TEST_F(DBTest, deberiaEjecutarUnBatchDePutsCorrectoCompleto) {
+	Batch batch;
+	batch.put("key", "value");
+	batch.put("key2", "value2");
+	db->writeBatch(batch);
+	EXPECT_EQ("value", db->get("key"));
+	EXPECT_EQ("value2", db->get("key2"));
+}
+
+TEST_F(DBTest, deberiaEjecutarUnBatchModifyEraseCorrectoCompleto) {
+	db->put("key", "value");
+	db->put("key2", "value2");
+	Batch batch;
+	batch.modify("key", "otro");
+	batch.erase("key2");
+	EXPECT_TRUE(db->writeBatch(batch));
+	EXPECT_EQ("otro", db->get("key"));
+	EXPECT_FALSE(db->contains("key2"));
+}
+
+TEST_F(DBTest, noDeberiaEjecutarBatchEnQueFallaraUnaAccion) {
+	Batch batch;
+	batch.put("key", "value");
+	batch.modify("key2", "value2"); // No existe key2, este falla
+	EXPECT_FALSE(db->writeBatch(batch));
+	EXPECT_THROW(db->get("key"), KeyNotFound);
+}
 
 TEST_F(DBTest, deberiaLanzarKeyNotFoundAlBuscarClaveInexistente) {
 	EXPECT_THROW(db->get("key"), KeyNotFound);

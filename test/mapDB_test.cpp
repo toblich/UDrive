@@ -18,6 +18,8 @@ class MapaDBTest : public ::testing::Test {
   BD* db;
 };
 
+/* De aquí en adelante, es una copia de basededatos_test.cpp */
+
 // Prueba de GTest, como test es trivial (y solo prueba RocksDB)
 TEST_F(MapaDBTest, deberiaRecuperarElMismoValorQueGuarda) {
 	db->put("key", "value");
@@ -29,14 +31,39 @@ TEST_F(MapaDBTest, deberiaDevolverFalseAlRepetirPutDeMismaClave) {
 	EXPECT_FALSE(db->put("key", "2"));
 }
 
-TEST_F(MapaDBTest, deberiaPoderModificarElValueDeUnaKeyExistente) {
+TEST_F(MapaDBTest, deberiaModificarElValueDeUnaKeyExistente) {
 	db->put("key", "value");
 	db->modify("key", "hola");
 	EXPECT_EQ("hola", db->get("key"));
 }
 
+TEST_F(MapaDBTest, deberiaEjecutarUnBatchDePutsCorrectoCompleto) {
+	Batch batch;
+	batch.put("key", "value");
+	batch.put("key2", "value2");
+	db->writeBatch(batch);
+	EXPECT_EQ("value", db->get("key"));
+	EXPECT_EQ("value2", db->get("key2"));
+}
 
-/* Tests de Excepciones */
+TEST_F(MapaDBTest, deberiaEjecutarUnBatchModifyEraseCorrectoCompleto) {
+	db->put("key", "value");
+	db->put("key2", "value2");
+	Batch batch;
+	batch.modify("key", "otro");
+	batch.erase("key2");
+	ASSERT_TRUE(db->writeBatch(batch));
+	EXPECT_EQ("otro", db->get("key"));
+	EXPECT_FALSE(db->contains("key2"));
+}
+
+TEST_F(MapaDBTest, noDeberiaEjecutarBatchEnQueFallaraUnaAccion) {
+	Batch batch;
+	batch.put("key", "value");
+	batch.modify("key2", "value2"); // No existe key2, este falla
+	EXPECT_FALSE(db->writeBatch(batch));
+	EXPECT_THROW(db->get("key"), KeyNotFound);
+}
 
 TEST_F(MapaDBTest, deberiaLanzarKeyNotFoundAlBuscarClaveInexistente) {
 	EXPECT_THROW(db->get("key"), KeyNotFound);

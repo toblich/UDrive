@@ -39,12 +39,8 @@ Testing/*
 files/*
 Debug/*
 .*project
-/Debug/
+db/*
 .cproject
 .project
-DB/*
 .settings
-passwords/000003.log passwords/CURRENT passwords/IDENTITY passwords/LOCK passwords/LOG passwords/MANIFEST-000001
-passwords/
-perfiles/
-sesiones/
+
