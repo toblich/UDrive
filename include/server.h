@@ -20,6 +20,7 @@ public:
 	static string mensajeSegunURI(string uri);
 	void pollServer(int milliseconds);
 	const char* getListeningPort() { return mg_get_option(server, "listening_port"); }
+	static enum mg_result getMultipartData(mg_connection* connection);
 
 private:
 	mg_server* server;

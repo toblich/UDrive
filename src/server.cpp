@@ -29,9 +29,7 @@ Server::~Server() {
 int Server::eventHandler(mg_connection* connection, mg_event event) {
 	switch (event) {
 
-		case MG_AUTH:
-			cout << "entro en auth" << endl;
-			return MG_TRUE;
+		case MG_AUTH: return MG_TRUE;
 
 		case MG_REQUEST:
 			cout << "entro en request" << endl;
@@ -80,17 +78,19 @@ enum mg_result Server::requestHandler(mg_connection* connection) {
 		return DELETEHandler(connection);
 	}
 	else{
-		cout << "WTF? No existe este verbo: " << verb << endl;
+		cout << "Verbo no existente: " << verb << endl;
 		return MG_TRUE;
 	}
 }
 
 enum mg_result Server::GETHandler(mg_connection* connection) {
 	string uri(connection->uri);
+	cout << "Estoy en get" << endl;
 	if (uri == "/archivo"){
-		mg_send_file(connection, "compilar.sh", NULL);
+		cout << "Estoy en archivo" << endl;
+		mg_send_file(connection, "Facebook_icon.jpg", NULL);
 		return MG_MORE;
-	}else{
+	}else {
 		mg_printf_data(connection, "Hola!: [%s]\n", Server::mensajeSegunURI(uri).c_str());
 		return MG_TRUE;
 	}
@@ -99,6 +99,7 @@ enum mg_result Server::GETHandler(mg_connection* connection) {
 enum mg_result Server::PUTHandler(mg_connection* connection) {
 	//Recibe un archivo de texto
 	string uri(connection->uri);
+	cout << "Estoy en put" << endl;
 	string filename = uri.substr(1, uri.length()-1); // Supone que no hay carpetas
 	ofstream outFile(filename.data(), std::ofstream::binary);
 	outFile.write(connection->content, connection->content_len);
@@ -110,23 +111,41 @@ enum mg_result Server::PUTHandler(mg_connection* connection) {
 enum mg_result Server::POSTHandler(mg_connection* connection) {
 	//Recibe un archivo binario
 	string uri(connection->uri);
+	cout << "Estoy en post" << endl;
+
+	if (uri == "/login"){
+		mg_printf_data(connection, "%s, %d\n", connection->content, connection->content_len);
+	}
+
+
+	if (uri == "/upload"){
+		return getMultipartData(connection);
+	}
+
+	return MG_TRUE;
+}
+
+enum mg_result Server::DELETEHandler(mg_connection* connection) {
+	string uri(connection->uri);
+	cout << "Estoy en delete" << endl;
+	mg_printf_data(connection, "DELETE [%s]\n", Server::mensajeSegunURI(uri).c_str());
+	return MG_TRUE;
+}
+
+enum mg_result Server::getMultipartData(mg_connection* connection){
 	const char *data;
 	int data_len, n1, n2;
 	char var_name[100], file_name[100];
+
 	n1 = n2 = 0;
+
 	while ((n2 = mg_parse_multipart(connection->content + n1, connection->content_len - n1,
-							  var_name, sizeof(var_name), file_name, sizeof(file_name), &data, &data_len)) > 0) {
+				   var_name, sizeof(var_name), file_name, sizeof(file_name), &data, &data_len)) > 0) {
 		mg_printf_data(connection, "var: %s, file_name: %s, size: %d bytes<br>\n", var_name, file_name, data_len);
 		n1 += n2;
 	}
 	ofstream outFile(file_name, std::ofstream::binary);
 	outFile.write(data, data_len);
 	outFile.close();
-	return MG_TRUE;
-}
-
-enum mg_result Server::DELETEHandler(mg_connection* connection) {
-	string uri(connection->uri);
-	mg_printf_data(connection, "DELETE [%s]\n", Server::mensajeSegunURI(uri).c_str());
 	return MG_TRUE;
 }
