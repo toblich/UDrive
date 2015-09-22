@@ -13,12 +13,13 @@ file(GLOB INCLUDES "include/*" )
 #Agrego todos los archivos de SOURCE
 file(GLOB SOURCE "src/*" )
 
-add_executable(udrive ${SOURCE} ${INCLUDES})
 
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAG} -g -std=c++11 -pthread")
 
 if (rocksdb)
+	add_executable(udrive ${SOURCE} ${INCLUDES})
+	
 	#Agrego librerias externas
 	include_directories(librocksdb)
 	add_library(librocksdb STATIC IMPORTED)
