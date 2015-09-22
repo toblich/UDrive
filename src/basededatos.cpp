@@ -5,19 +5,19 @@ using std::string;
 BaseDeDatos::BaseDeDatos() : BaseDeDatos(defaultPath) {}
 
 BaseDeDatos::BaseDeDatos(string path) {
-	this->path = path;
+	this->path = "db/" + path;
 	Logger logger;
 	// Para optimizar RocksDB.
 	options.IncreaseParallelism();
 	options.OptimizeLevelStyleCompaction();
 	options.create_if_missing = true;
 
-	Status s = DB::Open(options, path, &db);
+	Status s = DB::Open(options, this->path, &db);
 	if(!s.ok()) {
-		logger.loggear("No se pudo crear la Base de Datos con path " + path + ". " + s.ToString(), ERROR);
-		throw runtime_error("No se pudo crear la base de datos con path: " + path);
+		logger.loggear("No se pudo crear la Base de Datos con path " + this->path + ". " + s.ToString(), ERROR);
+		throw runtime_error("No se pudo crear la base de datos con path: " + this->path);
 	} else {
-		logger.loggear("Se creo satisfactoriamente la Base de Datos con path " + path, INFO);
+		logger.loggear("Se creo satisfactoriamente la Base de Datos con path " + this->path, INFO);
 	}
 }
 
@@ -84,13 +84,53 @@ void BaseDeDatos::modify(string key, string value) {
 	Status s = db->Get(ReadOptions(), key, &valor);
 	if(s.IsNotFound()) {
 		logger.loggear("No se encuentra la clave (" + key + ") en la base de datos. Se intentaba modificar el valor (" + valor + ")." , WARN);
-		throw KeyNotFound("modifiy: " + key);
+		throw KeyNotFound("modify: " + key);
 	} else if (not s.ok()){
 		logger.loggear("No se pudo modificar el valor en la clave " + key + " de la base de datos", ERROR);
 		throw new runtime_error("modify: " + key);
 	}
 	s = db->Put(WriteOptions(), key, value);
 	logger.loggear("Se modifico la clave (" + key + "). Se cambio el valor (" + valor + ") por el valor: value " + value + "." , TRACE);
+}
+
+bool BaseDeDatos::contains(string key) {
+	string value;
+	Status s = db->Get(ReadOptions(), key, &value);
+	return not s.IsNotFound();
+}
+
+bool BaseDeDatos::addActionToBatch(const DBAction& action, rocksdb::WriteBatch& writeBatch) {
+	switch (action.action) {
+	case PUT:
+		if (contains(action.key)) return false;
+		writeBatch.Put(action.key, action.value);
+		break;
+	case MODIFY:
+		if (not contains(action.key)) return false;
+		writeBatch.Put(action.key, action.value);
+		break;
+	case ERASE:
+		if (not contains(action.key)) return false;
+		writeBatch.Delete(action.key);
+		break;
+	default:
+		throw new InvalidDBAction("Accion inexistente (existen PUT, MODIFY y ERASE)");
+	}
+	return true;
+}
+
+bool BaseDeDatos::writeBatch(const Batch& batch) {
+	WriteBatch writeBatch;
+	list<DBAction>::const_iterator it = batch.getAcciones().cbegin();
+	list<DBAction>::const_iterator end = batch.getAcciones().cend();
+	bool ok = true;
+
+	for (; it != end and ok; it++) {
+		ok = addActionToBatch(*it, writeBatch);
+	}
+	if (not ok) return false;
+	Status s = db->Write(WriteOptions(), &writeBatch);
+	return s.ok();
 }
 
 void BaseDeDatos::deleteBD() {
