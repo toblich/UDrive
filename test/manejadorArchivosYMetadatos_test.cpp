@@ -79,7 +79,7 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaCrearBienCarpetas) {
 TEST_F(ManejadorArchivosYMetadatosTest, deberiaSubirBienArchivoDeTexto) {
 	string path = "pablo/hola";
 	manejador->crearCarpeta(path);
-	manejador->subirArchivo("pablo", "hola/hola.txt", "hola pablo", 10);
+	manejador->subirArchivo("pablo", "hola/hola.txt", "hola pablo", 10, "");
 	ifstream archivo;
 	string texto;
 	if ( archivo.is_open() ) {

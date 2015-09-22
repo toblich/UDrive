@@ -61,8 +61,9 @@ void ManejadorArchivosYMetadatos::crearCarpeta(std::string path) {
 // Tambien se podria sacar el username y que venga en el filename.
 // En ese caso habria que modificar una boludez.
 // El filename deberia venir con los path de carpetas tambien
+// En la base de datos se guarda el path sin la carpeta del FS
 void ManejadorArchivosYMetadatos::subirArchivo(std::string username,
-		std::string filename, const char* data, int dataLen) {
+		std::string filename, const char* data, int dataLen, std::string jsonMetadatos) {
 	//No le agrego el FileSystem porque se agrega despues en el metodo crearCarpeta
 	std::string pathCompleto = username + "/" + filename;
 	std::vector<std::string> directorios = parsearDirectorios(pathCompleto);
@@ -80,6 +81,26 @@ void ManejadorArchivosYMetadatos::subirArchivo(std::string username,
 	ofstream outFile(pathConFileSystem, std::ofstream::binary);
 	outFile.write(data, dataLen);
 	outFile.close();
+
+	dbMetadatos->put(pathCompleto, jsonMetadatos);
+}
+
+void ManejadorArchivosYMetadatos::actualizarMetadatos(std::string username,
+		std::string filename, std::string nuevosMetadatos) {
+	std::string pathCompleto = username + "/" + filename;
+	dbMetadatos->modify(pathCompleto, nuevosMetadatos);
+}
+
+void ManejadorArchivosYMetadatos::agregarPermiso(std::string usernameOrigen,
+		std::string filename, std::string usernameDestino) {
+	//TODO Falta agregar el hecho de agregar al archivo de permisos que esta descripto en el issue
+	std::string pathCompleto = usernameOrigen + "/" + filename;
+	std::string jsonArchivo = dbMetadatos->get(pathCompleto);
+	ParserJson parser;
+	MetadatoArchivo metadato = parser.deserializarMetadatoArchivo(jsonArchivo);
+	metadato.usuariosHabilitados.push_back(usernameDestino);
+	std::string jsonModificado = parser.serializarMetadatoArchivo(metadato);
+	dbMetadatos->modify(pathCompleto,jsonModificado);
 }
 
 void ManejadorArchivosYMetadatos::deleteFileSystem() {

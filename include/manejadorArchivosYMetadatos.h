@@ -24,7 +24,10 @@ public:
 	std::vector<std::string> parsearDirectorios(std::string pathCompleto);
 	void crearUsuario(std::string username);
 	void crearCarpeta(std::string path);
-	void subirArchivo(std::string username, std::string filename, const char* data, int dataLen);
+	void subirArchivo(std::string username, std::string filename, const char* data, int dataLen, std::string jsonMetadatos);
+	void actualizarMetadatos(std::string username, std::string filename, std::string nuevosMetadatos);
+	void agregarPermiso(std::string usernameOrigen, std::string filename, std::string usernameDestino);
+
 
 	void deleteFileSystem();
 };
