@@ -1,5 +1,5 @@
 #include "manejadorArchivosYMetadatos.h"
-#include "basededatos.h"
+#include "mapDB.h"
 #include <gtest/gtest.h>
 
 using namespace std;
@@ -10,7 +10,7 @@ class ManejadorArchivosYMetadatosTest : public ::testing::Test {
 
 	protected:
 		virtual void SetUp() {
-			db = new BaseDeDatos("manejador_test_db"); //TODO cuando mergiemos habria que ponerle un nombre pirulo para que no joda
+			db = new MapDB();
 			manejador = new ManejadorArchivosYMetadatos(db, pathFS);
 		}
 
@@ -21,7 +21,7 @@ class ManejadorArchivosYMetadatosTest : public ::testing::Test {
 			delete db;
 		}
 
-		BaseDeDatos* db;
+		BD* db;
 		ManejadorArchivosYMetadatos* manejador;
 };
 
