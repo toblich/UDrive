@@ -83,8 +83,11 @@ void ManejadorArchivosYMetadatos::subirArchivo(std::string username,
 }
 
 void ManejadorArchivosYMetadatos::deleteFileSystem() {
-	string command = "exec rm -r " + this->pathFileSystem;
-	system(command.c_str());
-	Logger logger;
-	logger.loggear("Se eliminaron los datos persistentes del file system." , TRACE);
+	struct stat sb;
+	if (stat(pathFileSystem.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode)){
+		string command = "exec rm -r " + this->pathFileSystem;
+		system(command.c_str());
+		Logger logger;
+		logger.loggear("Se eliminaron los datos persistentes del file system." , TRACE);
+	}
 }
