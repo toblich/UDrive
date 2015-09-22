@@ -17,9 +17,11 @@ public:
 
 	std::string serializarMetadatoArchivo(MetadatoArchivo metadato);
 	std::string serializarMetadatoUsuario(MetadatoUsuario metadato);
+	std::string serializarMetadatoSesion(MetadatosSesion metadato);
 
 	MetadatoArchivo deserializarMetadatoArchivo(std::string json);
 	MetadatoUsuario deserializarMetadatoUsuario(std::string json);
+	MetadatosSesion deserializarMetadatoSesion(std::string json);
 };
 
 #endif /* INCLUDE_PARSERJSON_H_ */

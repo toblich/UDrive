@@ -25,4 +25,10 @@ typedef struct{
 	Ubicacion ultimaUbicacion;
 }MetadatoUsuario;
 
+typedef struct{
+	std::string username;
+	std::string password;
+	std::string token;
+}MetadatosSesion;
+
 #endif /* INCLUDE_METADATOS_H_ */
