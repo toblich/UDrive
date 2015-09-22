@@ -1,4 +1,5 @@
 #include "manejadorDeUsuarios.h"
+#include "mapDB.h"
 #include <gtest/gtest.h>
 
 using namespace std;
@@ -6,9 +7,9 @@ using namespace std;
 class ManejadorDeUsuariosTest : public ::testing::Test {
  protected:
   virtual void SetUp() {
-	  perfiles = new BaseDeDatos("perfiles");
-	  sesiones = new BaseDeDatos("sesiones");
-	  passwords = new BaseDeDatos("passwords");
+	  perfiles = new MapDB();
+	  sesiones = new MapDB();
+	  passwords = new MapDB();
 	  manejador = new ManejadorDeUsuarios(perfiles, sesiones, passwords);
 	  username = "tobi";
 	  password = "pancheitor";
@@ -30,9 +31,9 @@ class ManejadorDeUsuariosTest : public ::testing::Test {
    string password;
    string perfil;
    ManejadorDeUsuarios* manejador;
-   BaseDeDatos* perfiles;
-   BaseDeDatos* sesiones;
-   BaseDeDatos* passwords;
+   MapDB* perfiles;
+   MapDB* sesiones;
+   MapDB* passwords;
 };
 
 TEST_F(ManejadorDeUsuariosTest, deberiaValidarLoginDeUsuarioRecienRegistrado) {

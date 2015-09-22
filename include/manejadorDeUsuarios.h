@@ -6,11 +6,13 @@
 #include <iostream>
 #include <functional>
 #include <unistd.h>
-#include "basededatos.h"
+#include "bd.h"
+
+using std::string;
 
 class ManejadorDeUsuarios {
 public:
-	ManejadorDeUsuarios(BaseDeDatos* perfiles, BaseDeDatos* sesiones, BaseDeDatos* passwords);
+	ManejadorDeUsuarios(BD* perfiles, BD* sesiones, BD* passwords);
 	virtual ~ManejadorDeUsuarios();
 
 	bool validarLogin(string username, string password);
@@ -25,9 +27,9 @@ public:
 	//bool eliminarUsuario();
 
 private:
-	BaseDeDatos* perfiles;
-	BaseDeDatos* sesiones;
-	BaseDeDatos* passwords;
+	BD* perfiles;
+	BD* sesiones;
+	BD* passwords;
 	string generarToken(string username, time_t timestamp);
 	bool esCaracterInvalido(char c);
 	bool esPerfilValido(string perfil);

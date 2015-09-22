@@ -2,14 +2,15 @@
 
 using namespace std;
 
-Server::Server(std::string listeningPort) {
+Server::Server(std::string listeningPort, BD* perfiles, BD* sesiones, BD* passwords) {
 	server = mg_create_server(NULL, Server::eventHandler);
 	mg_set_option(server, "listening_port", listeningPort.c_str());
 	mg_set_option(server, "document_root", ".");
 
-	perfiles = new BaseDeDatos("perfiles");
-	sesiones = new BaseDeDatos("sesiones");
-	passwords = new BaseDeDatos("passwords");
+	this->perfiles = perfiles;
+	this->sesiones = sesiones;
+	this->passwords = passwords;
+
 	manejador = new ManejadorDeUsuarios(perfiles, sesiones, passwords);
 }
 

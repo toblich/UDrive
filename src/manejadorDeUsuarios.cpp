@@ -2,7 +2,7 @@
 
 using namespace std;
 
-ManejadorDeUsuarios::ManejadorDeUsuarios(BaseDeDatos* perfiles, BaseDeDatos* sesiones, BaseDeDatos* passwords) {
+ManejadorDeUsuarios::ManejadorDeUsuarios(BD* perfiles, BD* sesiones, BD* passwords) {
 	this->perfiles = perfiles;
 	this->sesiones = sesiones;
 	this->passwords = passwords;
