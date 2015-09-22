@@ -23,7 +23,7 @@ public:
 
 private:
 	mg_server* server;
-	ManejadorDeUsuarios* manejador;
+	ManejadorDeUsuarios* manejadorUsuarios;
 	BD* perfiles;
 	BD* sesiones;
 	BD* passwords;

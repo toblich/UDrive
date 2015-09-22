@@ -11,12 +11,12 @@ Server::Server(std::string listeningPort, BD* perfiles, BD* sesiones, BD* passwo
 	this->sesiones = sesiones;
 	this->passwords = passwords;
 
-	manejador = new ManejadorDeUsuarios(perfiles, sesiones, passwords);
+	manejadorUsuarios = new ManejadorDeUsuarios(perfiles, sesiones, passwords);
 }
 
 Server::~Server() {
 	mg_destroy_server(&server);
-	delete manejador;
+	delete manejadorUsuarios;
 	//TODO: Sacar estas instrucciones para que despues persistan los datos.
 	perfiles->deleteBD(); //
 	sesiones->deleteBD(); //

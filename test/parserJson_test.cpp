@@ -52,8 +52,11 @@ TEST(ParserJsonTest, deberiaDeserializarBienEtiquetasCorrectasMetadatoArchivo){
 	int i = 0;
 	for ( ; itEtiq != etiq.end() ; itEtiq++, i++){
 		if (i==0) EXPECT_EQ("23", (*itEtiq));
-		if (i==1) EXPECT_EQ("true", (*itEtiq));
-		if (i==2) EXPECT_EQ("juan", (*itEtiq));
+		else {
+			if (i==1) EXPECT_EQ("true", (*itEtiq));
+			else if (i==2) EXPECT_EQ("juan", (*itEtiq));
+				else EXPECT_TRUE(false); //Rompo
+		}
 	}
 }
 

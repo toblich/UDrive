@@ -1,5 +1,6 @@
 #include <iostream>
-#include "manejadorArchivosYMetadatos.h"
+#include "server.h"
+#include "basededatos.h"
 
 using namespace std;
 
@@ -9,26 +10,7 @@ int main(int argc, char** argv) {
 	logger->escribirHoraEnElLog();
 	delete logger;
 
-
 	cout << "Hola Mundo!" << endl;
-
-
-	BaseDeDatos* db = new BaseDeDatos();
-	ManejadorArchivosYMetadatos manejador(db, "fileSystem_test");
-
-	string directorio = "hola/puto/como estas";
-	manejador.crearCarpeta(directorio);
-
-	directorio = "hola/puto/como estas/bien vos?/bien";
-	manejador.crearCarpeta(directorio);
-
-	cout << "Terminado el creado de carpetas." << endl;
-
-	cout << endl;
-	manejador.subirArchivo("pablo", "hola/puto/juan.txt", "hola mi amor", 12);
-
-	delete db;
-
 
 	// SERVER
 	BD* perfiles = new BaseDeDatos("perfiles");		// Los deletes los hace el destructor del Server

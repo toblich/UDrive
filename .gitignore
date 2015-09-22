@@ -48,3 +48,5 @@ passwords/000003.log passwords/CURRENT passwords/IDENTITY passwords/LOCK passwor
 passwords/
 perfiles/
 sesiones/
+fileSystem_test/
+fileSystem/

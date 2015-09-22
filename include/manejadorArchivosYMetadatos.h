@@ -12,13 +12,13 @@ const std::string defaultFileSystem = "FileSystem";
 class ManejadorArchivosYMetadatos {
 
 private:
-	BaseDeDatos* dbMetadatos;
+	BD* dbMetadatos;
 //	char homeDirectory[1024];
 	std::string pathFileSystem;
 
 public:
-	ManejadorArchivosYMetadatos(BaseDeDatos* dbMetadatos);
-	ManejadorArchivosYMetadatos(BaseDeDatos* dbMetadatos, std::string path);
+	ManejadorArchivosYMetadatos(BD* dbMetadatos);
+	ManejadorArchivosYMetadatos(BD* dbMetadatos, std::string path);
 	virtual ~ManejadorArchivosYMetadatos();
 
 	std::vector<std::string> parsearDirectorios(std::string pathCompleto);

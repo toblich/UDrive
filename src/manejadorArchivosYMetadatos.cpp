@@ -2,9 +2,9 @@
 
 //TODO: LOGUEAR!!!!!
 
-ManejadorArchivosYMetadatos::ManejadorArchivosYMetadatos(BaseDeDatos* dbMetadatos): ManejadorArchivosYMetadatos(dbMetadatos, defaultFileSystem){}
+ManejadorArchivosYMetadatos::ManejadorArchivosYMetadatos(BD* dbMetadatos): ManejadorArchivosYMetadatos(dbMetadatos, defaultFileSystem){}
 
-ManejadorArchivosYMetadatos::ManejadorArchivosYMetadatos(BaseDeDatos* dbMetadatos, std::string path) {
+ManejadorArchivosYMetadatos::ManejadorArchivosYMetadatos(BD* dbMetadatos, std::string path) {
 	this->dbMetadatos = dbMetadatos;
 	this->pathFileSystem = path;
 //    getcwd(homeDirectory, sizeof(homeDirectory));
@@ -26,7 +26,7 @@ std::vector<std::string> ManejadorArchivosYMetadatos::parsearDirectorios(std::st
 		char n = pathCompleto[i];
 		if (n != delim)
 			buffer +=n;
-		else if (n == delim && buffer != ""){ //No hay directorios vacios
+		else if (n == delim && buffer != ""){ //No hay directorios con nombre vacio
 			directorios.push_back(buffer);
 			buffer = "";
 		}
