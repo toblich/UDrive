@@ -1,3 +1,4 @@
+sudo: false
 language: cpp
 compiler: gcc
 
@@ -8,15 +9,40 @@ addons:
     packages:
     - gcc-4.8
     - g++-4.8
-
+    - libgtest-dev
 
 install:
   - export CXX="g++-4.8"
   - g++ --version
 
+before_script:
+  - chmod +x travis/*
+  - HOME=`pwd`
+  - mkdir lib
+  - export LIB="$HOME/lib"
+  - export INCLUDE="$HOME/include"
+
+  # Compilar GTest
+  - ./travis/compilarGTest.sh
+  - GTEST="$HOME/googletest-master/googletest"
+  - cp $GTEST/build/lib*.a $LIB/
+  - cp -r $GTEST/include/gtest $INCLUDE/ 
+
+  - cd $HOME
+  
+  # Para debug
+  - find . -type d
+  - ls $LIB
+  - ls $INCLUDE/gtest/
+
+  - mkdir build
+  - cd build
 
 script:
- # - g++ src/* -I./include -o UDrive
-  - echo Hola Mundo!
+  - cmake -Dtest=ON -Drocksdb=OFF ../; make unitTest; ./unitTest 
 
 
+# cache:
+#   directories:
+#     - rocksdb-master
+#     - googletest-master

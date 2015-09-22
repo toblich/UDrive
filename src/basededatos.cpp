@@ -2,7 +2,10 @@
 
 using std::string;
 
-BaseDeDatos::BaseDeDatos(){
+BaseDeDatos::BaseDeDatos() : BaseDeDatos(defaultPath) {}
+
+BaseDeDatos::BaseDeDatos(string path) {
+	this->path = path;
 	Logger logger;
 	// Para optimizar RocksDB.
 	options.IncreaseParallelism();
@@ -17,6 +20,7 @@ BaseDeDatos::BaseDeDatos(){
 		logger.loggear("Se creo satisfactoriamente la Base de Datos con path " + path, INFO);
 	}
 }
+
 
 BaseDeDatos::~BaseDeDatos(){
 	Logger logger;
@@ -90,7 +94,8 @@ void BaseDeDatos::modify(string key, string value) {
 }
 
 void BaseDeDatos::deleteBD() {
-	system("exec rm -r DB");
+	string command = "exec rm -r " + path;
+	system(command.c_str());
 	Logger logger;
 	logger.loggear("Se eliminaron los datos persistentes de la base de datos." , TRACE);
 

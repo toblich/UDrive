@@ -2,24 +2,54 @@
 
 using namespace std;
 
-Server::Server(std::string listeningPort) {
+Server::Server(std::string listeningPort, BD* perfiles, BD* sesiones, BD* passwords) {
 	server = mg_create_server(NULL, Server::eventHandler);
 	mg_set_option(server, "listening_port", listeningPort.c_str());
+	mg_set_option(server, "document_root", ".");
+
+	this->perfiles = perfiles;
+	this->sesiones = sesiones;
+	this->passwords = passwords;
+
+	manejador = new ManejadorDeUsuarios(perfiles, sesiones, passwords);
 }
 
 Server::~Server() {
 	mg_destroy_server(&server);
+	delete manejador;
+	//TODO: Sacar estas instrucciones para que despues persistan los datos.
+	perfiles->deleteBD(); //
+	sesiones->deleteBD(); //
+	passwords->deleteBD(); //
+	delete perfiles;
+	delete sesiones;
+	delete passwords;
 }
 
 int Server::eventHandler(mg_connection* connection, mg_event event) {
 	switch (event) {
-		case MG_AUTH: return MG_TRUE;
-		case MG_REQUEST:
-			requestHandler(connection);
+
+		case MG_AUTH:
+			cout << "entro en auth" << endl;
 			return MG_TRUE;
-		case MG_RECV:
+
+		case MG_REQUEST:
+			cout << "entro en request" << endl;
+			return requestHandler(connection);
+
+		case MG_CLOSE:
+			cout << "entro en close" << endl;
+			closeHandler(connection);
+			return MG_TRUE;
 
 		default: return MG_FALSE;
+	}
+}
+
+void Server::closeHandler(mg_connection* connection){
+	if(connection){
+		free(connection->connection_param);
+		connection->connection_param = NULL;
 	}
 }
 
@@ -35,30 +65,38 @@ string Server::mensajeSegunURI(string uri) {
 	else return "Te equivocaste MUAJAJAJAJA";
 }
 
-void Server::requestHandler(mg_connection* connection) {
+enum mg_result Server::requestHandler(mg_connection* connection) {
 	string verb = string(connection->request_method);
 	if (verb == "GET"){
-		GETHandler(connection);
+		return GETHandler(connection);
 	}
 	else if (verb == "POST"){
-		POSTHandler(connection);
+		return POSTHandler(connection);
 	}
 	else if (verb == "PUT"){
-		PUTHandler(connection);
+		return PUTHandler(connection);
 	}
 	else if (verb == "DELETE"){
-		DELETEHandler(connection);
+		return DELETEHandler(connection);
 	}
-	else
+	else{
 		cout << "WTF? No existe este verbo: " << verb << endl;
+		return MG_TRUE;
+	}
 }
 
-void Server::GETHandler(mg_connection* connection) {
+enum mg_result Server::GETHandler(mg_connection* connection) {
 	string uri(connection->uri);
-	mg_printf_data(connection, "Hola!: [%s]\n", Server::mensajeSegunURI(uri).c_str());
+	if (uri == "/archivo"){
+		mg_send_file(connection, "compilar.sh", NULL);
+		return MG_MORE;
+	}else{
+		mg_printf_data(connection, "Hola!: [%s]\n", Server::mensajeSegunURI(uri).c_str());
+		return MG_TRUE;
+	}
 }
 
-void Server::PUTHandler(mg_connection* connection) {
+enum mg_result Server::PUTHandler(mg_connection* connection) {
 	//Recibe un archivo de texto
 	string uri(connection->uri);
 	string filename = uri.substr(1, uri.length()-1); // Supone que no hay carpetas
@@ -66,9 +104,10 @@ void Server::PUTHandler(mg_connection* connection) {
 	outFile.write(connection->content, connection->content_len);
 	outFile.close();
 	mg_printf_data(connection, "PUT [%s]\n", Server::mensajeSegunURI(uri).c_str());
+	return MG_TRUE;
 }
 
-void Server::POSTHandler(mg_connection* connection) {
+enum mg_result Server::POSTHandler(mg_connection* connection) {
 	//Recibe un archivo binario
 	string uri(connection->uri);
 	const char *data;
@@ -77,16 +116,17 @@ void Server::POSTHandler(mg_connection* connection) {
 	n1 = n2 = 0;
 	while ((n2 = mg_parse_multipart(connection->content + n1, connection->content_len - n1,
 							  var_name, sizeof(var_name), file_name, sizeof(file_name), &data, &data_len)) > 0) {
-		mg_printf_data(connection, "var: %s, file_name: %s, size: %d bytes<br>",
-				   var_name, file_name, data_len);
+		mg_printf_data(connection, "var: %s, file_name: %s, size: %d bytes<br>\n", var_name, file_name, data_len);
 		n1 += n2;
 	}
 	ofstream outFile(file_name, std::ofstream::binary);
 	outFile.write(data, data_len);
 	outFile.close();
+	return MG_TRUE;
 }
 
-void Server::DELETEHandler(mg_connection* connection) {
+enum mg_result Server::DELETEHandler(mg_connection* connection) {
 	string uri(connection->uri);
 	mg_printf_data(connection, "DELETE [%s]\n", Server::mensajeSegunURI(uri).c_str());
+	return MG_TRUE;
 }

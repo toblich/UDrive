@@ -31,8 +31,12 @@ int main(int argc, char** argv) {
 
 
 	// SERVER
+	BD* perfiles = new BaseDeDatos("perfiles");		// Los deletes los hace el destructor del Server
+	BD* sesiones = new BaseDeDatos("sesiones");
+	BD* passwords = new BaseDeDatos("passwords");
+
 	string puerto = "8080";
-	Server server(puerto);
+	Server server(puerto, perfiles, sesiones, passwords);
 	cout << "Lanzando servidor en el puerto " << server.getListeningPort() << endl;
 	for (;;) {
 		server.pollServer(1000);

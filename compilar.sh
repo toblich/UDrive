@@ -1,3 +1,6 @@
+export INCLUDE=include
+export LIB=/usr/lib
+
 mkdir files
 rm -r build
 mkdir build
