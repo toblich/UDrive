@@ -3,7 +3,7 @@
 using namespace std;
 
 Server::Server(std::string listeningPort, BD* perfiles, BD* sesiones, BD* passwords) {
-	server = mg_create_server(NULL, Server::eventHandler);
+	server = mg_create_server((void *) this, Server::mgEventHandler);
 	mg_set_option(server, "listening_port", listeningPort.c_str());
 	mg_set_option(server, "document_root", ".");
 
@@ -12,6 +12,7 @@ Server::Server(std::string listeningPort, BD* perfiles, BD* sesiones, BD* passwo
 	this->passwords = passwords;
 
 	manejador = new ManejadorDeUsuarios(perfiles, sesiones, passwords);
+
 }
 
 Server::~Server() {
@@ -26,29 +27,30 @@ Server::~Server() {
 	delete passwords;
 }
 
-int Server::eventHandler(mg_connection* connection, mg_event event) {
+int Server::mgEventHandler(mg_connection* connection, mg_event event) {
+	Server* _server = (Server*) connection->server_param;
+	return _server->eventHandler(connection, event);
+}
+
+enum mg_result Server::eventHandler(mg_connection* connection, mg_event event) {
 	switch (event) {
 
 		case MG_AUTH: return MG_TRUE;
 
-		case MG_REQUEST:
-			cout << "entro en request" << endl;
-			return requestHandler(connection);
+		case MG_REQUEST: return requestHandler(connection);
 
-		case MG_CLOSE:
-			cout << "entro en close" << endl;
-			closeHandler(connection);
-			return MG_TRUE;
+		case MG_CLOSE: return closeHandler(connection);
 
 		default: return MG_FALSE;
 	}
 }
 
-void Server::closeHandler(mg_connection* connection){
+enum mg_result Server::closeHandler(mg_connection* connection){
 	if(connection){
 		free(connection->connection_param);
 		connection->connection_param = NULL;
 	}
+	return MG_TRUE;
 }
 
 void Server::pollServer(int milliseconds) {
@@ -113,16 +115,48 @@ enum mg_result Server::POSTHandler(mg_connection* connection) {
 	string uri(connection->uri);
 	cout << "Estoy en post" << endl;
 
-	if (uri == "/login"){
-		mg_printf_data(connection, "%s, %d\n", connection->content, connection->content_len);
+	if (uri == "/reg"){
+		//TODO:implementar la parte de registracion.
+		string username = "root";
+		string password = "administrador";
+		string perfil = "{\"pablo\": \"santi\"}";
+		manejador->registrarUsuario(username, password, perfil);
+		mg_printf_data(connection, "Usuario registrado\n");
+
 	}
 
+	if (uri == "/login"){
+		string user = getVar(connection, "user");
+		string pass = getVar(connection, "pass");
+
+		if(manejador->validarLogin(user, pass)){
+			string token = manejador->iniciarSesion(user);
+			mg_printf_data(connection, "Token de sesion: %s\n", token.c_str());
+		}else{
+			mg_printf_data(connection, "No es posible conectar, usuario o contraseña incorrecto\n");
+		}
+	}
 
 	if (uri == "/upload"){
 		return getMultipartData(connection);
 	}
 
 	return MG_TRUE;
+}
+
+string Server::getVar(mg_connection* connection, string varName){
+	string value;
+	int max = 100;
+	int n = 0;
+
+	value.resize(max);
+	mg_get_var_n(connection, varName.c_str(), (char*) value.data(), max, n);
+
+	value.resize(strlen(value.data()));
+
+	mg_printf_data(connection, "Variable: '%s'\n", value.c_str());
+
+	return value;
 }
 
 enum mg_result Server::DELETEHandler(mg_connection* connection) {
@@ -141,7 +175,7 @@ enum mg_result Server::getMultipartData(mg_connection* connection){
 
 	while ((n2 = mg_parse_multipart(connection->content + n1, connection->content_len - n1,
 				   var_name, sizeof(var_name), file_name, sizeof(file_name), &data, &data_len)) > 0) {
-		mg_printf_data(connection, "var: %s, file_name: %s, size: %d bytes<br>\n", var_name, file_name, data_len);
+		mg_printf_data(connection, "var: %s, file_name: %s, size: %d bytes\n", var_name, file_name, data_len);
 		n1 += n2;
 	}
 	ofstream outFile(file_name, std::ofstream::binary);
