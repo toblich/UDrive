@@ -68,7 +68,7 @@ string ParserJson::serializarMetadatoArchivo(MetadatoArchivo metadato) {
 	archivo["usuarios"] = usuarios;
 
 	string serializado = archivo.toStyledString();
-	std::cout << serializado << std::endl;
+//	std::cout << serializado << std::endl;
 	return serializado;
 }
 
@@ -87,7 +87,21 @@ string ParserJson::serializarMetadatoUsuario(MetadatoUsuario metadato) {
 	archivo["ultima ubicacion"] = ubicacion;
 
 	string serializado = archivo.toStyledString();
-	std::cout << serializado << std::endl;
+//	std::cout << serializado << std::endl;
+	return serializado;
+}
+
+string ParserJson::serializarMetadatoSesion(MetadatosSesion metadato){
+	Value archivo;
+
+	//TODO: Habría que verificar que no esten vacios, o se podria asumir
+	//		que como los escribimos nosotros van a estar bien??
+	archivo["username"] = metadato.username;
+	archivo["password"] = metadato.password;
+	archivo["token"] = metadato.token;
+
+	string serializado = archivo.toStyledString();
+//	std::cout << serializado << std::endl;
 	return serializado;
 }
 
@@ -168,6 +182,24 @@ MetadatoUsuario ParserJson::deserializarMetadatoUsuario(string json) {
 	} else {
 		Logger logger;
 		string error = "Fallo el parseo de un Json metadato de usuario.";
+		logger.loggear(error, WARN);
+	}
+	return metadatos;
+}
+
+MetadatosSesion ParserJson::deserializarMetadatoSesion(std::string json){
+	Value raiz;
+	Features f = Features::strictMode();
+	Reader reader(f);
+	MetadatosSesion metadatos;
+	bool parseadoExitoso = reader.parse(json, raiz);
+	if (parseadoExitoso){
+		metadatos.username = this->verificarString("username", raiz);
+		metadatos.password = this->verificarString("password", raiz);
+		metadatos.token = this->verificarString("token", raiz);
+	} else {
+		Logger logger;
+		string error = "Fallo el parseo de un Json metadato de sesion.";
 		logger.loggear(error, WARN);
 	}
 	return metadatos;

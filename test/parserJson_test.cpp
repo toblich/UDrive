@@ -161,3 +161,24 @@ TEST(ParserJsonTest, deberiaDeserializarBienUltimaUbicacionInexistenteMetadatoUs
 	EXPECT_FLOAT_EQ(0, pruebaUsu.ultimaUbicacion.latitud);
 	EXPECT_FLOAT_EQ(0, pruebaUsu.ultimaUbicacion.longitud);
 }
+
+TEST(ParserJsonTest, deberiaDeserializarBienUsernameCorrectoMetadatoSesion){
+	ParserJson parser;
+	string jsonSes = "{\n"
+			"\t\"username\" : \"pancheitor\",\n"
+			"\t\"password\" : \"pancho123\",\n"
+			"\t\"token\" : \"asg371ns812ssk\"\n"
+			"}";
+	MetadatosSesion pruebaSes = parser.deserializarMetadatoSesion(jsonSes);
+	EXPECT_EQ("pancheitor", pruebaSes.username);
+}
+
+TEST(ParserJsonTest, deberiaDeserializarBienUsernameInexistenteMetadatoSesion){
+	ParserJson parser;
+	string jsonSes = "{\n"
+			"\t\"password\" : \"pancho123\",\n"
+			"\t\"token\" : \"asg371ns812ssk\"\n"
+			"}";
+	MetadatosSesion pruebaSes = parser.deserializarMetadatoSesion(jsonSes);
+	EXPECT_EQ("", pruebaSes.username);
+}
