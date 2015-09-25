@@ -8,6 +8,7 @@
 #include <sys/stat.h>
 
 const std::string defaultFileSystem = "FileSystem";
+const std::string trash = ".trash";
 
 class ManejadorArchivosYMetadatos {
 
@@ -23,11 +24,14 @@ public:
 
 	std::vector<std::string> parsearDirectorios(std::string pathCompleto);
 	void crearUsuario(std::string username);
-	void crearCarpeta(std::string path);
-	void subirArchivo(std::string username, std::string filename, const char* data, int dataLen, std::string jsonMetadatos);
-	void actualizarMetadatos(std::string username, std::string filename, std::string nuevosMetadatos);
-	void agregarPermiso(std::string usernameOrigen, std::string filename, std::string usernameDestino);
-
+	void crearCarpeta(std::string username, std::string path);
+	void subirArchivo(std::string username, std::string filepath, const char* data, int dataLen, std::string jsonMetadatos);
+	std::string consultarMetadatosArchivo(std::string username, std::string filename);
+	void eliminarArchivo(std::string username, std::string filepath);
+	void actualizarMetadatos(std::string username, std::string filepath, std::string nuevosMetadatos);
+	void actualizarArchivo(std::string username, std::string filepath, const char* data, int dataLen);
+	void descargarArchivo(std::string username, std::string filepath);
+	void agregarPermiso(std::string usernameOrigen, std::string filepath, std::string usernameDestino);
 
 	void deleteFileSystem();
 };

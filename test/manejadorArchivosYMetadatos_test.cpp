@@ -62,9 +62,9 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaParsearBienPathConEspacios) {
 
 TEST_F(ManejadorArchivosYMetadatosTest, deberiaCrearBienCarpetas) {
 	struct stat sb;
-	string path = "hola/como estas/pablo";
-	manejador->crearCarpeta(path);
-	string pathCompleto = pathFS + "/" + path;
+	string path = "como estas/pablo";
+	manejador->crearCarpeta("hola", path);
+	string pathCompleto = pathFS + "/" + "hola/" + path;
 	std::vector<std::string> directorios = manejador->parsearDirectorios(pathCompleto);
 	std::string directorioAcumulado = "";
 	int size = directorios.size();
@@ -77,8 +77,8 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaCrearBienCarpetas) {
 }
 
 TEST_F(ManejadorArchivosYMetadatosTest, deberiaSubirBienArchivoDeTexto) {
-	string path = "pablo/hola";
-	manejador->crearCarpeta(path);
+	string path = "hola";
+	manejador->crearCarpeta("pablo", path);
 	manejador->subirArchivo("pablo", "hola/hola.txt", "hola pablo", 10, "");
 	ifstream archivo;
 	string texto;
@@ -92,8 +92,8 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaSubirBienArchivoDeTexto) {
 
 TEST_F(ManejadorArchivosYMetadatosTest, deberiaBorrarElFileSystem) {
 	struct stat sb;
-	string path = "pablo/hola";
-	manejador->crearCarpeta(path); //Creo una carpeta para asegurarme que exista el FS
+	string path = "hola";
+	manejador->crearCarpeta("pablo", path); //Creo una carpeta para asegurarme que exista el FS
 	//Me fijo si existe la carpeta del FS
 	EXPECT_TRUE(stat(pathFS.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode));
 	manejador->deleteFileSystem();
