@@ -7,18 +7,17 @@ option(rocksdb "Build with RocksDB." ON)
 project(UDrive)
 
 #Incluyo las librerias de headers
-include_directories(include/)
-file(GLOB INCLUDES "include/*" )
+include_directories(include/ include/db/)
 
 #Agrego todos los archivos de SOURCE
-file(GLOB SOURCE "src/*" )
+file(GLOB SOURCE "src/*" "src/db/*")
 
 
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAG} -g -std=c++11 -pthread")
 
 if (rocksdb)
-	add_executable(udrive ${SOURCE} ${INCLUDES})
+	add_executable(udrive ${SOURCE})
 	
 	#Agrego librerias externas
 	include_directories(librocksdb)
@@ -49,22 +48,22 @@ if(test)
 	enable_testing()
 
 	#Incluyo las librerias de headers
-	include_directories(include/)
+	include_directories(include/ include/db/)
 
 	set(PROJ ${CMAKE_CURRENT_LIST_DIR})
 	
 	#Agrego todos los archivos de TEST
-	file(GLOB SOURCE_TEST "test/*" )
+	file(GLOB SOURCE_TEST "test/*" "test/db/*")
 
-	file(GLOB SOURCE2 "src/*" )
+	file(GLOB SOURCE2 "src/*" "src/db/*")
 	list(REMOVE_ITEM SOURCE2 ${PROJ}/src/main.cpp)
 
 	if (NOT rocksdb)
-		list(REMOVE_ITEM SOURCE2 ${PROJ}/src/basededatos.cpp)
-		list(REMOVE_ITEM SOURCE_TEST ${PROJ}/test/basededatos_test.cpp)
+		list(REMOVE_ITEM SOURCE2 ${PROJ}/src/db/basededatos.cpp)
+		list(REMOVE_ITEM SOURCE_TEST ${PROJ}/test/db/basededatos_test.cpp)
 	endif()
 
-	add_executable(unitTest ${SOURCE2} ${SOURCE_TEST} ${INCLUDES})
+	add_executable(unitTest ${SOURCE2} ${SOURCE_TEST})
 
 	#Agrego librerias externas
 	find_package(GTest REQUIRED)

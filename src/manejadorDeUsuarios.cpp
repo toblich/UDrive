@@ -75,7 +75,8 @@ bool ManejadorDeUsuarios::esUsernameValido(string username) {
 }
 
 bool ManejadorDeUsuarios::esCaracterInvalido(char c) {
-	return c == '/' or c == ' ';
+	const string invalidos = "/ ~#?=&";
+	return (invalidos.find(c) != string::npos);
 }
 
 bool ManejadorDeUsuarios::esPasswordValida(string password) {

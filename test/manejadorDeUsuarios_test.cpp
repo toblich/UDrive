@@ -73,18 +73,17 @@ TEST_F(ManejadorDeUsuariosTest, noDeberiaCerrarSesionConTokenDeOtroUsuario) {
 	EXPECT_FALSE(manejador->cerrarSesion(token, "otro"));
 }
 
-TEST_F(ManejadorDeUsuariosTest, noDeberiaPermitirCrearUsuarioConUsernameConBarra) {
+TEST_F(ManejadorDeUsuariosTest, noDeberiaPermitirCrearUsuarioConUsernameConCaracteresInvalidos) {
 	string uname1 = "santi/tobi";
-	string uname2 = "/";
+	string uname2 = "#";
+	string uname3 = "hola~";
+	string uname4 = "&chau";
+	string uname5 = "what?";
 	EXPECT_FALSE(manejador->registrarUsuario(uname1, password, perfil));
 	EXPECT_FALSE(manejador->registrarUsuario(uname2, password, perfil));
-}
-
-TEST_F(ManejadorDeUsuariosTest, noDeberiaPermitirCrearUsuarioConUsernameConEspacio) {
-	string uname1 = "santi tobi";
-	string uname2 = " ";
-	EXPECT_FALSE(manejador->registrarUsuario(uname1, password, perfil));
-	EXPECT_FALSE(manejador->registrarUsuario(uname2, password, perfil));
+	EXPECT_FALSE(manejador->registrarUsuario(uname3, password, perfil));
+	EXPECT_FALSE(manejador->registrarUsuario(uname4, password, perfil));
+	EXPECT_FALSE(manejador->registrarUsuario(uname5, password, perfil));
 }
 
 TEST_F(ManejadorDeUsuariosTest, noDeberiaPermitirCrearUsuarioConPasswordCorta) {

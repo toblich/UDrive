@@ -2,6 +2,7 @@ export INCLUDE=include
 export LIB=/usr/lib
 
 mkdir files
+mkdir db
 rm -r build
 mkdir build
 cd build
