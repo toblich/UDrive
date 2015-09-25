@@ -62,9 +62,9 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaParsearBienPathConEspacios) {
 
 TEST_F(ManejadorArchivosYMetadatosTest, deberiaCrearBienCarpetas) {
 	struct stat sb;
-	string path = "como estas/pablo";
+	string path = "hola/como estas/pablo";
 	manejador->crearCarpeta("hola", path);
-	string pathCompleto = pathFS + "/" + "hola/" + path;
+	string pathCompleto = pathFS + "/" + path;
 	std::vector<std::string> directorios = manejador->parsearDirectorios(pathCompleto);
 	std::string directorioAcumulado = "";
 	int size = directorios.size();
