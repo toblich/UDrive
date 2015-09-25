@@ -82,3 +82,19 @@ bool ManejadorDeUsuarios::esPasswordValida(string password) {
 	// TODO: forzar Alfanumerica?
 	return (password.size() >= 8);
 }
+
+string ManejadorDeUsuarios::getPerfil(string username) {
+	if (perfiles->contains(username)){
+		return perfiles->get(username);
+	} else {
+		return string();
+	}
+}
+
+void ManejadorDeUsuarios::modifyPerfil(string username, string perfil){
+	if (perfiles->contains(username)){
+		perfiles->modify(username, perfil);
+	}else {
+		perfiles->put(username, perfil);
+	}
+}

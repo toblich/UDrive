@@ -26,6 +26,9 @@ public:
 
 	//bool eliminarUsuario();
 
+	string getPerfil(string username);
+	void modifyPerfil(string username, string perfil);
+
 private:
 	BD* perfiles;
 	BD* sesiones;

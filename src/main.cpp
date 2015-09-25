@@ -20,7 +20,7 @@ int main(int argc, char** argv) {
 	string puerto = "8080";
 	Server server(puerto, perfiles, sesiones, passwords);
 	cout << "Lanzando servidor en el puerto " << server.getListeningPort() << endl;
-	for (;;) {
+	while (server.isRunning()) {
 		server.pollServer(1000);
 	}
 

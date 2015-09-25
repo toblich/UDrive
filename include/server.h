@@ -2,13 +2,21 @@
 #define SERVER_H_
 
 #include <string>
+#include <vector>
+#include <map>
 #include <iostream>
 #include <fstream>
 #include "logger.h"
+#include "manejadorDeUsuarios.h"
+#include "realizadorDeEventos.h"
+#include "profile.h"
+#include "session.h"
+#include "file.h"
 #include "mongoose.h"
 #include "bd.h"
-#include "manejadorDeUsuarios.h"
 #include "parserJson.h"
+#include "parserURI.h"
+#include <typeinfo>
 
 using namespace std;
 
@@ -17,28 +25,24 @@ public:
 	Server(string portNumber, BD* perfiles, BD* sesiones, BD* passwords);
 	virtual ~Server();
 
-	enum mg_result eventHandler(mg_connection *connection, mg_event event);
+	mg_result eventHandler(mg_connection *connection, mg_event event);
 	static int mgEventHandler(mg_connection *connection, mg_event event);
-	string mensajeSegunURI(string uri);
 	void pollServer(int milliseconds);
 	const char* getListeningPort() { return mg_get_option(server, "listening_port"); }
-	enum mg_result getMultipartData(mg_connection* connection);
-	string getVar(mg_connection* connection, string varName);
+	bool isRunning() { return running; }
 
 private:
+	bool running;
+	map<string, RealizadorDeEventos*> mapaURI;
 	ParserJson parser;
 	mg_server* server;
-	ManejadorDeUsuarios* manejador;
+	ManejadorDeUsuarios* manejadorUsuarios;
 	BD* perfiles;
 	BD* sesiones;
 	BD* passwords;
 
-	enum mg_result closeHandler(mg_connection* connection);
-	enum mg_result requestHandler(mg_connection* connection);
-	enum mg_result GETHandler(mg_connection* connection);
-	enum mg_result PUTHandler(mg_connection* connection);
-	enum mg_result POSTHandler(mg_connection* connection);
-	enum mg_result DELETEHandler(mg_connection* connection);
+	mg_result closeHandler(mg_connection* connection);
+	mg_result requestHandler(mg_connection* connection);
 };
 
 #endif /* SERVER_H_ */
