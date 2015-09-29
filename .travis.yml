@@ -39,7 +39,7 @@ before_script:
   - cd build
 
 script:
-  - cmake -Dtest=ON -Drocksdb=OFF ../; make unitTest; ./unitTest 
+  - ./compilar -t
 
 
 # cache:
