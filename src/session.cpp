@@ -20,7 +20,7 @@ mg_result Session::POSTHandler(mg_connection* connection) {
 	}else{
 		mg_send_status(connection, CODESTATUS_BAD_REQUEST);
 		mg_send_header(connection, contentType.c_str(), jsonType.c_str());
-		printfData(connection, "{\"error\":\"No es posible conectar, usuario o contraseña incorrecto\"}");
+		printfData(connection, "{\"error\":\"No es posible conectar, usuario y/o contraseña incorrecto/s\"}");
 	}
 
 	return MG_TRUE;
@@ -35,7 +35,7 @@ mg_result Session::DELETEHandler(mg_connection* connection) {
 	manejadorUs->cerrarSesion(uris[1],username);
 	mg_send_status(connection, CODESTATUS_SUCCES);
 	mg_send_header(connection, contentType.c_str(), jsonType.c_str());
-	printfData(connection, "{\"succes\":\"Sesion cerrada correctamente\"}");
+	printfData(connection, "{\"succes\": \"Sesion cerrada correctamente\"}");
 
 	return MG_TRUE;
 }
