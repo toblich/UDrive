@@ -1,5 +1,5 @@
-#ifndef INCLUDE_SESSION_H_
-#define INCLUDE_SESSION_H_
+#ifndef SESSION_H_
+#define SESSION_H_
 
 #include "realizadorDeEventos.h"
 #include "parserURI.h"
@@ -18,4 +18,4 @@ protected:
 	mg_result DELETEHandler(mg_connection* connection);
 };
 
-#endif /* INCLUDE_SESSION_H_ */
+#endif /* SESSION_H_ */

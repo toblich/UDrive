@@ -9,6 +9,14 @@ RealizadorDeEventos::~RealizadorDeEventos() {
 	// TODO Auto-generated destructor stub
 }
 
+size_t RealizadorDeEventos::printfData(mg_connection* connection, const char* format, ...) {
+	va_list ap;
+	va_start(ap, format);
+	size_t ret = mg_vprintf_data(connection, format, ap);
+	va_end(ap);
+	return ret;
+}
+
 string RealizadorDeEventos::getVar(mg_connection* connection, string varName){
 	string variable;
 	int maxLenght = 200;
@@ -18,24 +26,26 @@ string RealizadorDeEventos::getVar(mg_connection* connection, string varName){
 	//Si no existe una variable con ese varName, devuelvo un string vacio.
 	if (result == -1) return string();
 	variable.resize(strlen(variable.data()));
-	mg_printf_data(connection, "Variable: '%s'\n", variable.c_str());
 
 	return variable;
 }
 
-void RealizadorDeEventos::getMultipartData(mg_connection* connection){
+RealizadorDeEventos::DatosArchivo RealizadorDeEventos::getMultipartData(mg_connection* connection){
+	DatosArchivo datosArch;
 	const char* data;
 	char varName[100], fileName[100];
 	int dataLenght, n1 = 0, n2 = 0;
 
 	while ((n2 = mg_parse_multipart(connection->content + n1, connection->content_len - n1,
 			varName, sizeof(varName), fileName, sizeof(fileName), &data, &dataLenght)) > 0) {
-		mg_printf_data(connection, "var: %s, file_name: %s\n", varName, fileName);
+		//mg_printf_data(connection, "var: %s, file_name: %s\n", varName, fileName);
 		n1 += n2;
 	}
-	ofstream outFile(fileName, ofstream::binary);
-	outFile.write(data, dataLenght);
-	outFile.close();
+
+	datosArch.fileData = data;
+	datosArch.dataLenght = dataLenght;
+
+	return datosArch;
 }
 
 mg_result RealizadorDeEventos::handler(mg_connection* connection) {

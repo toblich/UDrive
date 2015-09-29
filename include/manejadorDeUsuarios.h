@@ -1,5 +1,5 @@
-#ifndef INCLUDE_MANEJADORDEUSUARIOS_H_
-#define INCLUDE_MANEJADORDEUSUARIOS_H_
+#ifndef MANEJADORDEUSUARIOS_H_
+#define MANEJADORDEUSUARIOS_H_
 
 #include <time.h>
 #include <string>
@@ -40,4 +40,4 @@ private:
 	bool esPasswordValida(string password);
 };
 
-#endif /* INCLUDE_MANEJADORDEUSUARIOS_H_ */
+#endif /* MANEJADORDEUSUARIOS_H_ */

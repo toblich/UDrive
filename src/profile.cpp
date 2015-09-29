@@ -35,7 +35,7 @@ mg_result Profile::PUTHandler(mg_connection* connection) {
 	manejadorUs->modifyPerfil(uris[1], newProfile);
 	mg_send_status(connection, CODESTATUS_SUCCES);
 	//mg_send_header(connection, "Content-Type", "application/json");
-	mg_printf_data(connection, "{\"succes\":\"Se modifico el perfil exitosamente\"}\n");
+	mg_printf_data(connection, "{ \"success\": \"Se modifico el perfil exitosamente\"}\n");
 
 	return MG_TRUE;
 }
@@ -48,8 +48,9 @@ mg_result Profile::POSTHandler(mg_connection* connection) {
 	//TODO: falta revisar si hay errores
 	if( manejadorUs->registrarUsuario(username, password, profile)){
 		mg_send_status(connection, CODESTATUS_RESOURCE_CREATED);
-		//mg_send_header(connection, "Content-Type", "application/json");
-		mg_printf_data(connection, "{\"succes\":\"Cuenta creada correctamente\"}\n");
+		mg_send_header(connection, contentType.c_str(), jsonType.c_str());
+		//mg_printf_data(connection, "{\"succes\":\"Cuenta creada correctamente\"}\n");
+		printfData(connection, "{\"succes\":\"Cuenta creada correctamente\"}");
 	}else{
 		mg_send_status(connection, CODESTATUS_BAD_REQUEST);
 		//mg_send_header(connection, "Content-Type", "application/json");

@@ -1,5 +1,5 @@
-#ifndef INCLUDE_FILE_H_
-#define INCLUDE_FILE_H_
+#ifndef FILE_H_
+#define FILE_H_
 
 #include "realizadorDeEventos.h"
 
@@ -7,6 +7,12 @@ class File : public RealizadorDeEventos {
 public:
 	File();
 	virtual ~File();
+
+protected:
+	mg_result GETHandler(mg_connection* connection);
+	mg_result PUTHandler(mg_connection* connection);
+	mg_result DELETEHandler(mg_connection* connection);
+
 };
 
-#endif /* INCLUDE_FILE_H_ */
+#endif /* FILE_H_ */

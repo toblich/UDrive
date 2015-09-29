@@ -1,12 +1,14 @@
-#ifndef INCLUDE_REALIZADORDEEVENTOS_H_
-#define INCLUDE_REALIZADORDEEVENTOS_H_
+#ifndef REALIZADORDEEVENTOS_H_
+#define REALIZADORDEEVENTOS_H_
 
 #include <string>
 #include <iostream>
 #include <fstream>
 #include "mongoose.h"
 #include "manejadorDeUsuarios.h"
+//#include "manejadorArchivosYMetadatos.h"
 #include "parserURI.h"
+#include <stdarg.h>
 
 using namespace std;
 
@@ -26,15 +28,24 @@ public:
 
 		// 5xx Error de Servidor
 		CODESTATUS_INTERNAL_SERVER_ERROR = 500
-
 	}CodeStatus;
+
+	typedef struct{
+		const char* fileData;
+		int	dataLenght;
+	}DatosArchivo;
 
 	RealizadorDeEventos();
 	virtual ~RealizadorDeEventos();
 	mg_result handler(mg_connection* connection);
 
 protected:
-	void getMultipartData(mg_connection* connection);
+
+	string contentType = "Content-Type";
+	string jsonType = "application/json";
+
+	size_t printfData(mg_connection* connection, const char* format, ...);
+	DatosArchivo getMultipartData(mg_connection* connection);
 	string getVar(mg_connection* connection, string varName);
 	virtual mg_result POSTHandler(mg_connection* connection);
 	virtual mg_result GETHandler(mg_connection* connection);
@@ -44,4 +55,4 @@ protected:
 
 };
 
-#endif /* INCLUDE_REALIZADORDEEVENTOS_H_ */
+#endif /* REALIZADORDEEVENTOS_H_ */
