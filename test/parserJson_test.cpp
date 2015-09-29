@@ -3,18 +3,36 @@
 
 using namespace std;
 
-TEST(ParserJsonTest, deberiaDeserializarBienNombreCorrectoMetadatoArchivo){
+const string jsonArchOK = "{\n"
+		"\t\"etiquetas\" : [ \"23\", true, \"juan\" ],\n"
+		"\t\"extension\" : \"jpg\",\n"
+		"\t\"fecha ultima modificacion\" : \"09/09/2015\",\n"
+		"\t\"nombre\" : \"sol\",\n"
+		"\t\"propietario\" : \"Pancheitor\",\n"
+		"\t\"usuario ultima modificacion\" : \"Pepe\",\n"
+		"\t\"usuarios\" : [ \"Pancheitor\", \"Juan\", \"Pepe\", \"Santi\" ]\n"
+		"}";
+
+const string jsonUsuOK = "{\n"
+		"\t\"email\" : \"panch@eitor.com\",\n"
+		"\t\"nombre\" : \"Pancheitor\",\n"
+		"\t\"path foto de perfil\" : \"fotos/pancheitor.jpg\",\n"
+		"\t\"ultima ubicacion\" : {\n"
+			"\t \t\"latitud\" : 45.0123,\n"
+			"\t \t\"longitud\" : -37.1293\n"
+		"\t}\n"
+		"}";
+
+const string jsonSesOK = "{\n"
+		"\t\"username\" : \"pancheitor\",\n"
+		"\t\"password\" : \"pancho123\",\n"
+		"\t\"token\" : \"asg371ns812ssk\"\n"
+		"}";
+
+
+TEST(ParserJsonTest, deberiaDeserializarBienNombreCorrectoMetadatoArchivo) {
 	ParserJson parser;
-	string jsonArch = "{\n"
-			"\t\"etiquetas\" : [ \"23\", true, \"juan\" ],\n"
-			"\t\"extension\" : \"jpg\",\n"
-			"\t\"fecha ultima modificacion\" : \"09/09/2015\",\n"
-			"\t\"nombre\" : \"sol\",\n"
-			"\t\"propietario\" : \"Pancheitor\",\n"
-			"\t\"usuario ultima modificacion\" : \"Pepe\",\n"
-			"\t\"usuarios\" : [ \"Pancheitor\", \"Juan\", \"Pepe\", \"Santi\" ]\n"
-			"}";
-	MetadatoArchivo pruebaArch = parser.deserializarMetadatoArchivo(jsonArch);
+	MetadatoArchivo pruebaArch = parser.deserializarMetadatoArchivo(jsonArchOK);
 
 	EXPECT_EQ("sol", pruebaArch.nombre);
 }
@@ -36,16 +54,8 @@ TEST(ParserJsonTest, deberiaDeserializarBienNombreInexistenteMetadatoArchivo){
 
 TEST(ParserJsonTest, deberiaDeserializarBienEtiquetasCorrectasMetadatoArchivo){
 	ParserJson parser;
-	string jsonArch = "{\n"
-			"\t\"etiquetas\" : [ \"23\", true, \"juan\" ],\n"
-			"\t\"extension\" : \"jpg\",\n"
-			"\t\"fecha ultima modificacion\" : \"09/09/2015\",\n"
-			"\t\"nombre\" : \"sol\",\n"
-			"\t\"propietario\" : \"Pancheitor\",\n"
-			"\t\"usuario ultima modificacion\" : \"Pepe\",\n"
-			"\t\"usuarios\" : [ \"Pancheitor\", \"Juan\", \"Pepe\", \"Santi\" ]\n"
-			"}";
-	MetadatoArchivo pruebaArch = parser.deserializarMetadatoArchivo(jsonArch);
+
+	MetadatoArchivo pruebaArch = parser.deserializarMetadatoArchivo(jsonArchOK);
 
 	list<string> etiq = pruebaArch.etiquetas;
 	list<string>::iterator itEtiq = etiq.begin();
@@ -75,16 +85,8 @@ TEST(ParserJsonTest, deberiaDeserializarBienEtiquetasInexistenteMetadatoArchivo)
 
 TEST(ParserJsonTest, deberiaDeserializarBienNombreCorrectoMetadatoUsuario){
 	ParserJson parser;
-	string jsonUsu = "{\n"
-			"\t\"email\" : \"panch@eitor.com\",\n"
-			"\t\"nombre\" : \"Pancheitor\",\n"
-			"\t\"path foto de perfil\" : \"fotos/pancheitor.jpg\",\n"
-			"\t\"ultima ubicacion\" : {\n"
-				"\t \t\"latitud\" : 45.0123,\n"
-				"\t \t\"longitud\" : -37.1293\n"
-			"\t}\n"
-			"}";
-	MetadatoUsuario pruebaUsu = parser.deserializarMetadatoUsuario(jsonUsu);
+
+	MetadatoUsuario pruebaUsu = parser.deserializarMetadatoUsuario(jsonUsuOK);
 	EXPECT_EQ("Pancheitor", pruebaUsu.nombre);
 }
 
@@ -104,16 +106,7 @@ TEST(ParserJsonTest, deberiaDeserializarBienNombreInexistenteMetadatoUsuario){
 
 TEST(ParserJsonTest, deberiaDeserializarBienUltimaUbicacionCorrectaMetadatoUsuario){
 	ParserJson parser;
-	string jsonUsu = "{\n"
-			"\t\"email\" : \"panch@eitor.com\",\n"
-			"\t\"nombre\" : \"Pancheitor\",\n"
-			"\t\"path foto de perfil\" : \"fotos/pancheitor.jpg\",\n"
-			"\t\"ultima ubicacion\" : {\n"
-				"\t \t\"latitud\" : 45.0123,\n"
-				"\t \t\"longitud\" : -37.1293\n"
-			"\t}\n"
-			"}";
-	MetadatoUsuario pruebaUsu = parser.deserializarMetadatoUsuario(jsonUsu);
+	MetadatoUsuario pruebaUsu = parser.deserializarMetadatoUsuario(jsonUsuOK);
 	EXPECT_FLOAT_EQ(45.0123, pruebaUsu.ultimaUbicacion.latitud);
 	EXPECT_FLOAT_EQ(-37.1293, pruebaUsu.ultimaUbicacion.longitud);
 }
@@ -161,12 +154,7 @@ TEST(ParserJsonTest, deberiaDeserializarBienUltimaUbicacionInexistenteMetadatoUs
 
 TEST(ParserJsonTest, deberiaDeserializarBienUsernameCorrectoMetadatoSesion){
 	ParserJson parser;
-	string jsonSes = "{\n"
-			"\t\"username\" : \"pancheitor\",\n"
-			"\t\"password\" : \"pancho123\",\n"
-			"\t\"token\" : \"asg371ns812ssk\"\n"
-			"}";
-	MetadatosSesion pruebaSes = parser.deserializarMetadatoSesion(jsonSes);
+	MetadatosSesion pruebaSes = parser.deserializarMetadatoSesion(jsonSesOK);
 	EXPECT_EQ("pancheitor", pruebaSes.username);
 }
 
@@ -178,4 +166,16 @@ TEST(ParserJsonTest, deberiaDeserializarBienUsernameInexistenteMetadatoSesion){
 			"}";
 	MetadatosSesion pruebaSes = parser.deserializarMetadatoSesion(jsonSes);
 	EXPECT_EQ("", pruebaSes.username);
+}
+
+TEST(ParserJsonTest, deberiaObtenerLoMismoAlSerializarYDeserializarMetadatoArchivo){
+
+}
+
+TEST(ParserJsonTest, deberiaObtenerLoMismoAlSerializarYDeserializarMetadatoUsuario){
+
+}
+
+TEST(ParserJsonTest, deberiaObtenerLoMismoAlSerializarYDeserializarMetadatoSesion){
+
 }
