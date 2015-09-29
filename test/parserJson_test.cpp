@@ -29,6 +29,18 @@ const string jsonSesOK = "{\n"
 		"\t\"token\" : \"asg371ns812ssk\"\n"
 		"}";
 
+bool sonListasIguales(const list<string>& expected, const list<string>& actual) {
+	list<string>::const_iterator exp = expected.cbegin();
+	list<string>::const_iterator act = actual.cbegin();
+	const list<string>::const_iterator ENDexp = expected.cend();
+	const list<string>::const_iterator ENDact = actual.cend();
+
+	for (; exp != ENDexp and act != ENDact; exp++, act++) {
+		if (*exp != *act) return false;
+	}
+
+	return (exp == ENDexp and act == ENDact);
+}
 
 TEST(ParserJsonTest, deberiaDeserializarBienNombreCorrectoMetadatoArchivo) {
 	ParserJson parser;
@@ -169,13 +181,67 @@ TEST(ParserJsonTest, deberiaDeserializarBienUsernameInexistenteMetadatoSesion){
 }
 
 TEST(ParserJsonTest, deberiaObtenerLoMismoAlSerializarYDeserializarMetadatoArchivo){
+	list<string> etiquetas;
+	etiquetas.push_back("etiA");
+	etiquetas.push_back("#etiqueta B");
+	list<string> usuariosHabilitados;
+	usuariosHabilitados.push_back("pablo");
+	usuariosHabilitados.push_back("santi");
 
+	MetadatoArchivo original = {
+			"nombreArchivo",
+			"jpg",
+			"29/09/2015",
+			"pablo",
+			"santi",
+			etiquetas,
+			usuariosHabilitados
+	};
+
+	ParserJson parser;
+	string json = parser.serializarMetadatoArchivo(original);
+	MetadatoArchivo deserializado = parser.deserializarMetadatoArchivo(json);
+
+	EXPECT_EQ(original.nombre, deserializado.nombre);
+	EXPECT_EQ(original.extension, deserializado.extension);
+	EXPECT_EQ(original.fechaUltimaModificacion, deserializado.fechaUltimaModificacion);
+	EXPECT_EQ(original.usuarioUltimaModificacion, deserializado.usuarioUltimaModificacion);
+	EXPECT_EQ(original.propietario, deserializado.propietario);
+	EXPECT_TRUE(sonListasIguales(original.etiquetas, deserializado.etiquetas));
+	EXPECT_TRUE(sonListasIguales(original.usuariosHabilitados, deserializado.usuariosHabilitados));
 }
 
 TEST(ParserJsonTest, deberiaObtenerLoMismoAlSerializarYDeserializarMetadatoUsuario){
+	MetadatoUsuario original = {
+			"tobi",
+			"u@drive.com",
+			"<pathFotoPerfil>",
+			{ 1.0, 1.0 }
+	};
 
+	ParserJson parser;
+	string json = parser.serializarMetadatoUsuario(original);
+	MetadatoUsuario deserializado = parser.deserializarMetadatoUsuario(json);
+
+	EXPECT_EQ(original.nombre, deserializado.nombre);
+	EXPECT_EQ(original.email, deserializado.email);
+	EXPECT_EQ(original.pathFotoPerfil, deserializado.pathFotoPerfil);
+	EXPECT_FLOAT_EQ(original.ultimaUbicacion.latitud, deserializado.ultimaUbicacion.latitud);
+	EXPECT_FLOAT_EQ(original.ultimaUbicacion.longitud, deserializado.ultimaUbicacion.longitud);
 }
 
 TEST(ParserJsonTest, deberiaObtenerLoMismoAlSerializarYDeserializarMetadatoSesion){
+	MetadatosSesion original = {
+			"pancho",
+			"tallerdos",
+			"902430791097619746"
+	};
 
+	ParserJson parser;
+	string json = parser.serializarMetadatoSesion(original);
+	MetadatosSesion deserializado = parser.deserializarMetadatoSesion(json);
+
+	EXPECT_EQ(original.username, deserializado.username);
+	EXPECT_EQ(original.password, deserializado.password);
+	EXPECT_EQ(original.token, deserializado.token);
 }
