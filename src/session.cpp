@@ -15,12 +15,12 @@ mg_result Session::POSTHandler(mg_connection* connection) {
 	if(manejadorUs->validarLogin(user, pass)){
 		string token = manejadorUs->iniciarSesion(user);
 		mg_send_status(connection, CODESTATUS_SUCCES);
-		//mg_send_header(connection, "Content-Type", "application/json");
-		mg_printf_data(connection, "{\"token\":\"%s\"}\n", token.c_str());
+		mg_send_header(connection, contentType.c_str(), jsonType.c_str());
+		printfData(connection, "{\"token\": \"%s\"}", token.c_str());
 	}else{
 		mg_send_status(connection, CODESTATUS_BAD_REQUEST);
-		//mg_send_header(connection, "Content-Type", "application/json");
-		mg_printf_data(connection, "{\"error\":\"No es posible conectar, usuario o contraseña incorrecto\"}\n");
+		mg_send_header(connection, contentType.c_str(), jsonType.c_str());
+		printfData(connection, "{\"error\":\"No es posible conectar, usuario o contraseña incorrecto\"}");
 	}
 
 	return MG_TRUE;
@@ -34,8 +34,8 @@ mg_result Session::DELETEHandler(mg_connection* connection) {
 
 	manejadorUs->cerrarSesion(uris[1],username);
 	mg_send_status(connection, CODESTATUS_SUCCES);
-	//mg_send_header(connection, "Content-Type", "application/json");
-	mg_printf_data(connection, "{\"succes\":\"Sesion cerrada correctamente\"}\n");
+	mg_send_header(connection, contentType.c_str(), jsonType.c_str());
+	printfData(connection, "{\"succes\":\"Sesion cerrada correctamente\"}");
 
 	return MG_TRUE;
 }

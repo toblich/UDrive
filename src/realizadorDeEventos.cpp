@@ -51,7 +51,7 @@ RealizadorDeEventos::DatosArchivo RealizadorDeEventos::getMultipartData(mg_conne
 mg_result RealizadorDeEventos::handler(mg_connection* connection) {
 	string verb = string(connection->request_method);
 
-	if (verb == "GET")			return this->GETHandler(connection);
+	if 		(verb == "GET")		return this->GETHandler(connection);
 	else if (verb == "POST")	return this->POSTHandler(connection);
 	else if (verb == "PUT")		return this->PUTHandler(connection);
 	else if (verb == "DELETE")	return this->DELETEHandler(connection);
@@ -83,6 +83,6 @@ mg_result RealizadorDeEventos::DELETEHandler(mg_connection* connection) {
 
 void RealizadorDeEventos::unsupportedMethod(mg_connection* connection) {
 	mg_send_status(connection, CODESTATUS_UNSUPPORTED_METHOD);
-	//mg_send_header(connection, "Content-Type", "application/json");
-	mg_printf_data(connection, "{\"error\":\"metodo no soportado por esta clase\"}\n");
+	mg_send_header(connection, contentType.c_str(), jsonType.c_str());
+	printfData(connection, "{\"error\": \"metodo no soportado por esta clase\"}");
 }
