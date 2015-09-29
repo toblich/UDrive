@@ -77,36 +77,38 @@ std::vector<std::string> ManejadorArchivosYMetadatos::parsearDirectorios(std::st
 
 // El path recibido no debe contener el nombre de un archivo.
 // En caso de que sea asi, se debera modificar este metodo.
-void ManejadorArchivosYMetadatos::crearCarpeta(std::string username, std::string path) {
-	struct stat sb;
-	// Agrego el FileSystem para que sea la "raiz"
-	string pathCompletoConFS = this->pathFileSystem + "/" + path;
-	std::vector<std::string> directorios = parsearDirectorios(pathCompletoConFS);
-	std::string directorioAcumulado = "";
-	int size = directorios.size();
-	for (int i = 0; i < size; i++){
-		std::string directorio = directorios[i];
-		std::string directorioPadre = directorioAcumulado;
-		directorioAcumulado += (directorio + "/");
-		// Me fijo si existe la carpeta, sino la creo
-		if (! (stat(directorioAcumulado.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode)) ){
-			mkdir(directorioAcumulado.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-			Logger logger;
-			logger.loggear("La carpeta " + directorio + " no existe dentro de " + directorioPadre +" por lo que ha sido creada.", INFO);
+bool ManejadorArchivosYMetadatos::crearCarpeta(std::string username, std::string path) {
+	if ( verificarPermisos(username, path) ) {
+		struct stat sb;
+		// Agrego el FileSystem para que sea la "raiz"
+		string pathCompletoConFS = this->pathFileSystem + "/" + path;
+		std::vector<std::string> directorios = parsearDirectorios(pathCompletoConFS);
+		std::string directorioAcumulado = "";
+		int size = directorios.size();
+		for (int i = 0; i < size; i++){
+			std::string directorio = directorios[i];
+			std::string directorioPadre = directorioAcumulado;
+			directorioAcumulado += (directorio + "/");
+			// Me fijo si existe la carpeta, sino la creo
+			if (! (stat(directorioAcumulado.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode)) ){
+				mkdir(directorioAcumulado.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+				Logger logger;
+				logger.loggear("La carpeta " + directorio + " no existe dentro de " + directorioPadre +" por lo que ha sido creada.", INFO);
+			}
 		}
-	}
-}
-
-bool ManejadorArchivosYMetadatos::crearCarpetaSegura(std::string username, std::string path) {
-	if ( this->verificarPathValido(path) ) {
-		this->crearCarpeta(username, path);
 		return true;
 	} else return false;
 }
 
-void ManejadorArchivosYMetadatos::crearUsuario(std::string username) {
+bool ManejadorArchivosYMetadatos::crearCarpetaSegura(std::string username, std::string path) {
+	if ( this->verificarPathValido(path) ) {
+		return this->crearCarpeta(username, path);
+	} else return false;
+}
+
+bool ManejadorArchivosYMetadatos::crearUsuario(std::string username) {
 	//Creo tanto la carpeta del username como su papelera
-	this->crearCarpeta(username, trash);
+	return this->crearCarpeta(username, trash);
 }
 
 // OJO porque el put tira excepciones
@@ -137,7 +139,7 @@ bool ManejadorArchivosYMetadatos::actualizarArchivo(std::string username,
 		if (pathSinArchivo != "") {
 			if ( not crearCarpetaSegura(username, pathSinArchivo) ) return false ;
 		}
-		std::string pathConFileSystem = this->pathFileSystem + "/" + username + "/" + filepath;
+		std::string pathConFileSystem = this->pathFileSystem + "/" + filepath;
 
 		ofstream outFile(pathConFileSystem, std::ofstream::binary);
 		outFile.write(data, dataLen);
@@ -212,7 +214,7 @@ bool ManejadorArchivosYMetadatos::eliminarArchivo(std::string username, std::str
 
 std::string ManejadorArchivosYMetadatos::descargarArchivo(std::string username, std::string filepath) {
 	//TODO
-	return false;
+	return "";
 }
 
 bool ManejadorArchivosYMetadatos::deleteFileSystem() {
