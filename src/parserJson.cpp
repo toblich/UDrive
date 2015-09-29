@@ -140,7 +140,7 @@ MetadatoArchivo ParserJson::deserializarMetadatoArchivo(string json) {
 			unsigned int size = usu.size();
 			for (unsigned int i=0; i < size; i++){
 				// No veo que sean un tipo en especial porque podrian ser cualquier
-				// cosa las etiquetas (mismo numeros).
+				// cosa los usernames (mismo numeros).
 				usuarios.push_back(usu[i].asString());
 			}
 		} else {

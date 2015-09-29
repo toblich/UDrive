@@ -57,6 +57,7 @@ fi
 mkdir build
 cd build
 mkdir db
+mkdir files
 cmake -Dtest=$test -Drocksdb=$rocksdb -Dcoverage=$coverage ../
 
 if [[ $coverage == 'ON' ]]; then

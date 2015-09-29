@@ -40,7 +40,8 @@ void ManejadorArchivosYMetadatos::logError(std::string mensaje) {
 
 // Una carpeta no puede contener un #
 bool ManejadorArchivosYMetadatos::verificarPathValido(std::string path) {
-	if ( path.find('#') == std::string::npos ) return true;
+	if ( path.find('#') == std::string::npos )
+		return true;
 	this->logWarn("El path " + path + " no es valido.");
 	return false;
 }
@@ -49,12 +50,15 @@ bool ManejadorArchivosYMetadatos::verificarPermisos(std::string username, std::s
 	std::vector<std::string> directorios = this->parsearDirectorios(path);
 	if ( directorios.size() > 0){
 		std::string fileOwner = directorios[0];
-		if ( username == fileOwner ) return true;
+		if ( username == fileOwner )
+			return true;
 		else {
 			//TODO: Verificar que el username tenga permisos en la parte de ~permisos
 			//TODO: Sino, loguear que no tiene permisos
+			this->logWarn("El usuario " + username + " no posee los permisos para el archivo " + path + ".");
 		}
-	} return false; //Esto no deberia pasar jamás, pero bueno
+	}
+	return false; //Esto no deberia pasar jamás, pero bueno
 }
 
 std::vector<std::string> ManejadorArchivosYMetadatos::parsearDirectorios(std::string pathCompleto) {
@@ -71,7 +75,7 @@ std::vector<std::string> ManejadorArchivosYMetadatos::parsearDirectorios(std::st
 			buffer = "";
 		}
 	}
-	if(buffer != "") directorios.push_back(buffer);
+	if (buffer != "") directorios.push_back(buffer);
 	return directorios;
 }
 
@@ -97,18 +101,21 @@ bool ManejadorArchivosYMetadatos::crearCarpeta(std::string username, std::string
 			}
 		}
 		return true;
-	} else return false;
+	} else
+		return false;
 }
 
 bool ManejadorArchivosYMetadatos::crearCarpetaSegura(std::string username, std::string path) {
 	if ( this->verificarPathValido(path) ) {
 		return this->crearCarpeta(username, path);
-	} else return false;
+	} else
+		return false;
 }
 
 bool ManejadorArchivosYMetadatos::crearUsuario(std::string username) {
 	//Creo tanto la carpeta del username como su papelera
-	return this->crearCarpeta(username, trash);
+	string pathTrash = username + "/" + trash;
+	return this->crearCarpeta(username, pathTrash);
 }
 
 // OJO porque el put tira excepciones
@@ -116,10 +123,12 @@ bool ManejadorArchivosYMetadatos::crearUsuario(std::string username) {
 bool ManejadorArchivosYMetadatos::subirArchivo(std::string username,
 		std::string filepath, const char* data, int dataLen, std::string jsonMetadatos) {
 	if ( verificarPermisos(username, filepath) ) {
-		if ( this->actualizarArchivo(username, filepath, data, dataLen) ) return false;
+		if ( not this->actualizarArchivo(username, filepath, data, dataLen) )
+			return false;
 		dbMetadatos->put(filepath, jsonMetadatos);
 		return true;
-	} else return false;
+	} else
+		return false;
 }
 
 // El filename deberia venir con los path de carpetas tambien y dentro tambien el nombre de usuario
@@ -137,7 +146,10 @@ bool ManejadorArchivosYMetadatos::actualizarArchivo(std::string username,
 		}
 		//Verifico que existan todas las carpetas y sino las creo
 		if (pathSinArchivo != "") {
-			if ( not crearCarpetaSegura(username, pathSinArchivo) ) return false ;
+			if ( not crearCarpetaSegura(username, pathSinArchivo) ) {
+				this->logWarn("Al querer actualizar el archivo " + filepath + " no se pudieron crear las carpetas.");
+				return false ;
+			}
 		}
 		std::string pathConFileSystem = this->pathFileSystem + "/" + filepath;
 
@@ -145,7 +157,8 @@ bool ManejadorArchivosYMetadatos::actualizarArchivo(std::string username,
 		outFile.write(data, dataLen);
 		outFile.close();
 		return true;
-	} else return false;
+	} else
+		return false;
 }
 
 // OJO porque el get tira excepciones
@@ -163,7 +176,8 @@ bool ManejadorArchivosYMetadatos::actualizarMetadatos(std::string username,
 	if ( verificarPermisos(username, filepath) ) {
 		dbMetadatos->modify(filepath, nuevosMetadatos);
 		return true;
-	} else return false;
+	} else
+		return false;
 }
 
 // OJO porque el get y modify tiran excepciones
@@ -179,7 +193,8 @@ bool ManejadorArchivosYMetadatos::agregarPermiso(std::string usernameOrigen,
 		std::string jsonModificado = parser.serializarMetadatoArchivo(metadato);
 		dbMetadatos->modify(pathCompleto,jsonModificado);
 		return true;
-	} else return false;
+	} else
+		return false;
 }
 
 // OJO porque el get tira excepciones
@@ -195,21 +210,22 @@ bool ManejadorArchivosYMetadatos::eliminarArchivo(std::string username, std::str
 
 		int result = rename( pathArchivo.c_str(), pathArchivoPapelera.c_str() );
 		if ( result == 0 ) {
-			// TODO Loguear eliminado ok
 			this->logInfo("La eliminacion del archivo " + filepath + " fue correcta.");
 			std::string json = this->dbMetadatos->get(filepath);
 			Batch batch;
 			batch.erase(filepath);
 			batch.put(pathCompletoPapelera, json);
-			// Tener en cuenta que hay que cambiar en ~permisos
-			if ( this->dbMetadatos->writeBatch(batch) ) return true;
+			// TODO: Tener en cuenta que hay que cambiar en ~permisos
+			if ( this->dbMetadatos->writeBatch(batch) )
+				return true;
 			this->logWarn("No se ha podido escribir el batch de eliminacion del archivo " + filepath + ".");
 			return false;
 		} else {
 			this->logWarn("La eliminacion del archivo " + filepath + " no fue correcta.");
 			return false;
 		}
-	} else return false;
+	} else
+		return false;
 }
 
 std::string ManejadorArchivosYMetadatos::descargarArchivo(std::string username, std::string filepath) {
