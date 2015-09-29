@@ -36,5 +36,8 @@ before_script:
   - ls $LIB
   - ls $INCLUDE/gtest/
 
+  - mkdir build
+  - cd build 
+
 script:
-  - ./build.sh -t
+  - cmake -Dtest=ON -Drocksdb=OFF ../ && make unitTest && ./unitTest
