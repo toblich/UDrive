@@ -3,18 +3,48 @@
 
 using namespace std;
 
-TEST(ParserJsonTest, deberiaDeserializarBienNombreCorrectoMetadatoArchivo){
+const string jsonArchOK = "{\n"
+		"\t\"etiquetas\" : [ \"23\", true, \"juan\" ],\n"
+		"\t\"extension\" : \"jpg\",\n"
+		"\t\"fecha ultima modificacion\" : \"09/09/2015\",\n"
+		"\t\"nombre\" : \"sol\",\n"
+		"\t\"propietario\" : \"Pancheitor\",\n"
+		"\t\"usuario ultima modificacion\" : \"Pepe\",\n"
+		"\t\"usuarios\" : [ \"Pancheitor\", \"Juan\", \"Pepe\", \"Santi\" ]\n"
+		"}";
+
+const string jsonUsuOK = "{\n"
+		"\t\"email\" : \"panch@eitor.com\",\n"
+		"\t\"nombre\" : \"Pancheitor\",\n"
+		"\t\"path foto de perfil\" : \"fotos/pancheitor.jpg\",\n"
+		"\t\"ultima ubicacion\" : {\n"
+			"\t \t\"latitud\" : 45.0123,\n"
+			"\t \t\"longitud\" : -37.1293\n"
+		"\t}\n"
+		"}";
+
+const string jsonSesOK = "{\n"
+		"\t\"username\" : \"pancheitor\",\n"
+		"\t\"password\" : \"pancho123\",\n"
+		"\t\"token\" : \"asg371ns812ssk\"\n"
+		"}";
+
+bool sonListasIguales(const list<string>& expected, const list<string>& actual) {
+	list<string>::const_iterator exp = expected.cbegin();
+	list<string>::const_iterator act = actual.cbegin();
+	const list<string>::const_iterator ENDexp = expected.cend();
+	const list<string>::const_iterator ENDact = actual.cend();
+
+	for (; exp != ENDexp and act != ENDact; exp++, act++) {
+		if (*exp != *act) return false;
+	}
+
+	return (exp == ENDexp and act == ENDact);
+}
+
+TEST(ParserJsonTest, deberiaDeserializarBienNombreCorrectoMetadatoArchivo) {
 	ParserJson parser;
-	string jsonArch = "{\n"
-			"\t\"etiquetas\" : [ \"23\", true, \"juan\" ],\n"
-			"\t\"extension\" : \"jpg\",\n"
-			"\t\"fecha ultima modificacion\" : \"09/09/2015\",\n"
-			"\t\"nombre\" : \"sol\",\n"
-			"\t\"propietario\" : \"Pancheitor\",\n"
-			"\t\"usuario ultima modificacion\" : \"Pepe\",\n"
-			"\t\"usuarios\" : [ \"Pancheitor\", \"Juan\", \"Pepe\", \"Santi\" ]\n"
-			"}";
-	MetadatoArchivo pruebaArch = parser.deserializarMetadatoArchivo(jsonArch);
+	MetadatoArchivo pruebaArch = parser.deserializarMetadatoArchivo(jsonArchOK);
 
 	EXPECT_EQ("sol", pruebaArch.nombre);
 }
@@ -36,24 +66,19 @@ TEST(ParserJsonTest, deberiaDeserializarBienNombreInexistenteMetadatoArchivo){
 
 TEST(ParserJsonTest, deberiaDeserializarBienEtiquetasCorrectasMetadatoArchivo){
 	ParserJson parser;
-	string jsonArch = "{\n"
-			"\t\"etiquetas\" : [ \"23\", true, \"juan\" ],\n"
-			"\t\"extension\" : \"jpg\",\n"
-			"\t\"fecha ultima modificacion\" : \"09/09/2015\",\n"
-			"\t\"nombre\" : \"sol\",\n"
-			"\t\"propietario\" : \"Pancheitor\",\n"
-			"\t\"usuario ultima modificacion\" : \"Pepe\",\n"
-			"\t\"usuarios\" : [ \"Pancheitor\", \"Juan\", \"Pepe\", \"Santi\" ]\n"
-			"}";
-	MetadatoArchivo pruebaArch = parser.deserializarMetadatoArchivo(jsonArch);
+
+	MetadatoArchivo pruebaArch = parser.deserializarMetadatoArchivo(jsonArchOK);
 
 	list<string> etiq = pruebaArch.etiquetas;
 	list<string>::iterator itEtiq = etiq.begin();
 	int i = 0;
 	for ( ; itEtiq != etiq.end() ; itEtiq++, i++){
 		if (i==0) EXPECT_EQ("23", (*itEtiq));
-		if (i==1) EXPECT_EQ("true", (*itEtiq));
-		if (i==2) EXPECT_EQ("juan", (*itEtiq));
+		else {
+			if (i==1) EXPECT_EQ("true", (*itEtiq));
+			else if (i==2) EXPECT_EQ("juan", (*itEtiq));
+				else EXPECT_TRUE(false); //Rompo
+		}
 	}
 }
 
@@ -75,16 +100,8 @@ TEST(ParserJsonTest, deberiaDeserializarBienEtiquetasInexistenteMetadatoArchivo)
 
 TEST(ParserJsonTest, deberiaDeserializarBienNombreCorrectoMetadatoUsuario){
 	ParserJson parser;
-	string jsonUsu = "{\n"
-			"\t\"email\" : \"panch@eitor.com\",\n"
-			"\t\"nombre\" : \"Pancheitor\",\n"
-			"\t\"path foto de perfil\" : \"fotos/pancheitor.jpg\",\n"
-			"\t\"ultima ubicacion\" : {\n"
-				"\t \t\"latitud\" : 45.0123,\n"
-				"\t \t\"longitud\" : -37.1293\n"
-			"\t}\n"
-			"}";
-	MetadatoUsuario pruebaUsu = parser.deserializarMetadatoUsuario(jsonUsu);
+
+	MetadatoUsuario pruebaUsu = parser.deserializarMetadatoUsuario(jsonUsuOK);
 	EXPECT_EQ("Pancheitor", pruebaUsu.nombre);
 }
 
@@ -104,16 +121,7 @@ TEST(ParserJsonTest, deberiaDeserializarBienNombreInexistenteMetadatoUsuario){
 
 TEST(ParserJsonTest, deberiaDeserializarBienUltimaUbicacionCorrectaMetadatoUsuario){
 	ParserJson parser;
-	string jsonUsu = "{\n"
-			"\t\"email\" : \"panch@eitor.com\",\n"
-			"\t\"nombre\" : \"Pancheitor\",\n"
-			"\t\"path foto de perfil\" : \"fotos/pancheitor.jpg\",\n"
-			"\t\"ultima ubicacion\" : {\n"
-				"\t \t\"latitud\" : 45.0123,\n"
-				"\t \t\"longitud\" : -37.1293\n"
-			"\t}\n"
-			"}";
-	MetadatoUsuario pruebaUsu = parser.deserializarMetadatoUsuario(jsonUsu);
+	MetadatoUsuario pruebaUsu = parser.deserializarMetadatoUsuario(jsonUsuOK);
 	EXPECT_FLOAT_EQ(45.0123, pruebaUsu.ultimaUbicacion.latitud);
 	EXPECT_FLOAT_EQ(-37.1293, pruebaUsu.ultimaUbicacion.longitud);
 }
@@ -161,12 +169,7 @@ TEST(ParserJsonTest, deberiaDeserializarBienUltimaUbicacionInexistenteMetadatoUs
 
 TEST(ParserJsonTest, deberiaDeserializarBienUsernameCorrectoMetadatoSesion){
 	ParserJson parser;
-	string jsonSes = "{\n"
-			"\t\"username\" : \"pancheitor\",\n"
-			"\t\"password\" : \"pancho123\",\n"
-			"\t\"token\" : \"asg371ns812ssk\"\n"
-			"}";
-	MetadatosSesion pruebaSes = parser.deserializarMetadatoSesion(jsonSes);
+	MetadatosSesion pruebaSes = parser.deserializarMetadatoSesion(jsonSesOK);
 	EXPECT_EQ("pancheitor", pruebaSes.username);
 }
 
@@ -178,4 +181,70 @@ TEST(ParserJsonTest, deberiaDeserializarBienUsernameInexistenteMetadatoSesion){
 			"}";
 	MetadatosSesion pruebaSes = parser.deserializarMetadatoSesion(jsonSes);
 	EXPECT_EQ("", pruebaSes.username);
+}
+
+TEST(ParserJsonTest, deberiaObtenerLoMismoAlSerializarYDeserializarMetadatoArchivo){
+	list<string> etiquetas;
+	etiquetas.push_back("etiA");
+	etiquetas.push_back("#etiqueta B");
+	list<string> usuariosHabilitados;
+	usuariosHabilitados.push_back("pablo");
+	usuariosHabilitados.push_back("santi");
+
+	MetadatoArchivo original = {
+			"nombreArchivo",
+			"jpg",
+			"29/09/2015",
+			"pablo",
+			"santi",
+			etiquetas,
+			usuariosHabilitados
+	};
+
+	ParserJson parser;
+	string json = parser.serializarMetadatoArchivo(original);
+	MetadatoArchivo deserializado = parser.deserializarMetadatoArchivo(json);
+
+	EXPECT_EQ(original.nombre, deserializado.nombre);
+	EXPECT_EQ(original.extension, deserializado.extension);
+	EXPECT_EQ(original.fechaUltimaModificacion, deserializado.fechaUltimaModificacion);
+	EXPECT_EQ(original.usuarioUltimaModificacion, deserializado.usuarioUltimaModificacion);
+	EXPECT_EQ(original.propietario, deserializado.propietario);
+	EXPECT_TRUE(sonListasIguales(original.etiquetas, deserializado.etiquetas));
+	EXPECT_TRUE(sonListasIguales(original.usuariosHabilitados, deserializado.usuariosHabilitados));
+}
+
+TEST(ParserJsonTest, deberiaObtenerLoMismoAlSerializarYDeserializarMetadatoUsuario){
+	MetadatoUsuario original = {
+			"tobi",
+			"u@drive.com",
+			"<pathFotoPerfil>",
+			{ 1.0, 1.0 }
+	};
+
+	ParserJson parser;
+	string json = parser.serializarMetadatoUsuario(original);
+	MetadatoUsuario deserializado = parser.deserializarMetadatoUsuario(json);
+
+	EXPECT_EQ(original.nombre, deserializado.nombre);
+	EXPECT_EQ(original.email, deserializado.email);
+	EXPECT_EQ(original.pathFotoPerfil, deserializado.pathFotoPerfil);
+	EXPECT_FLOAT_EQ(original.ultimaUbicacion.latitud, deserializado.ultimaUbicacion.latitud);
+	EXPECT_FLOAT_EQ(original.ultimaUbicacion.longitud, deserializado.ultimaUbicacion.longitud);
+}
+
+TEST(ParserJsonTest, deberiaObtenerLoMismoAlSerializarYDeserializarMetadatoSesion){
+	MetadatosSesion original = {
+			"pancho",
+			"tallerdos",
+			"902430791097619746"
+	};
+
+	ParserJson parser;
+	string json = parser.serializarMetadatoSesion(original);
+	MetadatosSesion deserializado = parser.deserializarMetadatoSesion(json);
+
+	EXPECT_EQ(original.username, deserializado.username);
+	EXPECT_EQ(original.password, deserializado.password);
+	EXPECT_EQ(original.token, deserializado.token);
 }

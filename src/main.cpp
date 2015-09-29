@@ -11,6 +11,8 @@ int main(int argc, char** argv) {
 	logger->escribirHoraEnElLog();
 	delete logger;
 
+	cout << "Hola Mundo!" << endl;
+
 	// SERVER
 	BD* perfiles = new BaseDeDatos("perfiles");		// Los deletes los hace el destructor del Server
 	BD* sesiones = new BaseDeDatos("sesiones");
