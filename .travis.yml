@@ -17,6 +17,7 @@ install:
 
 before_script:
   - chmod +x travis/*
+  - chmod +x build.sh
   - HOME=`pwd`
   - mkdir lib
   - export LIB="$HOME/lib"
@@ -29,20 +30,14 @@ before_script:
   - cp -r $GTEST/include/gtest $INCLUDE/ 
 
   - cd $HOME
-  
+
   # Para debug
   - find . -type d
   - ls $LIB
   - ls $INCLUDE/gtest/
 
   - mkdir build
-  - cd build
+  - cd build 
 
 script:
-  - cmake -Dtest=ON -Drocksdb=OFF ../; make unitTest; ./unitTest 
-
-
-# cache:
-#   directories:
-#     - rocksdb-master
-#     - googletest-master
+  - cmake -Dtest=ON -Drocksdb=OFF ../ && make unitTest && ./unitTest
