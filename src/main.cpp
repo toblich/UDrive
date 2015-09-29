@@ -5,7 +5,6 @@
 using namespace std;
 
 int main(int argc, char** argv) {
-	cout << "Hola Mundo!" << endl;
 
 	// LOG
 	Logger* logger = new Logger();
@@ -19,10 +18,14 @@ int main(int argc, char** argv) {
 
 	string puerto = "8080";
 	Server server(puerto, perfiles, sesiones, passwords);
+
 	cout << "Lanzando servidor en el puerto " << server.getListeningPort() << endl;
+
 	while (server.isRunning()) {
 		server.pollServer(1000);
 	}
+
+	cout << "Cerrando servidor" << endl;
 
 	return 0;
 }

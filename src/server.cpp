@@ -68,6 +68,12 @@ mg_result Server::requestHandler(mg_connection* connection) {
 	string uri = string(connection->uri);
 	vector<string> uris = parser.parsear(uri);
 
+	if (uris[0] == "close"){
+		running = false;
+		mg_printf_data(connection, "Se cerro el servidor\n");
+		return MG_TRUE;
+	}
+
 	RealizadorDeEventos* evento = mapaURI.at(uris[0]);
 
 	return evento->handler(connection);
