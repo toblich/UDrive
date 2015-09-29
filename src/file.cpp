@@ -24,6 +24,7 @@ mg_result File::GETHandler(mg_connection* connection) {
 		mg_send_file(connection, completePath.c_str(), NULL);
 		mg_send_header(connection, contentType.c_str(), jsonType.c_str());
 		printfData(connection, "{\"success\": \"Se envio el archivo exitosamente\"}");
+		return MG_MORE;
 	}else{
 		mg_send_status(connection, CODESTATUS_UNAUTHORIZED_CLIENT);
 		mg_send_header(connection, contentType.c_str(), jsonType.c_str());
