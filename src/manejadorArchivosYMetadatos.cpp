@@ -22,15 +22,39 @@ ManejadorArchivosYMetadatos::ManejadorArchivosYMetadatos(BD* dbMetadatos, std::s
 ManejadorArchivosYMetadatos::~ManejadorArchivosYMetadatos() {
 }
 
+
+void ManejadorArchivosYMetadatos::logInfo(std::string mensaje) {
+	Logger logger;
+	logger.loggear(mensaje,INFO);
+}
+
+void ManejadorArchivosYMetadatos::logWarn(std::string mensaje) {
+	Logger logger;
+	logger.loggear(mensaje,WARN);
+}
+
+void ManejadorArchivosYMetadatos::logError(std::string mensaje) {
+	Logger logger;
+	logger.loggear(mensaje,ERROR);
+}
+
 // Una carpeta no puede contener un #
 bool ManejadorArchivosYMetadatos::verificarPathValido(std::string path) {
 	if ( path.find('#') == std::string::npos ) return true;
+	this->logWarn("El path " + path + " no es valido.");
 	return false;
 }
 
 bool ManejadorArchivosYMetadatos::verificarPermisos(std::string username, std::string path) {
-	//TODO
-	return true;
+	std::vector<std::string> directorios = this->parsearDirectorios(path);
+	if ( directorios.size() > 0){
+		std::string fileOwner = directorios[0];
+		if ( username == fileOwner ) return true;
+		else {
+			//TODO: Verificar que el username tenga permisos en la parte de ~permisos
+			//TODO: Sino, loguear que no tiene permisos
+		}
+	} return false; //Esto no deberia pasar jamás, pero bueno
 }
 
 std::vector<std::string> ManejadorArchivosYMetadatos::parsearDirectorios(std::string pathCompleto) {
@@ -56,12 +80,10 @@ std::vector<std::string> ManejadorArchivosYMetadatos::parsearDirectorios(std::st
 void ManejadorArchivosYMetadatos::crearCarpeta(std::string username, std::string path) {
 	struct stat sb;
 	// Agrego el FileSystem para que sea la "raiz"
-//	string pathCompletoConFS = this->pathFileSystem + "/" + username + "/" + path;
 	string pathCompletoConFS = this->pathFileSystem + "/" + path;
 	std::vector<std::string> directorios = parsearDirectorios(pathCompletoConFS);
 	std::string directorioAcumulado = "";
 	int size = directorios.size();
-	//TODO Ojo con que se cree una carpeta .trash por parte del usuario
 	for (int i = 0; i < size; i++){
 		std::string directorio = directorios[i];
 		std::string directorioPadre = directorioAcumulado;
@@ -79,8 +101,7 @@ bool ManejadorArchivosYMetadatos::crearCarpetaSegura(std::string username, std::
 	if ( this->verificarPathValido(path) ) {
 		this->crearCarpeta(username, path);
 		return true;
-	}
-	return false;
+	} else return false;
 }
 
 void ManejadorArchivosYMetadatos::crearUsuario(std::string username) {
@@ -88,75 +109,19 @@ void ManejadorArchivosYMetadatos::crearUsuario(std::string username) {
 	this->crearCarpeta(username, trash);
 }
 
-
-
+// OJO porque el put tira excepciones
 // En la base de datos se guarda el path sin la carpeta del FS
-void ManejadorArchivosYMetadatos::subirArchivo(std::string username,
+bool ManejadorArchivosYMetadatos::subirArchivo(std::string username,
 		std::string filepath, const char* data, int dataLen, std::string jsonMetadatos) {
 	if ( verificarPermisos(username, filepath) ) {
-		this->actualizarArchivo(username, filepath, data, dataLen);
+		if ( this->actualizarArchivo(username, filepath, data, dataLen) ) return false;
 		dbMetadatos->put(filepath, jsonMetadatos);
-	}
+		return true;
+	} else return false;
 }
 
-// OJO porque el get tira excepciones
-// TODO: Ver si lanzar una excepcion mas especifica del tipo Metadato no encontrado
-std::string ManejadorArchivosYMetadatos::consultarMetadatosArchivo(std::string username, std::string filepath) {
-	if ( verificarPermisos(username, filepath) ) {
-		return dbMetadatos->get(filepath);
-	}
-	return "";
-}
-
-void ManejadorArchivosYMetadatos::actualizarMetadatos(std::string username,
-		std::string filepath, std::string nuevosMetadatos) {
-	if ( verificarPermisos(username, filepath) ) {
-		dbMetadatos->modify(filepath, nuevosMetadatos);
-	}
-}
-
-void ManejadorArchivosYMetadatos::agregarPermiso(std::string usernameOrigen,
-		std::string filepath, std::string usernameDestino) {
-	if ( verificarPermisos(usernameOrigen, filepath) ) {
-		//TODO Falta agregar el hecho de agregar al archivo de permisos que esta descripto en el issue
-		std::string pathCompleto = usernameOrigen + "/" + filepath;
-		std::string jsonArchivo = dbMetadatos->get(pathCompleto);
-		ParserJson parser;
-		MetadatoArchivo metadato = parser.deserializarMetadatoArchivo(jsonArchivo);
-		metadato.usuariosHabilitados.push_back(usernameDestino);
-		std::string jsonModificado = parser.serializarMetadatoArchivo(metadato);
-		dbMetadatos->modify(pathCompleto,jsonModificado);
-	}
-}
-
-// Lo que se hace es moverlo a la papelera y cambiar el key de los metadatos por ese
-void ManejadorArchivosYMetadatos::eliminarArchivo(std::string username, std::string filepath) {
-	if ( verificarPermisos(username, filepath) ) {
-		std::string pathArchivo = this->pathFileSystem + "/" + filepath;
-		std::vector<std::string> directorios = parsearDirectorios(filepath);
-		int size = directorios.size();
-		std::string filename = directorios[size-1];
-		std::string pathCompletoPapelera = username + "/" + trash + "/" + filename;
-		std::string pathArchivoPapelera = this->pathFileSystem + "/" + pathCompletoPapelera;
-
-		int result = rename( pathArchivo.c_str(), pathArchivoPapelera.c_str() );
-		if ( result == 0 ) {
-			// TODO Loguear eliminado ok
-			std::string json = this->dbMetadatos->get(filepath);
-			Batch batch;
-			batch.erase(filepath);
-			batch.put(pathCompletoPapelera, json);
-			// Tener en cuenta que hay que cambiar en ~permisos
-			this->dbMetadatos->writeBatch(batch);
-		}
-		else
-			;// TODO Loguear eliminado no ok
-	}
-}
-
-// Tambien se podria sacar el username y que venga en el filename. En ese caso habria que modificar una boludez.
-// El filename deberia venir con los path de carpetas tambien (Pero sin el del usuario)
-void ManejadorArchivosYMetadatos::actualizarArchivo(std::string username,
+// El filename deberia venir con los path de carpetas tambien y dentro tambien el nombre de usuario
+bool ManejadorArchivosYMetadatos::actualizarArchivo(std::string username,
 		std::string filepath, const char* data, int dataLen) {
 	//No le agrego el FileSystem porque se agrega despues en el metodo crearCarpeta
 	if ( verificarPermisos(username, filepath) ) {
@@ -170,26 +135,96 @@ void ManejadorArchivosYMetadatos::actualizarArchivo(std::string username,
 		}
 		//Verifico que existan todas las carpetas y sino las creo
 		if (pathSinArchivo != "") {
-			if ( crearCarpetaSegura(username, pathSinArchivo) ) ;
+			if ( not crearCarpetaSegura(username, pathSinArchivo) ) return false ;
 		}
 		std::string pathConFileSystem = this->pathFileSystem + "/" + username + "/" + filepath;
 
 		ofstream outFile(pathConFileSystem, std::ofstream::binary);
 		outFile.write(data, dataLen);
 		outFile.close();
+		return true;
+	} else return false;
+}
+
+// OJO porque el get tira excepciones
+// TODO: Ver si lanzar una excepcion mas especifica del tipo Metadato no encontrado
+std::string ManejadorArchivosYMetadatos::consultarMetadatosArchivo(std::string username, std::string filepath) {
+	if ( verificarPermisos(username, filepath) ) {
+		return dbMetadatos->get(filepath);
 	}
+	return "";
 }
 
-void ManejadorArchivosYMetadatos::descargarArchivo(std::string username, std::string filepath) {
+// OJO porque el modify tira excepciones
+bool ManejadorArchivosYMetadatos::actualizarMetadatos(std::string username,
+		std::string filepath, std::string nuevosMetadatos) {
+	if ( verificarPermisos(username, filepath) ) {
+		dbMetadatos->modify(filepath, nuevosMetadatos);
+		return true;
+	} else return false;
+}
+
+// OJO porque el get y modify tiran excepciones
+bool ManejadorArchivosYMetadatos::agregarPermiso(std::string usernameOrigen,
+		std::string filepath, std::string usernameDestino) {
+	if ( verificarPermisos(usernameOrigen, filepath) ) {
+		//TODO Falta agregar el hecho de agregar al archivo de permisos que esta descripto en el issue
+		std::string pathCompleto = usernameOrigen + "/" + filepath;
+		std::string jsonArchivo = dbMetadatos->get(pathCompleto);
+		ParserJson parser;
+		MetadatoArchivo metadato = parser.deserializarMetadatoArchivo(jsonArchivo);
+		metadato.usuariosHabilitados.push_back(usernameDestino);
+		std::string jsonModificado = parser.serializarMetadatoArchivo(metadato);
+		dbMetadatos->modify(pathCompleto,jsonModificado);
+		return true;
+	} else return false;
+}
+
+// OJO porque el get tira excepciones
+// Lo que se hace es moverlo a la papelera y cambiar el key de los metadatos por ese
+bool ManejadorArchivosYMetadatos::eliminarArchivo(std::string username, std::string filepath) {
+	if ( verificarPermisos(username, filepath) ) {
+		std::string pathArchivo = this->pathFileSystem + "/" + filepath;
+		std::vector<std::string> directorios = parsearDirectorios(filepath);
+		int size = directorios.size();
+		std::string filename = directorios[size-1];
+		std::string pathCompletoPapelera = username + "/" + trash + "/" + filename;
+		std::string pathArchivoPapelera = this->pathFileSystem + "/" + pathCompletoPapelera;
+
+		int result = rename( pathArchivo.c_str(), pathArchivoPapelera.c_str() );
+		if ( result == 0 ) {
+			// TODO Loguear eliminado ok
+			this->logInfo("La eliminacion del archivo " + filepath + " fue correcta.");
+			std::string json = this->dbMetadatos->get(filepath);
+			Batch batch;
+			batch.erase(filepath);
+			batch.put(pathCompletoPapelera, json);
+			// Tener en cuenta que hay que cambiar en ~permisos
+			if ( this->dbMetadatos->writeBatch(batch) ) return true;
+			this->logWarn("No se ha podido escribir el batch de eliminacion del archivo " + filepath + ".");
+			return false;
+		} else {
+			this->logWarn("La eliminacion del archivo " + filepath + " no fue correcta.");
+			return false;
+		}
+	} else return false;
+}
+
+std::string ManejadorArchivosYMetadatos::descargarArchivo(std::string username, std::string filepath) {
 	//TODO
+	return false;
 }
 
-void ManejadorArchivosYMetadatos::deleteFileSystem() {
+bool ManejadorArchivosYMetadatos::deleteFileSystem() {
 	struct stat sb;
 	if (stat(pathFileSystem.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode)){
 		string command = "exec rm -r " + this->pathFileSystem;
 		system(command.c_str());
 		Logger logger;
 		logger.loggear("Se eliminaron los datos persistentes del file system." , TRACE);
+		return true;
+	} else {
+		this->logWarn("No se ha podido eliminar el filesystem porque no existe.");
+		return false;
 	}
 }

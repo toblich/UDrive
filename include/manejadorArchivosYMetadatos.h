@@ -18,6 +18,9 @@ private:
 	std::string pathFileSystem;
 	bool verificarPathValido(std::string path);
 	bool verificarPermisos(std::string username, std::string path);
+	void logInfo(std::string mensaje);
+	void logWarn(std::string mensaje);
+	void logError(std::string mensaje);
 
 public:
 	ManejadorArchivosYMetadatos(BD* dbMetadatos);
@@ -29,15 +32,15 @@ public:
 	void crearCarpeta(std::string username, std::string path);
 	bool crearCarpetaSegura(std::string username, std::string path);
 
-	void subirArchivo(std::string username, std::string filepath, const char* data, int dataLen, std::string jsonMetadatos);
+	bool subirArchivo(std::string username, std::string filepath, const char* data, int dataLen, std::string jsonMetadatos);
 	std::string consultarMetadatosArchivo(std::string username, std::string filename);
-	void eliminarArchivo(std::string username, std::string filepath);
-	void actualizarMetadatos(std::string username, std::string filepath, std::string nuevosMetadatos);
-	void actualizarArchivo(std::string username, std::string filepath, const char* data, int dataLen);
-	void descargarArchivo(std::string username, std::string filepath);
-	void agregarPermiso(std::string usernameOrigen, std::string filepath, std::string usernameDestino);
+	bool eliminarArchivo(std::string username, std::string filepath);
+	bool actualizarMetadatos(std::string username, std::string filepath, std::string nuevosMetadatos);
+	bool actualizarArchivo(std::string username, std::string filepath, const char* data, int dataLen);
+	std::string descargarArchivo(std::string username, std::string filepath);
+	bool agregarPermiso(std::string usernameOrigen, std::string filepath, std::string usernameDestino);
 
-	void deleteFileSystem();
+	bool deleteFileSystem();
 };
 
 #endif /* MANEJADORARCHIVOSYMETADATOS_H_ */
