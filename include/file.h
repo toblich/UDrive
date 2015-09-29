@@ -5,10 +5,11 @@
 
 class File : public RealizadorDeEventos {
 public:
-	File(ManejadorArchivosYMetadatos* manejadorArchYMet);
+	File(ManejadorDeUsuarios* manejadorUs, ManejadorArchivosYMetadatos* manejadorArchYMet);
 	virtual ~File();
 
 protected:
+	ManejadorDeUsuarios* manejadorUs;
 	ManejadorArchivosYMetadatos* manejadorArchYMet;
 
 	mg_result GETHandler(mg_connection* connection);
