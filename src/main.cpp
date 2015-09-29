@@ -11,16 +11,16 @@ int main(int argc, char** argv) {
 	logger->escribirHoraEnElLog();
 	delete logger;
 
-	cout << "Hola Mundo!" << endl;
-
-	// SERVER
-	BD* perfiles = new BaseDeDatos("perfiles");		// Los deletes los hace el destructor del Server
+	// BD
+	// Los deletes los hace el destructor del Server
+	BD* perfiles = new BaseDeDatos("perfiles");
 	BD* sesiones = new BaseDeDatos("sesiones");
 	BD* passwords = new BaseDeDatos("passwords");
+	BD* metadatos = new BaseDeDatos("metadatos");
 
+	//SERVER
 	string puerto = "8080";
-	Server server(puerto, perfiles, sesiones, passwords);
-
+	Server server(puerto, perfiles, sesiones, passwords, metadatos);
 	cout << "Lanzando servidor en el puerto " << server.getListeningPort() << endl;
 
 	while (server.isRunning()) {

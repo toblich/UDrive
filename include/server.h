@@ -7,22 +7,18 @@
 #include <iostream>
 #include <fstream>
 #include "logger.h"
-#include "manejadorDeUsuarios.h"
-#include "realizadorDeEventos.h"
 #include "profile.h"
 #include "session.h"
 #include "file.h"
 #include "mongoose.h"
 #include "bd.h"
-#include "parserJson.h"
 #include "parserURI.h"
-#include <typeinfo>
 
 using namespace std;
 
 class Server {
 public:
-	Server(string portNumber, BD* perfiles, BD* sesiones, BD* passwords);
+	Server(string portNumber, BD* perfiles, BD* sesiones, BD* passwords, BD* metadatos);
 	virtual ~Server();
 
 	mg_result eventHandler(mg_connection *connection, mg_event event);
@@ -34,12 +30,13 @@ public:
 private:
 	bool running;
 	map<string, RealizadorDeEventos*> mapaURI;
-	ParserJson parser;
 	mg_server* server;
 	ManejadorDeUsuarios* manejadorUsuarios;
+	ManejadorArchivosYMetadatos* manejadorAYM;
 	BD* perfiles;
 	BD* sesiones;
 	BD* passwords;
+	BD* metadatos;
 
 	mg_result closeHandler(mg_connection* connection);
 	mg_result requestHandler(mg_connection* connection);

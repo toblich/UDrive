@@ -4,11 +4,11 @@
 #include <string>
 #include <iostream>
 #include <fstream>
+#include <stdarg.h>
 #include "mongoose.h"
 #include "manejadorDeUsuarios.h"
-//#include "manejadorArchivosYMetadatos.h"
+#include "manejadorArchivosYMetadatos.h"
 #include "parserURI.h"
-#include <stdarg.h>
 
 using namespace std;
 

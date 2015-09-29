@@ -1,11 +1,13 @@
 #ifndef MANEJADORARCHIVOSYMETADATOS_H_
 #define MANEJADORARCHIVOSYMETADATOS_H_
 
-#include "server.h"
 #include "parserJson.h"
 #include <vector>
 #include <unistd.h>
 #include <sys/stat.h>
+#include "bd.h"
+#include "logger.h"
+
 
 const std::string defaultFileSystem = "FileSystem";
 const std::string trash = "#trash";

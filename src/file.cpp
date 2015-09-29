@@ -1,8 +1,7 @@
 #include "file.h"
 
-File::File() {
-	// TODO Auto-generated constructor stub
-
+File::File(ManejadorArchivosYMetadatos* manejadorArchYMet) {
+	this->manejadorArchYMet = manejadorArchYMet;
 }
 
 File::~File() {
