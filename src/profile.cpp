@@ -18,7 +18,7 @@ mg_result Profile::GETHandler(mg_connection* connection) {
 		if (perfil != ""){
 			mg_send_status(connection, CODESTATUS_SUCCES);
 			mg_send_header(connection, contentType.c_str(), jsonType.c_str());
-			printfData(connection, "{\"perfil\": \"%s\"}", perfil.c_str());
+			printfData(connection, "{\"perfil\": %s}", perfil.c_str());
 		}else{
 			mg_send_status(connection, CODESTATUS_RESOURCE_NOT_FOUND);
 			mg_send_header(connection, contentType.c_str(), jsonType.c_str());
@@ -44,7 +44,7 @@ mg_result Profile::PUTHandler(mg_connection* connection) {
 	string token = getVar(connection, "token");
 	nuevoPerfil.nombre = getVar(connection, "nombre");
 	nuevoPerfil.email = getVar(connection, "email");
-	nuevoPerfil.pathFotoPerfil = getVar(connection, "foto");
+	nuevoPerfil.pathFotoPerfil = getVar(connection, "pathFoto");
 	nuevoPerfil.ultimaUbicacion.latitud = getVarFloat(connection, "latitud");
 	nuevoPerfil.ultimaUbicacion.longitud = getVarFloat(connection, "longitud");
 	string perfilActualizado = parserJson.serializarMetadatoUsuario(nuevoPerfil);
