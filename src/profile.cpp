@@ -4,8 +4,7 @@ Profile::Profile(ManejadorDeUsuarios* manejadorUsuarios) {
 	this->manejadorUs = manejadorUsuarios;
 }
 
-Profile::~Profile() {
-}
+Profile::~Profile() { }
 
 mg_result Profile::GETHandler(mg_connection* connection) {
 	ParserURI parser;
@@ -35,15 +34,24 @@ mg_result Profile::GETHandler(mg_connection* connection) {
 }
 
 mg_result Profile::PUTHandler(mg_connection* connection) {
-	ParserURI parser;
+	ParserURI parserURI;
+	ParserJson parserJson;
+	MetadatoUsuario nuevoPerfil;
+
 	string uri = string(connection->uri);
-	vector<string> uris = parser.parsear(uri);
-	string newProfile = getVar(connection, "profile");
+	vector<string> uris = parserURI.parsear(uri);
+
 	string token = getVar(connection, "token");
+	nuevoPerfil.nombre = getVar(connection, "nombre");
+	nuevoPerfil.email = getVar(connection, "email");
+	nuevoPerfil.pathFotoPerfil = getVar(connection, "foto");
+	nuevoPerfil.ultimaUbicacion.latitud = getVarFloat(connection, "latitud");
+	nuevoPerfil.ultimaUbicacion.longitud = getVarFloat(connection, "longitud");
+	string perfilActualizado = parserJson.serializarMetadatoUsuario(nuevoPerfil);
 
 	if (manejadorUs->autenticarToken(token, uris[1])){
 
-		manejadorUs->modifyPerfil(uris[1], newProfile);
+		manejadorUs->modifyPerfil(uris[1], perfilActualizado);
 		mg_send_status(connection, CODESTATUS_SUCCES);
 		mg_send_header(connection, contentType.c_str(), jsonType.c_str());
 		printfData(connection, "{\"success\": \"Se modifico el perfil exitosamente\"}");

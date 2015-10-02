@@ -30,6 +30,10 @@ string RealizadorDeEventos::getVar(mg_connection* connection, string varName){
 	return variable;
 }
 
+float RealizadorDeEventos::getVarFloat(mg_connection* connection, string varName) {
+	return stof(getVar(connection, varName));
+}
+
 RealizadorDeEventos::DatosArchivo RealizadorDeEventos::getMultipartData(mg_connection* connection){
 	DatosArchivo datosArch;
 	const char* data;

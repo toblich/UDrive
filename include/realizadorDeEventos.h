@@ -47,6 +47,7 @@ protected:
 	size_t printfData(mg_connection* connection, const char* format, ...);
 	DatosArchivo getMultipartData(mg_connection* connection);
 	string getVar(mg_connection* connection, string varName);
+	float getVarFloat(mg_connection* connection, string varName);
 	virtual mg_result POSTHandler(mg_connection* connection);
 	virtual mg_result GETHandler(mg_connection* connection);
 	virtual mg_result PUTHandler(mg_connection* connection);

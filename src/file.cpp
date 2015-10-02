@@ -5,9 +5,7 @@ File::File(ManejadorDeUsuarios* manejadorUs, ManejadorArchivosYMetadatos* maneja
 	this->manejadorArchYMet = manejadorArchYMet;
 }
 
-File::~File() {
-	// TODO Auto-generated destructor stub
-}
+File::~File() { }
 
 mg_result File::GETHandler(mg_connection* connection) {
 	ParserURI parser;
