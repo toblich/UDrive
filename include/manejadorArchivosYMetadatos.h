@@ -6,6 +6,7 @@
 #include <vector>
 #include <unistd.h>
 #include <sys/stat.h>
+#include <dirent.h>
 
 const std::string defaultFileSystem = "FileSystem";
 const std::string trash = "#trash";
@@ -19,6 +20,9 @@ private:
 	void logInfo(std::string mensaje);
 	void logWarn(std::string mensaje);
 	void logError(std::string mensaje);
+	bool existeArchivo(std::string filepath);
+	bool existeCarpeta(std::string path);
+	bool deleteCarpeta(std::string path);
 
 public:
 	ManejadorArchivosYMetadatos(BD* dbMetadatos);
@@ -29,9 +33,11 @@ public:
 	bool verificarPermisos(std::string username, std::string path);
 
 	std::vector<std::string> parsearDirectorios(std::string pathCompleto);
+	bool carpetaVacia(std::string path);
 	bool crearUsuario(std::string username);
 	bool crearCarpeta(std::string username, std::string path);
 	bool crearCarpetaSegura(std::string username, std::string path);
+	bool borrarCarpeta(std::string username, std::string path);
 
 	bool subirArchivo(std::string username, std::string filepath, const char* data, int dataLen, std::string jsonMetadatos);
 	std::string consultarMetadatosArchivo(std::string username, std::string filename);

@@ -119,8 +119,8 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaEliminarBienArchivoDeTexto) {
 	manejador->eliminarArchivo("pablo", filepath);
 	string filepathCompletoTrash = pathFS + "/pablo/#trash/saludo.txt";
 	struct stat buffer;
-	EXPECT_FALSE(stat (filepathCompleto.c_str(), &buffer) == 0);
-	EXPECT_TRUE(stat (filepathCompletoTrash.c_str(), &buffer) == 0);
+	EXPECT_FALSE(stat (filepathCompleto.c_str(), &buffer) == 0); //No existe en el filesystem
+	EXPECT_TRUE(stat (filepathCompletoTrash.c_str(), &buffer) == 0); //Si existe en el trash
 }
 
 TEST_F(ManejadorArchivosYMetadatosTest, deberiaPoderConsultarMetadatosDeArchivo) {
@@ -183,6 +183,49 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaDevolverPathCompletoPorArchivoExi
     pathAComparar += "/" + pathFS + "/" + filepath;
 
 	EXPECT_EQ(pathAComparar,pathCompleto);
+}
+
+TEST_F(ManejadorArchivosYMetadatosTest, deberiaVerificarBienQueCarpetaEstaVacia) {
+	manejador->crearCarpetaSegura("pablo","pablo/como estas/bien");
+	EXPECT_TRUE( manejador->carpetaVacia(pathFS + "/pablo/como estas/bien") );
+}
+
+TEST_F(ManejadorArchivosYMetadatosTest, deberiaVerificarBienQueCarpetaNoEstaVacia) {
+	manejador->crearCarpetaSegura("pablo","pablo/como estas/bien");
+	EXPECT_FALSE( manejador->carpetaVacia(pathFS + "/pablo/como estas") );
+}
+
+TEST_F(ManejadorArchivosYMetadatosTest, deberiaBorrarBienCarpetaSinArchivosNiCarpetas) {
+	manejador->crearCarpetaSegura("pablo","pablo/como estas/bien");
+	EXPECT_TRUE( manejador->borrarCarpeta("pablo","pablo/como estas/bien") );
+}
+
+TEST_F(ManejadorArchivosYMetadatosTest, deberiaBorrarBienCarpetaConArchivosPeroSinCarpetas) {
+	string filepath = "pablo/como estas/bien/saludo.txt";
+	string filepath2 = "pablo/como estas/bien/juan";
+	manejador->crearUsuario("pablo");
+	manejador->crearCarpetaSegura("pablo","pablo/como estas/bien");
+	manejador->subirArchivo("pablo", filepath, "hola pablo", 10, "un metadato");
+	manejador->subirArchivo("pablo", filepath2, "hola pablo", 10, "un metadato");
+	EXPECT_TRUE( manejador->borrarCarpeta("pablo","pablo/como estas/bien") );
+}
+
+TEST_F(ManejadorArchivosYMetadatosTest, deberiaBorrarBienCarpetaSinArchivosPeroConCarpetas) {
+	manejador->crearUsuario("pablo");
+	manejador->crearCarpetaSegura("pablo","pablo/como estas/bien/vos?");
+	EXPECT_TRUE( manejador->borrarCarpeta("pablo","pablo/como estas") );
+}
+
+TEST_F(ManejadorArchivosYMetadatosTest, deberiaBorrarBienCarpetaConArchivosYCarpetas) {
+	string filepath = "pablo/como estas/bien/saludo.txt";
+	string filepath2 = "pablo/como estas/bien/juan";
+	string filepath3 = "pablo/como estas/bien/vos?/juan";
+	manejador->crearUsuario("pablo");
+	manejador->crearCarpetaSegura("pablo","pablo/como estas/bien/vos?");
+	manejador->subirArchivo("pablo", filepath, "hola pablo", 10, "un metadato");
+	manejador->subirArchivo("pablo", filepath2, "hola pablo", 10, "un metadato");
+	manejador->subirArchivo("pablo", filepath3, "hola pablo", 10, "un metadato");
+	EXPECT_TRUE( manejador->borrarCarpeta("pablo","pablo/como estas") );
 }
 
 TEST_F(ManejadorArchivosYMetadatosTest, deberiaBorrarElFileSystem) {

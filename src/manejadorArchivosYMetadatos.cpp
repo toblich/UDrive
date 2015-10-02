@@ -9,7 +9,7 @@
 //		 bajo la key '~permisos/pablo' y cuyo value sera algo del estilo 'pancho/datos/pepe.jpg#tobi/hola/asd.txt#santi/chau.txt'
 //		 lo cual habra que parsear y ver si esta o no.
 //
-//		 REVISAR Y TESTEAR TODO!!!
+//		 REVISAR Y TESTEAR!!!
 
 ManejadorArchivosYMetadatos::ManejadorArchivosYMetadatos(BD* dbMetadatos): ManejadorArchivosYMetadatos(dbMetadatos, defaultFileSystem){}
 
@@ -21,7 +21,6 @@ ManejadorArchivosYMetadatos::ManejadorArchivosYMetadatos(BD* dbMetadatos, std::s
 
 ManejadorArchivosYMetadatos::~ManejadorArchivosYMetadatos() {
 }
-
 
 void ManejadorArchivosYMetadatos::logInfo(std::string mensaje) {
 	Logger logger;
@@ -36,6 +35,32 @@ void ManejadorArchivosYMetadatos::logWarn(std::string mensaje) {
 void ManejadorArchivosYMetadatos::logError(std::string mensaje) {
 	Logger logger;
 	logger.loggear(mensaje,ERROR);
+}
+
+bool ManejadorArchivosYMetadatos::existeArchivo(std::string filepath) {
+	struct stat buffer;
+	return ( stat (filepath.c_str(), &buffer) == 0 );
+}
+
+bool ManejadorArchivosYMetadatos::existeCarpeta(std::string path) {
+	struct stat sb;
+	return ( stat(path.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode) );
+}
+
+bool ManejadorArchivosYMetadatos::carpetaVacia(std::string pathConFS) {
+	DIR* dir;
+	struct dirent* ent;
+	bool vacia = true;
+	if ( ( dir = opendir(pathConFS.c_str()) ) != NULL ) {
+		while ( (ent = readdir (dir)) != NULL && vacia) {
+			if ( strcmp(ent->d_name, ".") == 0 ) continue;
+			if ( strcmp(ent->d_name, "..") == 0 ) continue;
+			vacia = false;
+		}
+		closedir (dir);
+	} else
+		return false;
+	return vacia;
 }
 
 // Una carpeta no puede contener un #
@@ -56,6 +81,7 @@ bool ManejadorArchivosYMetadatos::verificarPermisos(std::string username, std::s
 			//TODO: Verificar que el username tenga permisos en la parte de ~permisos
 			//TODO: Sino, loguear que no tiene permisos
 			this->logWarn("El usuario " + username + " no posee los permisos para el archivo " + path + ".");
+			return false; //Este return deberia depender de si tiene permisos o no
 		}
 	}
 	return false; //Esto no deberia pasar jamás, pero bueno
@@ -83,7 +109,6 @@ std::vector<std::string> ManejadorArchivosYMetadatos::parsearDirectorios(std::st
 // En caso de que sea asi, se debera modificar este metodo.
 bool ManejadorArchivosYMetadatos::crearCarpeta(std::string username, std::string path) {
 	if ( verificarPermisos(username, path) ) {
-		struct stat sb;
 		// Agrego el FileSystem para que sea la "raiz"
 		string pathCompletoConFS = this->pathFileSystem + "/" + path;
 		std::vector<std::string> directorios = parsearDirectorios(pathCompletoConFS);
@@ -94,7 +119,7 @@ bool ManejadorArchivosYMetadatos::crearCarpeta(std::string username, std::string
 			std::string directorioPadre = directorioAcumulado;
 			directorioAcumulado += (directorio + "/");
 			// Me fijo si existe la carpeta, sino la creo
-			if (! (stat(directorioAcumulado.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode)) ){
+			if (not existeCarpeta(directorioAcumulado) ) {
 				mkdir(directorioAcumulado.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 				this->logInfo("La carpeta " + directorio + " no existe dentro de " + directorioPadre +" por lo que ha sido creada.");
 			}
@@ -117,15 +142,43 @@ bool ManejadorArchivosYMetadatos::crearUsuario(std::string username) {
 	return this->crearCarpeta(username, pathTrash);
 }
 
+//Borrara todos los archivos de la carpeta y, en caso de que quede vacia, la carpeta fisica del fileSystem tambien
+bool ManejadorArchivosYMetadatos::borrarCarpeta(std::string username, std::string path) {
+	std::string pathConFS = this->pathFileSystem + "/" + path;
+	DIR* dir;
+	struct dirent* ent;
+	if ( ( dir = opendir(pathConFS.c_str()) ) != NULL ) {
+		while ( (ent = readdir (dir)) != NULL ) {
+			if ( strcmp(ent->d_name, ".") == 0 ) continue;
+			if ( strcmp(ent->d_name, "..") == 0 ) continue;
+			std::string pathInterno = path + "/" + ent->d_name;
+			std::string pathInternoConFS = this->pathFileSystem + "/" + pathInterno;
+			if ( this->existeCarpeta(pathInternoConFS) )
+				this->borrarCarpeta(username, pathInterno);
+			else
+				this->eliminarArchivo(username, pathInterno);
+		}
+		closedir (dir);
+		if ( this->carpetaVacia(pathConFS) )
+			return this->deleteCarpeta(pathConFS);
+	} else
+		this->logWarn("No existe el directorio " + path);
+	return false;
+}
+
 // OJO porque el put tira excepciones
 // En la base de datos se guarda el path sin la carpeta del FS
 bool ManejadorArchivosYMetadatos::subirArchivo(std::string username,
 		std::string filepath, const char* data, int dataLen, std::string jsonMetadatos) {
 	if ( verificarPermisos(username, filepath) ) {
-		if ( not this->actualizarArchivo(username, filepath, data, dataLen) )
+		std::string filepathCompleto = this->pathFileSystem + "/" + filepath;
+		if ( not this->existeArchivo(filepathCompleto) ) {
+			if ( not this->actualizarArchivo(username, filepath, data, dataLen) )
+				return false;
+			dbMetadatos->put(filepath, jsonMetadatos);
+			return true;
+		} else
 			return false;
-		dbMetadatos->put(filepath, jsonMetadatos);
-		return true;
 	} else
 		return false;
 }
@@ -199,39 +252,41 @@ bool ManejadorArchivosYMetadatos::agregarPermiso(std::string usernameOrigen,
 // Lo que se hace es moverlo a la papelera y cambiar el key de los metadatos por ese
 bool ManejadorArchivosYMetadatos::eliminarArchivo(std::string username, std::string filepath) {
 	if ( verificarPermisos(username, filepath) ) {
-		std::string pathArchivo = this->pathFileSystem + "/" + filepath;
-		std::vector<std::string> directorios = parsearDirectorios(filepath);
-		int size = directorios.size();
-		std::string filename = directorios[size-1];
-		std::string pathCompletoPapelera = username + "/" + trash + "/" + filename;
-		std::string pathArchivoPapelera = this->pathFileSystem + "/" + pathCompletoPapelera;
+		std::string filepathCompleto = this->pathFileSystem + "/" + filepath;
+		if ( this->existeArchivo(filepathCompleto) ) {
+			std::vector<std::string> directorios = parsearDirectorios(filepath);
+			int size = directorios.size();
+			std::string filename = directorios[size-1];
+			std::string pathCompletoPapelera = username + "/" + trash + "/" + filename;
+			std::string pathArchivoPapelera = this->pathFileSystem + "/" + pathCompletoPapelera;
 
-		int result = rename( pathArchivo.c_str(), pathArchivoPapelera.c_str() );
-		if ( result == 0 ) {
-			this->logInfo("La eliminacion del archivo " + filepath + " fue correcta.");
-			std::string json = this->dbMetadatos->get(filepath);
-			Batch batch;
-			batch.erase(filepath);
-			batch.put(pathCompletoPapelera, json);
-			// TODO: Tener en cuenta que hay que cambiar en ~permisos
-			if ( this->dbMetadatos->writeBatch(batch) )
-				return true;
-			this->logWarn("No se ha podido escribir el batch de eliminacion del archivo " + filepath + ".");
+			int result = rename( filepathCompleto.c_str(), pathArchivoPapelera.c_str() );
+			if ( result == 0 ) {
+				this->logInfo("La eliminacion del archivo " + filepath + " fue correcta.");
+				std::string json = this->dbMetadatos->get(filepath);
+				Batch batch;
+				batch.erase(filepath);
+				batch.put(pathCompletoPapelera, json);
+				// TODO: Tener en cuenta que hay que cambiar en ~permisos
+				if ( this->dbMetadatos->writeBatch(batch) )
+					return true;
+				this->logWarn("No se ha podido escribir el batch de eliminacion del archivo " + filepath + ".");
+				return false;
+			} else {
+				this->logWarn("La eliminacion del archivo " + filepath + " no fue correcta.");
+				return false;
+			}
+		} else
 			return false;
-		} else {
-			this->logWarn("La eliminacion del archivo " + filepath + " no fue correcta.");
-			return false;
-		}
 	} else
 		return false;
 }
 
 std::string ManejadorArchivosYMetadatos::descargarArchivo(std::string username, std::string filepath) {
-	//Ojo porque si no se corre desde la carpeta build como ./udrive esto va a pinchar seguramente (Ya que la carpeta del FileSystem no va a existir
+	//OJO porque si no se corre desde la carpeta build como ./udrive esto va a pinchar seguramente (Ya que la carpeta del FileSystem no va a existir)
 	if ( verificarPermisos(username, filepath) ) {
 		std::string filepathCompleto = this->pathFileSystem + "/" + filepath;
-		struct stat buffer;
-		if ( stat (filepathCompleto.c_str(), &buffer) == 0 ) { //si existe el archivo
+		if ( this->existeArchivo(filepathCompleto) ) {
 			std::string pathADevolver(this->homeDirectory);
 			pathADevolver += "/" + filepathCompleto;
 			return pathADevolver;
@@ -241,16 +296,20 @@ std::string ManejadorArchivosYMetadatos::descargarArchivo(std::string username, 
 	return "";
 }
 
-bool ManejadorArchivosYMetadatos::deleteFileSystem() {
-	struct stat sb;
-	if (stat(pathFileSystem.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode)){
-		string command = "exec rm -r " + this->pathFileSystem;
+bool ManejadorArchivosYMetadatos::deleteCarpeta(std::string path) {
+	if ( this->existeCarpeta(path) ){
+		string command = "exec rm -r '" + path + "'";
 		system(command.c_str());
 		Logger logger;
-		logger.loggear("Se eliminaron los datos persistentes del file system." , TRACE);
+		logger.loggear("Se elimino permanentemente la carpeta " + path + "." , TRACE);
 		return true;
 	} else {
-		this->logWarn("No se ha podido eliminar el filesystem porque no existe.");
+		this->logWarn("No se ha podido eliminar la carpeta " + path + " porque no existe." );
 		return false;
 	}
 }
+
+bool ManejadorArchivosYMetadatos::deleteFileSystem() {
+	return this->deleteCarpeta(this->pathFileSystem);
+}
+
