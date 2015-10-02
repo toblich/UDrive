@@ -15,20 +15,18 @@ mg_result File::GETHandler(mg_connection* connection) {
 	string user = getVar(connection, "user");
 
 	if (manejadorUs->autenticarToken(token, user)){
-		//TODO: Ver si esta bien usar ese path, sino hay que cambiarlo
 		string filepath = uris[1] + "/" + uris[2];
 		string completePath = manejadorArchYMet->descargarArchivo(user, filepath);
-		mg_send_status(connection, CODESTATUS_SUCCES);
-		mg_send_file(connection, completePath.c_str(), NULL);
-		mg_send_header(connection, contentType.c_str(), jsonType.c_str());
-		printfData(connection, "{\"success\": \"Se envio el archivo exitosamente\"}");
-		return MG_MORE;
+		if (sendFile(connection, completePath)){
+			mg_send_status(connection, CODESTATUS_SUCCES);
+			mg_send_header(connection, contentType.c_str(), jsonType.c_str());
+			printfData(connection, "{\"success\": \"Se descargo el archivo exitosamente\"}");
+		}
 	}else{
 		mg_send_status(connection, CODESTATUS_UNAUTHORIZED_CLIENT);
 		mg_send_header(connection, contentType.c_str(), jsonType.c_str());
 		printfData(connection, "{\"error\": \"El token no corresponde con la sesion del usuario\"}");
 	}
-
 	return MG_TRUE;
 }
 

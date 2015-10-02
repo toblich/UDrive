@@ -45,6 +45,7 @@ protected:
 	string jsonType = "application/json";
 
 	size_t printfData(mg_connection* connection, const char* format, ...);
+	bool sendFile(mg_connection* connection, string filePath);
 	DatosArchivo getMultipartData(mg_connection* connection);
 	string getVar(mg_connection* connection, string varName);
 	float getVarFloat(mg_connection* connection, string varName);

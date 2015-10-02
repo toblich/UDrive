@@ -52,6 +52,21 @@ RealizadorDeEventos::DatosArchivo RealizadorDeEventos::getMultipartData(mg_conne
 	return datosArch;
 }
 
+bool RealizadorDeEventos::sendFile(mg_connection* connection, string filePath) {
+	char buf[1024];
+	int n;
+	FILE *fp;
+	fp = fopen(filePath.c_str(), "rb");
+	if (fp == NULL)	return false;
+
+	while ((n = fread(buf, 1, sizeof(buf), fp)) > 0) {
+		mg_send_data(connection,buf,n);
+	}
+	fclose(fp);
+	mg_send_data(connection,"",0);
+	return true;
+}
+
 mg_result RealizadorDeEventos::handler(mg_connection* connection) {
 	string verb = string(connection->request_method);
 
