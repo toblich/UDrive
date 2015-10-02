@@ -17,7 +17,7 @@ Server::Server(std::string listeningPort, BD* perfiles, BD* sesiones, BD* passwo
 
 	running = true;
 
-	mapaURI.insert(std::pair<string,RealizadorDeEventos*>("profile", new Profile(manejadorUsuarios)));
+	mapaURI.insert(std::pair<string,RealizadorDeEventos*>("profile", new Profile(manejadorUsuarios, manejadorAYM)));
 	mapaURI.insert(std::pair<string,RealizadorDeEventos*>("session", new Session(manejadorUsuarios)));
 	mapaURI.insert(std::pair<string,RealizadorDeEventos*>("file", new File(manejadorUsuarios, manejadorAYM)));
 }

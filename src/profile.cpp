@@ -1,7 +1,8 @@
 #include "profile.h"
 
-Profile::Profile(ManejadorDeUsuarios* manejadorUsuarios) {
+Profile::Profile(ManejadorDeUsuarios* manejadorUsuarios, ManejadorArchivosYMetadatos* manejarAyM) {
 	this->manejadorUs = manejadorUsuarios;
+	this->manejadorAyM = manejarAyM;
 }
 
 Profile::~Profile() { }
@@ -71,7 +72,7 @@ mg_result Profile::POSTHandler(mg_connection* connection) {
 	string profile = getVar(connection, "profile");
 
 	//TODO: falta revisar si hay errores
-	if( manejadorUs->registrarUsuario(username, password, profile)){
+	if( manejadorUs->registrarUsuario(username, password, profile) and manejadorAyM->crearUsuario(username)){
 		mg_send_status(connection, CODESTATUS_RESOURCE_CREATED);
 		mg_send_header(connection, contentType.c_str(), jsonType.c_str());
 		printfData(connection, "{\"succes\": \"Cuenta creada correctamente\"}");

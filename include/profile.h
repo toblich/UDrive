@@ -8,11 +8,12 @@ using namespace std;
 
 class Profile : public RealizadorDeEventos {
 public:
-	Profile(ManejadorDeUsuarios* manejadorUsuarios);
+	Profile(ManejadorDeUsuarios* manejadorUsuarios, ManejadorArchivosYMetadatos* manejarAyM);
 	virtual ~Profile();
 
 protected:
 	ManejadorDeUsuarios* manejadorUs;
+	ManejadorArchivosYMetadatos* manejadorAyM;
 
 	mg_result GETHandler(mg_connection* connection);
 	mg_result PUTHandler(mg_connection* connection);
