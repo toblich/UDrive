@@ -185,13 +185,12 @@ bool ManejadorArchivosYMetadatos::agregarPermiso(std::string usernameOrigen,
 		std::string filepath, std::string usernameDestino) {
 	if ( verificarPermisos(usernameOrigen, filepath) ) {
 		//TODO Falta agregar el hecho de agregar al archivo de permisos que esta descripto en el issue
-		std::string pathCompleto = usernameOrigen + "/" + filepath;
-		std::string jsonArchivo = dbMetadatos->get(pathCompleto);
+		std::string jsonArchivo = dbMetadatos->get(filepath);
 		ParserJson parser;
 		MetadatoArchivo metadato = parser.deserializarMetadatoArchivo(jsonArchivo);
 		metadato.usuariosHabilitados.push_back(usernameDestino);
 		std::string jsonModificado = parser.serializarMetadatoArchivo(metadato);
-		dbMetadatos->modify(pathCompleto,jsonModificado);
+		dbMetadatos->modify(filepath,jsonModificado);
 		return true;
 	} else
 		return false;

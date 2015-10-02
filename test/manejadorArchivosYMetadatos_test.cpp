@@ -161,7 +161,7 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaPoderAgregarPermisoYAgregarloAlMe
 	string metadatoActualizado = manejador->consultarMetadatosArchivo("pablo",filepath);
 	ParserJson parser;
 	MetadatoArchivo asd = parser.deserializarMetadatoArchivo(metadatoActualizado);
-	EXPECT_EQ("juan", asd.usuariosHabilitados.front());
+	EXPECT_EQ("juan", asd.usuariosHabilitados.back());
 }
 
 TEST_F(ManejadorArchivosYMetadatosTest, deberiaBorrarElFileSystem) {
