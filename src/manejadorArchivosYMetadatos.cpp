@@ -16,7 +16,7 @@ ManejadorArchivosYMetadatos::ManejadorArchivosYMetadatos(BD* dbMetadatos): Manej
 ManejadorArchivosYMetadatos::ManejadorArchivosYMetadatos(BD* dbMetadatos, std::string path) {
 	this->dbMetadatos = dbMetadatos;
 	this->pathFileSystem = path;
-//    getcwd(homeDirectory, sizeof(homeDirectory));
+	getcwd(homeDirectory, sizeof(homeDirectory));
 }
 
 ManejadorArchivosYMetadatos::~ManejadorArchivosYMetadatos() {
@@ -96,8 +96,7 @@ bool ManejadorArchivosYMetadatos::crearCarpeta(std::string username, std::string
 			// Me fijo si existe la carpeta, sino la creo
 			if (! (stat(directorioAcumulado.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode)) ){
 				mkdir(directorioAcumulado.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-				Logger logger;
-				logger.loggear("La carpeta " + directorio + " no existe dentro de " + directorioPadre +" por lo que ha sido creada.", INFO);
+				this->logInfo("La carpeta " + directorio + " no existe dentro de " + directorioPadre +" por lo que ha sido creada.");
 			}
 		}
 		return true;
@@ -228,7 +227,17 @@ bool ManejadorArchivosYMetadatos::eliminarArchivo(std::string username, std::str
 }
 
 std::string ManejadorArchivosYMetadatos::descargarArchivo(std::string username, std::string filepath) {
-	//TODO
+	//Ojo porque si no se corre desde la carpeta build como ./udrive esto va a pinchar seguramente (Ya que la carpeta del FileSystem no va a existir
+	if ( verificarPermisos(username, filepath) ) {
+		std::string filepathCompleto = this->pathFileSystem + "/" + filepath;
+		struct stat buffer;
+		if ( stat (filepathCompleto.c_str(), &buffer) == 0 ) { //si existe el archivo
+			std::string pathADevolver(this->homeDirectory);
+			pathADevolver += "/" + filepathCompleto;
+			return pathADevolver;
+		} else
+			this->logWarn("Se ha querido descargar el archivo de path " + filepath + ", el cual no existe.");
+	}
 	return "";
 }
 

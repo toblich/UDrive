@@ -42,13 +42,13 @@ while true; do
 	shift	# avanza en la lista de parametros
 done	 
 
-if [[ ! -d files ]]; then
-	mkdir files
-fi
+# if [[ ! -d files ]]; then
+# 	mkdir files
+# fi
 
-if [[ ! -d db ]]; then
-	mkdir db
-fi
+# if [[ ! -d db ]]; then
+# 	mkdir db
+# fi
 
 if [[ -d build ]]; then
 	rm -r build
@@ -64,18 +64,20 @@ if [[ $coverage == 'ON' ]]; then
 	make coverage
 else if [[ $test == 'ON' ]]; then	# coverage de por si incluye y corre test
 		make unitTest
-		cd ..
-		./build/unitTest
-		cd -
+		# cd ..
+		# ./build/unitTest
+		# cd -
+		./unitTest
 	fi
 fi
 
 if [[ $rocksdb == 'ON' ]]; then
 	make udrive
 	if [[ $execute == 'ON' ]]; then
-		cd ..
-		./build/udrive
-		cd -
+		# cd ..
+		# ./build/udrive
+		# cd -
+		./udrive
 	fi
 fi
 

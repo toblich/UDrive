@@ -164,6 +164,27 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaPoderAgregarPermisoYAgregarloAlMe
 	EXPECT_EQ("juan", asd.usuariosHabilitados.back());
 }
 
+TEST_F(ManejadorArchivosYMetadatosTest, deberiaDevolverStringVacioPorArchivoInexistenteAlDescargar) {
+	string path = "vacio";
+	path = manejador->descargarArchivo("pablo", "pablo/archivos/hola.txt");
+	EXPECT_EQ("",path);
+}
+
+TEST_F(ManejadorArchivosYMetadatosTest, deberiaDevolverPathCompletoPorArchivoExistenteAlDescargar) {
+	string path = "pablo/archivos";
+	string filepath = "pablo/archivos/saludo.txt";
+	manejador->crearCarpetaSegura("pablo", path);
+	manejador->subirArchivo("pablo", filepath, "hola pablo", 10, "un metadato");
+	string pathCompleto = manejador->descargarArchivo("pablo", filepath);
+
+	char homeDirectory[1024];
+    getcwd(homeDirectory, sizeof(homeDirectory));
+    string pathAComparar(homeDirectory);
+    pathAComparar += "/" + pathFS + "/" + filepath;
+
+	EXPECT_EQ(pathAComparar,pathCompleto);
+}
+
 TEST_F(ManejadorArchivosYMetadatosTest, deberiaBorrarElFileSystem) {
 	struct stat sb;
 	string path = "pablo/hola";

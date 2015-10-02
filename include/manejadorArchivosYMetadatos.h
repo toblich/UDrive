@@ -14,7 +14,7 @@ class ManejadorArchivosYMetadatos {
 
 private:
 	BD* dbMetadatos;
-//	char homeDirectory[1024];
+	char homeDirectory[1024];
 	std::string pathFileSystem;
 	void logInfo(std::string mensaje);
 	void logWarn(std::string mensaje);
