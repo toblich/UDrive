@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 
 # Optiones. Pasar valor con 'cmake -Dmyvarname=ON'.
-option(test "Build all tests." OFF) # Makes boolean 'test' available.
+option(test "Build all tests." ON) # Makes boolean 'test' available.
 option(rocksdb "Build with RocksDB." ON) 
 option(coverage "Build coverage." OFF)  
 
@@ -10,15 +10,16 @@ project(UDrive)
 #Incluyo las librerias de headers
 include_directories(include/ include/db/)
 
-#Agrego todos los archivos de SOURCE
-file(GLOB SOURCE "src/*" "src/db/*")
+set(PROJ ${CMAKE_CURRENT_LIST_DIR})
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -std=c++11 -pthread")
 
 
+########## COVERAGE ##########
+
 if(coverage)
 	set(test ON)
-	
+	set(rocksdb OFF)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -fprofile-arcs -ftest-coverage")
 
 	FIND_PROGRAM( GCOV_PATH gcov )
@@ -36,19 +37,37 @@ if(coverage)
 
 		# Run tests
 		COMMAND unitTest
+		COMMAND udrive --no-action
+		COMMAND python ../test/server_test.py -v
 
 		# Capturing lcov counters and generating report
 		COMMAND ${LCOV_PATH} --directory . --capture --output-file ${_outputname}.info
-		COMMAND ${LCOV_PATH} --remove ${_outputname}.info 'test/*' '/usr/*' 'src/mongoose.c' '*.h' 'src/jsoncpp.cpp' 'src/logger.cpp' --output-file ${_outputname}.info.cleaned
+		COMMAND ${LCOV_PATH} --remove ${_outputname}.info 'test/*' '/usr/*' 'src/mongoose.c' '*.h' 'src/jsoncpp.cpp' 'src/logger.cpp' 'src/main*' --output-file ${_outputname}.info.cleaned
 		COMMAND ${GENHTML_PATH} -o ${_outputname} ${_outputname}.info.cleaned
 		COMMAND ${CMAKE_COMMAND} -E remove ${_outputname}.info ${_outputname}.info.cleaned
 	)
 endif()
 
 
-if (rocksdb)
-	add_executable(udrive ${SOURCE})
+########## UDRIVE ##########
+
+#Incluyo las librerias de headers
+include_directories(include/ include/db/)
+
+#Agrego todos los archivos de SOURCE
+file(GLOB SOURCE "src/*" "src/db/*")
+
+if (NOT rocksdb)
+	list(REMOVE_ITEM SOURCE ${PROJ}/src/main.cpp)
+	list(REMOVE_ITEM SOURCE ${PROJ}/src/db/basededatos.cpp)
 	
+	add_executable(udrive ${SOURCE})
+else()
+	list(REMOVE_ITEM SOURCE ${PROJ}/src/main_rocksdbless.cpp)
+	list(REMOVE_ITEM SOURCE ${PROJ}/src/db/mapDB.cpp)
+		
+	add_executable(udrive ${SOURCE})
+
 	#Agrego librerias externas
 	include_directories(librocksdb)
 	add_library(librocksdb STATIC IMPORTED)
@@ -75,19 +94,20 @@ if (rocksdb)
 endif()
 
 
+########## TESTS ##########
+
 if(test)
-	enable_testing()
+	#enable_testing()
 
 	#Incluyo las librerias de headers
 	include_directories(include/ include/db/)
-
-	set(PROJ ${CMAKE_CURRENT_LIST_DIR})
 	
 	#Agrego todos los archivos de TEST
 	file(GLOB SOURCE_TEST "test/*" "test/db/*")
 
 	file(GLOB SOURCE2 "src/*" "src/db/*")
 	list(REMOVE_ITEM SOURCE2 ${PROJ}/src/main.cpp)
+	list(REMOVE_ITEM SOURCE2 ${PROJ}/src/main_rocksdbless.cpp)
 
 	if (NOT rocksdb)
 		list(REMOVE_ITEM SOURCE2 ${PROJ}/src/db/basededatos.cpp)
