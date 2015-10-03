@@ -29,7 +29,7 @@ mg_result Session::POSTHandler(mg_connection* connection) {
 mg_result Session::DELETEHandler(mg_connection* connection) {
 	ParserURI parser;
 	string uri = string(connection->uri);
-	vector<string> uris = parser.parsear(uri);
+	vector<string> uris = parser.parsear(uri, '/');
 	string username = getVar(connection, "user");
 
 	if (manejadorUs->cerrarSesion(uris[1],username)){

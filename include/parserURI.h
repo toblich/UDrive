@@ -8,10 +8,9 @@ using namespace std;
 class ParserURI {
 
 public:
-	static vector<string> parsear(string uri) {
+	static vector<string> parsear(string uri, char delim) {
 		vector<string> uris;
 		unsigned int size = uri.size();
-		char delim = '/';
 		string buffer = "";
 		for (unsigned int i = 0; i < size; i++) {
 			char n = uri[i];

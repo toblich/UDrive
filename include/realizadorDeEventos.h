@@ -5,6 +5,8 @@
 #include <iostream>
 #include <fstream>
 #include <stdarg.h>
+#include <list>
+#include <ctime>
 #include "mongoose.h"
 #include "manejadorDeUsuarios.h"
 #include "manejadorArchivosYMetadatos.h"
@@ -32,7 +34,10 @@ public:
 
 	typedef struct{
 		const char* fileData;
-		int	dataLenght;
+		int	dataLength;
+		string fileName;
+		string user;
+		string token;
 	}DatosArchivo;
 
 	RealizadorDeEventos();
@@ -46,7 +51,7 @@ protected:
 
 	size_t printfData(mg_connection* connection, const char* format, ...);
 	bool sendFile(mg_connection* connection, string filePath);
-	DatosArchivo getMultipartData(mg_connection* connection);
+	DatosArchivo getMultipartData(mg_connection* connection, string variable);
 	string getVar(mg_connection* connection, string varName);
 	float getVarFloat(mg_connection* connection, string varName);
 	virtual mg_result POSTHandler(mg_connection* connection);
