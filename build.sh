@@ -11,7 +11,7 @@
 export INCLUDE=include
 export LIB=/usr/lib
 
-ARGS=$(getopt -o rtcx -l "rocksdb,test,coverage,execute" -- "$@")
+ARGS=$(getopt -o hrtcx -l "help,rocksdb,test,coverage,execute" -- "$@")
 eval set -- "$ARGS"
 
 rocksdb=OFF
@@ -21,6 +21,18 @@ execute=OFF
 
 while true; do
 	case "$1" in 
+		-h|--help)
+			echo "
+-h, --help	Muestra esta ayuda y finaliza
+-r, --rocksdb	Compila udrive con RocksDB
+-t, --test	Compila y ejecuta tests unitarios (de C++)
+-x, --execute	Compila y ejecuta udrive [implica --rocksdb]
+-c, --coverage	Compila tests y udrive sin RocksDB y ejecuta tests
+		(C++ y Python), generando reporte de coverage
+		[anula --rocksdb e implica --test]
+";
+			exit 0;
+			;;
 		-r|--rocksdb)
 			rocksdb=ON;
 			;;
