@@ -105,6 +105,25 @@ std::vector<std::string> ManejadorArchivosYMetadatos::parsearDirectorios(std::st
 	return directorios;
 }
 
+std::string ManejadorArchivosYMetadatos::actualizarUsuarioFechaModificacion(std::string jsonMetadatos,
+		std::string usernameModificacion) {
+	ParserJson parser;
+	MetadatoArchivo metadato = parser.deserializarMetadatoArchivo(jsonMetadatos);
+	metadato.usuarioUltimaModificacion=usernameModificacion;
+
+	struct tm *tiempo;
+	time_t fecha_sistema;
+	time(&fecha_sistema);
+	tiempo = localtime(&fecha_sistema);
+	int anio = tiempo->tm_year + 1900;
+	int mes = tiempo->tm_mon + 1;
+	int dia = tiempo->tm_mday;
+	std::string fecha = std::to_string(dia) + "/" + std::to_string(mes) + "/" + std::to_string(anio);
+	metadato.fechaUltimaModificacion = fecha;
+	std::string nuevosMetadatos = parser.serializarMetadatoArchivo(metadato);
+	return nuevosMetadatos;
+}
+
 // El path recibido no debe contener el nombre de un archivo.
 // En caso de que sea asi, se debera modificar este metodo.
 bool ManejadorArchivosYMetadatos::crearCarpeta(std::string username, std::string path) {
@@ -223,6 +242,7 @@ std::string ManejadorArchivosYMetadatos::consultarMetadatosArchivo(std::string u
 }
 
 // OJO porque el modify tira excepciones
+// TODO: Tiene sentido? Me parece mejor el hecho de agarrar y tener una "modificacion" por cada tipo como "darPermiso", "agregarEtiqueta", etc
 bool ManejadorArchivosYMetadatos::actualizarMetadatos(std::string username,
 		std::string filepath, std::string nuevosMetadatos) {
 	if ( verificarPermisos(username, filepath) ) {
@@ -307,6 +327,10 @@ bool ManejadorArchivosYMetadatos::deleteCarpeta(std::string path) {
 		this->logWarn("No se ha podido eliminar la carpeta " + path + " porque no existe." );
 		return false;
 	}
+}
+
+void ManejadorArchivosYMetadatos::tamanioCarpeta(std::string path, unsigned long int & size) {
+
 }
 
 bool ManejadorArchivosYMetadatos::deleteFileSystem() {

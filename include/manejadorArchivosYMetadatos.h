@@ -29,8 +29,11 @@ public:
 	ManejadorArchivosYMetadatos(BD* dbMetadatos, std::string path);
 	virtual ~ManejadorArchivosYMetadatos();
 
+
 	bool verificarPathValido(std::string path);
 	bool verificarPermisos(std::string username, std::string path);
+
+	void tamanioCarpeta(std::string path, unsigned long int size);
 
 	std::vector<std::string> parsearDirectorios(std::string pathCompleto);
 	bool carpetaVacia(std::string path);
@@ -39,6 +42,7 @@ public:
 	bool crearCarpetaSegura(std::string username, std::string path);
 	bool borrarCarpeta(std::string username, std::string path);
 
+	std::string actualizarUsuarioFechaModificacion(std::string jsonMetadatos, std::string usernameModificacion);
 	bool subirArchivo(std::string username, std::string filepath, const char* data, int dataLen, std::string jsonMetadatos);
 	std::string consultarMetadatosArchivo(std::string username, std::string filename);
 	bool eliminarArchivo(std::string username, std::string filepath);

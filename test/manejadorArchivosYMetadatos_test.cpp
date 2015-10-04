@@ -178,9 +178,9 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaDevolverPathCompletoPorArchivoExi
 	string pathCompleto = manejador->descargarArchivo("pablo", filepath);
 
 	char homeDirectory[1024];
-    getcwd(homeDirectory, sizeof(homeDirectory));
-    string pathAComparar(homeDirectory);
-    pathAComparar += "/" + pathFS + "/" + filepath;
+	getcwd(homeDirectory, sizeof(homeDirectory));
+	string pathAComparar(homeDirectory);
+	pathAComparar += "/" + pathFS + "/" + filepath;
 
 	EXPECT_EQ(pathAComparar,pathCompleto);
 }
@@ -226,6 +226,32 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaBorrarBienCarpetaConArchivosYCarp
 	manejador->subirArchivo("pablo", filepath2, "hola pablo", 10, "un metadato");
 	manejador->subirArchivo("pablo", filepath3, "hola pablo", 10, "un metadato");
 	EXPECT_TRUE( manejador->borrarCarpeta("pablo","pablo/como estas") );
+}
+
+TEST_F(ManejadorArchivosYMetadatosTest, deberiaCambiarBienFechaYUsuarioUltimaModificacion) {
+	std::string jsonArchOK = "{\n"
+			"\t\"etiquetas\" : [ \"23\", true, \"juan\" ],\n"
+			"\t\"extension\" : \"jpg\",\n"
+			"\t\"fecha ultima modificacion\" : \"09/09/2015\",\n"
+			"\t\"nombre\" : \"sol\",\n"
+			"\t\"propietario\" : \"Pancheitor\",\n"
+			"\t\"usuario ultima modificacion\" : \"Pepe\",\n"
+			"\t\"usuarios\" : [ \"Pancheitor\", \"Juan\", \"Pepe\", \"Santi\" ]\n"
+			"}";
+	struct tm *tiempo;
+	time_t fecha_sistema;
+	time(&fecha_sistema);
+	tiempo = localtime(&fecha_sistema);
+	int anio = tiempo->tm_year + 1900;
+	int mes = tiempo->tm_mon + 1;
+	int dia = tiempo->tm_mday;
+
+	std::string jsonNuevoMetadato = manejador->actualizarUsuarioFechaModificacion(jsonArchOK, "juancito");
+	ParserJson parser;
+	MetadatoArchivo nuevoMetadato = parser.deserializarMetadatoArchivo(jsonNuevoMetadato);
+	std::string fecha = std::to_string(dia) + "/" + std::to_string(mes) + "/" + std::to_string(anio);
+	EXPECT_EQ(fecha, nuevoMetadato.fechaUltimaModificacion);
+	EXPECT_EQ("juancito", nuevoMetadato.usuarioUltimaModificacion);
 }
 
 TEST_F(ManejadorArchivosYMetadatosTest, deberiaBorrarElFileSystem) {
