@@ -207,29 +207,39 @@ bool ManejadorArchivosYMetadatos::actualizarArchivo(std::string username,
 		std::string filepath, const char* data, int dataLen) {
 	//No le agrego el FileSystem porque se agrega despues en el metodo crearCarpeta
 	if ( verificarPermisos(username, filepath) ) {
-		std::vector<std::string> directorios = parsearDirectorios(filepath);
-		int size = directorios.size();
-		std::string pathSinArchivo = "";
-		for (int i = 0; i < size-1; i++){ //Saco el nombre del archivo
-			std::string directorio = directorios[i];
-			pathSinArchivo += directorio;
-			if (i < size-2) pathSinArchivo += "/";
-		}
-		//Verifico que existan todas las carpetas y sino las creo
-		if (pathSinArchivo != "") {
-			if ( not crearCarpetaSegura(username, pathSinArchivo) ) {
-				this->logWarn("Al querer actualizar el archivo " + filepath + " no se pudieron crear las carpetas.");
-				return false ;
-			}
-		}
-		std::string pathConFileSystem = this->pathFileSystem + "/" + filepath;
+		unsigned long int folderSize = 0;
+		if ( tamanioCarpeta(username, folderSize) ) {
+			if ( folderSize + dataLen <= CUOTA ) {
+				std::vector<std::string> directorios = parsearDirectorios(filepath);
+				int size = directorios.size();
+				std::string pathSinArchivo = "";
+				for (int i = 0; i < size-1; i++){ //Saco el nombre del archivo
+					std::string directorio = directorios[i];
+					pathSinArchivo += directorio;
+					if (i < size-2) pathSinArchivo += "/";
+				}
+				//Verifico que existan todas las carpetas y sino las creo
+				if (pathSinArchivo != "") {
+					if ( not crearCarpetaSegura(username, pathSinArchivo) ) {
+						this->logWarn("Al querer actualizar el archivo " + filepath + " no se pudieron crear las carpetas.");
+						return false ;
+					}
+				}
+				std::string pathConFileSystem = this->pathFileSystem + "/" + filepath;
 
-		ofstream outFile(pathConFileSystem, std::ofstream::binary);
-		outFile.write(data, dataLen);
-		outFile.close();
-		return true;
-	} else
-		return false;
+				ofstream outFile(pathConFileSystem, std::ofstream::binary);
+				outFile.write(data, dataLen);
+				outFile.close();
+				return true;
+			}
+			unsigned long int cuotaMB = CUOTA/1048576;
+			std::string texto = "No se ha podido subir el archivo " + filepath + " debido a que se ha superado la cuota de ";// + cuotaMB + " MB.";
+			texto += cuotaMB;
+			texto += " MB.";
+			this->logWarn(texto);
+		}
+	}
+	return false;
 }
 
 // OJO porque el get tira excepciones
@@ -343,8 +353,10 @@ bool ManejadorArchivosYMetadatos::tamanioCarpeta(std::string path, unsigned long
 				this->tamanioCarpeta(pathInterno, size);
 			else {
 				struct stat buffer;
-				stat ( pathInternoConFS.c_str(), &buffer );
-				size += buffer.st_size;
+				if ( stat ( pathInternoConFS.c_str(), &buffer ) == 0 )
+					size += buffer.st_size;
+				else
+					this->logWarn("No se pudo encontrar el archivo " + pathInterno);
 			}
 		}
 		closedir (dir);

@@ -10,6 +10,7 @@
 
 const std::string defaultFileSystem = "FileSystem";
 const std::string trash = "#trash";
+const unsigned long int CUOTA = 2147483648; // 2GB
 
 class ManejadorArchivosYMetadatos {
 
@@ -33,9 +34,9 @@ public:
 	bool verificarPathValido(std::string path);
 	bool verificarPermisos(std::string username, std::string path);
 
-	bool tamanioCarpeta(std::string path, unsigned long int & size);
 
 	std::vector<std::string> parsearDirectorios(std::string pathCompleto);
+	bool tamanioCarpeta(std::string path, unsigned long int & size);
 	bool carpetaVacia(std::string path);
 	bool crearUsuario(std::string username);
 	bool crearCarpeta(std::string username, std::string path);
