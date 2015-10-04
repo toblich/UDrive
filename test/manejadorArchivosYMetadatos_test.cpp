@@ -254,6 +254,43 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaCambiarBienFechaYUsuarioUltimaMod
 	EXPECT_EQ("juancito", nuevoMetadato.usuarioUltimaModificacion);
 }
 
+TEST_F(ManejadorArchivosYMetadatosTest, deberiaTenerTamanioCeroCarpetaVacia) {
+	unsigned long int size = 0;
+	manejador->crearUsuario("pablo");
+	manejador->tamanioCarpeta("pablo", size);
+	EXPECT_EQ(0,size);
+}
+
+TEST_F(ManejadorArchivosYMetadatosTest, deberiaTenerCarpetaTamanioIgualAlUnicoArchivo) {
+	unsigned long int size = 0;
+	string filepath = "pablo/como estas/bien/saludo.txt";
+	manejador->crearUsuario("pablo");
+	manejador->crearCarpetaSegura("pablo","pablo/como estas/bien");
+	manejador->subirArchivo("pablo", filepath, "hola pablo", 10, "un metadato");
+	manejador->tamanioCarpeta("pablo", size);
+	EXPECT_EQ(10, size);
+}
+
+TEST_F(ManejadorArchivosYMetadatosTest, deberiaTenerCarpetaTamanioIgualASumaDeArchivos) {
+	unsigned long int sizePablo = 0;
+	unsigned long int sizeBien = 0;
+	unsigned long int sizeVos = 0;
+	string filepath  = "pablo/como estas/bien/vos?/saludo.txt";
+	string filepath2 = "pablo/como estas/bien/vos?/juan";
+	string filepath3 = "pablo/como estas/bien/juan";
+	manejador->crearUsuario("pablo");
+	manejador->crearCarpetaSegura("pablo","pablo/como estas/bien/vos?");
+	manejador->subirArchivo("pablo", filepath, "hola pablo", 10, "un metadato");
+	manejador->subirArchivo("pablo", filepath2, "hola tobi", 9, "un metadato");
+	manejador->subirArchivo("pablo", filepath3, "hola pancho", 11, "un metadato");
+	manejador->tamanioCarpeta("pablo", sizePablo);
+	manejador->tamanioCarpeta("pablo/como estas/bien", sizeBien);
+	manejador->tamanioCarpeta("pablo/como estas/bien/vos?", sizeVos);
+	EXPECT_EQ(30, sizePablo);
+	EXPECT_EQ(30, sizeBien);
+	EXPECT_EQ(19, sizeVos);
+}
+
 TEST_F(ManejadorArchivosYMetadatosTest, deberiaBorrarElFileSystem) {
 	struct stat sb;
 	string path = "pablo/hola";

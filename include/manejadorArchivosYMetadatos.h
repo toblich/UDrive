@@ -33,7 +33,7 @@ public:
 	bool verificarPathValido(std::string path);
 	bool verificarPermisos(std::string username, std::string path);
 
-	void tamanioCarpeta(std::string path, unsigned long int size);
+	bool tamanioCarpeta(std::string path, unsigned long int & size);
 
 	std::vector<std::string> parsearDirectorios(std::string pathCompleto);
 	bool carpetaVacia(std::string path);

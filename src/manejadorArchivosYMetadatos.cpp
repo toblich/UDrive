@@ -329,8 +329,29 @@ bool ManejadorArchivosYMetadatos::deleteCarpeta(std::string path) {
 	}
 }
 
-void ManejadorArchivosYMetadatos::tamanioCarpeta(std::string path, unsigned long int & size) {
-
+bool ManejadorArchivosYMetadatos::tamanioCarpeta(std::string path, unsigned long int & size) {
+	std::string pathConFS = this->pathFileSystem + "/" + path;
+	DIR* dir;
+	struct dirent* ent;
+	if ( ( dir = opendir(pathConFS.c_str()) ) != NULL ) {
+		while ( (ent = readdir (dir)) != NULL ) {
+			if ( strcmp(ent->d_name, ".") == 0 ) continue;
+			if ( strcmp(ent->d_name, "..") == 0 ) continue;
+			std::string pathInterno = path + "/" + ent->d_name;
+			std::string pathInternoConFS = this->pathFileSystem + "/" + pathInterno;
+			if ( this->existeCarpeta(pathInternoConFS) )
+				this->tamanioCarpeta(pathInterno, size);
+			else {
+				struct stat buffer;
+				stat ( pathInternoConFS.c_str(), &buffer );
+				size += buffer.st_size;
+			}
+		}
+		closedir (dir);
+		return true;
+	}
+	this->logWarn("No existe el directorio " + path);
+	return false;
 }
 
 bool ManejadorArchivosYMetadatos::deleteFileSystem() {
