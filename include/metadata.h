@@ -8,10 +8,11 @@ using namespace std;
 
 class Metadata : public RealizadorDeEventos {
 public:
-	Metadata(ManejadorArchivosYMetadatos* manejadorArchYMet);
+	Metadata(ManejadorDeUsuarios* manejadorUs, ManejadorArchivosYMetadatos* manejadorArchYMet);
 	virtual ~Metadata();
 
 protected:
+	ManejadorDeUsuarios* manejadorUs;
 	ManejadorArchivosYMetadatos* manejadorArchYMet;
 
 	mg_result GETHandler(mg_connection* connection);
