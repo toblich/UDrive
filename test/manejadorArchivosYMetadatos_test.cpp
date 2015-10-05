@@ -119,8 +119,8 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaEliminarBienArchivoDeTexto) {
 	manejador->eliminarArchivo("pablo", filepath);
 	string filepathCompletoTrash = pathFS + "/pablo/#trash/saludo.txt";
 	struct stat buffer;
-	EXPECT_FALSE(stat (filepathCompleto.c_str(), &buffer) == 0);
-	EXPECT_TRUE(stat (filepathCompletoTrash.c_str(), &buffer) == 0);
+	EXPECT_FALSE(stat (filepathCompleto.c_str(), &buffer) == 0); //No existe en el filesystem
+	EXPECT_TRUE(stat (filepathCompletoTrash.c_str(), &buffer) == 0); //Si existe en el trash
 }
 
 TEST_F(ManejadorArchivosYMetadatosTest, deberiaPoderConsultarMetadatosDeArchivo) {
@@ -178,11 +178,117 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaDevolverPathCompletoPorArchivoExi
 	string pathCompleto = manejador->descargarArchivo("pablo", filepath);
 
 	char homeDirectory[1024];
-    getcwd(homeDirectory, sizeof(homeDirectory));
-    string pathAComparar(homeDirectory);
-    pathAComparar += "/" + pathFS + "/" + filepath;
+	getcwd(homeDirectory, sizeof(homeDirectory));
+	string pathAComparar(homeDirectory);
+	pathAComparar += "/" + pathFS + "/" + filepath;
 
 	EXPECT_EQ(pathAComparar,pathCompleto);
+}
+
+TEST_F(ManejadorArchivosYMetadatosTest, deberiaVerificarBienQueCarpetaEstaVacia) {
+	manejador->crearCarpetaSegura("pablo","pablo/como estas/bien");
+	EXPECT_TRUE( manejador->carpetaVacia(pathFS + "/pablo/como estas/bien") );
+}
+
+TEST_F(ManejadorArchivosYMetadatosTest, deberiaVerificarBienQueCarpetaNoEstaVacia) {
+	manejador->crearCarpetaSegura("pablo","pablo/como estas/bien");
+	EXPECT_FALSE( manejador->carpetaVacia(pathFS + "/pablo/como estas") );
+}
+
+TEST_F(ManejadorArchivosYMetadatosTest, deberiaBorrarBienCarpetaSinArchivosNiCarpetas) {
+	manejador->crearCarpetaSegura("pablo","pablo/como estas/bien");
+	EXPECT_TRUE( manejador->borrarCarpeta("pablo","pablo/como estas/bien") );
+}
+
+TEST_F(ManejadorArchivosYMetadatosTest, deberiaBorrarBienCarpetaConArchivosPeroSinCarpetas) {
+	string filepath = "pablo/como estas/bien/saludo.txt";
+	string filepath2 = "pablo/como estas/bien/juan";
+	manejador->crearUsuario("pablo");
+	manejador->crearCarpetaSegura("pablo","pablo/como estas/bien");
+	manejador->subirArchivo("pablo", filepath, "hola pablo", 10, "un metadato");
+	manejador->subirArchivo("pablo", filepath2, "hola pablo", 10, "un metadato");
+	EXPECT_TRUE( manejador->borrarCarpeta("pablo","pablo/como estas/bien") );
+}
+
+TEST_F(ManejadorArchivosYMetadatosTest, deberiaBorrarBienCarpetaSinArchivosPeroConCarpetas) {
+	manejador->crearUsuario("pablo");
+	manejador->crearCarpetaSegura("pablo","pablo/como estas/bien/vos?");
+	EXPECT_TRUE( manejador->borrarCarpeta("pablo","pablo/como estas") );
+}
+
+TEST_F(ManejadorArchivosYMetadatosTest, deberiaBorrarBienCarpetaConArchivosYCarpetas) {
+	string filepath = "pablo/como estas/bien/saludo.txt";
+	string filepath2 = "pablo/como estas/bien/juan";
+	string filepath3 = "pablo/como estas/bien/vos?/juan";
+	manejador->crearUsuario("pablo");
+	manejador->crearCarpetaSegura("pablo","pablo/como estas/bien/vos?");
+	manejador->subirArchivo("pablo", filepath, "hola pablo", 10, "un metadato");
+	manejador->subirArchivo("pablo", filepath2, "hola pablo", 10, "un metadato");
+	manejador->subirArchivo("pablo", filepath3, "hola pablo", 10, "un metadato");
+	EXPECT_TRUE( manejador->borrarCarpeta("pablo","pablo/como estas") );
+}
+
+TEST_F(ManejadorArchivosYMetadatosTest, deberiaCambiarBienFechaYUsuarioUltimaModificacion) {
+	std::string jsonArchOK = "{\n"
+			"\t\"etiquetas\" : [ \"23\", true, \"juan\" ],\n"
+			"\t\"extension\" : \"jpg\",\n"
+			"\t\"fecha ultima modificacion\" : \"09/09/2015\",\n"
+			"\t\"nombre\" : \"sol\",\n"
+			"\t\"propietario\" : \"Pancheitor\",\n"
+			"\t\"usuario ultima modificacion\" : \"Pepe\",\n"
+			"\t\"usuarios\" : [ \"Pancheitor\", \"Juan\", \"Pepe\", \"Santi\" ]\n"
+			"}";
+	struct tm *tiempo;
+	time_t fecha_sistema;
+	time(&fecha_sistema);
+	tiempo = localtime(&fecha_sistema);
+	int anio = tiempo->tm_year + 1900;
+	int mes = tiempo->tm_mon + 1;
+	int dia = tiempo->tm_mday;
+
+	std::string jsonNuevoMetadato = manejador->actualizarUsuarioFechaModificacion(jsonArchOK, "juancito");
+	ParserJson parser;
+	MetadatoArchivo nuevoMetadato = parser.deserializarMetadatoArchivo(jsonNuevoMetadato);
+	std::string fecha = std::to_string(dia) + "/" + std::to_string(mes) + "/" + std::to_string(anio);
+	EXPECT_EQ(fecha, nuevoMetadato.fechaUltimaModificacion);
+	EXPECT_EQ("juancito", nuevoMetadato.usuarioUltimaModificacion);
+}
+
+TEST_F(ManejadorArchivosYMetadatosTest, deberiaTenerTamanioCeroCarpetaVacia) {
+	unsigned long int size = 0;
+	manejador->crearUsuario("pablo");
+	manejador->tamanioCarpeta("pablo", size);
+	EXPECT_EQ(0,size);
+}
+
+TEST_F(ManejadorArchivosYMetadatosTest, deberiaTenerCarpetaTamanioIgualAlUnicoArchivo) {
+	unsigned long int size = 0;
+	string filepath = "pablo/como estas/bien/saludo.txt";
+	manejador->crearUsuario("pablo");
+	manejador->crearCarpetaSegura("pablo","pablo/como estas/bien");
+	manejador->subirArchivo("pablo", filepath, "hola pablo", 10, "un metadato");
+	manejador->tamanioCarpeta("pablo", size);
+	EXPECT_EQ(10, size);
+}
+
+TEST_F(ManejadorArchivosYMetadatosTest, deberiaTenerCarpetaTamanioIgualASumaDeArchivos) {
+	unsigned long int sizePablo = 0;
+	unsigned long int sizeBien = 0;
+	unsigned long int sizeVos = 0;
+	string filepath  = "pablo/como estas/bien/vos?/saludo.txt";
+	string filepath2 = "pablo/como estas/bien/vos?/juan";
+	string filepath3 = "pablo/como estas/bien/juan";
+	manejador->crearUsuario("pablo");
+	manejador->crearCarpetaSegura("pablo","pablo/como estas/bien/vos?");
+	manejador->subirArchivo("pablo", filepath, "hola pablo", 10, "un metadato");
+	manejador->subirArchivo("pablo", filepath2, "hola tobi", 9, "un metadato");
+	manejador->subirArchivo("pablo", filepath3, "hola pancho", 11, "un metadato");
+	manejador->tamanioCarpeta("pablo", sizePablo);
+	manejador->tamanioCarpeta("pablo/como estas/bien", sizeBien);
+	manejador->tamanioCarpeta("pablo/como estas/bien/vos?", sizeVos);
+	EXPECT_EQ(30, sizePablo);
+	EXPECT_EQ(30, sizeBien);
+	EXPECT_EQ(19, sizeVos);
 }
 
 TEST_F(ManejadorArchivosYMetadatosTest, deberiaBorrarElFileSystem) {
