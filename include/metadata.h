@@ -1,7 +1,12 @@
 #ifndef METADATA_H_
 #define METADATA_H_
 
-class Metadata {
+#include "realizadorDeEventos.h"
+#include "parserURI.h"
+
+using namespace std;
+
+class Metadata : public RealizadorDeEventos {
 public:
 	Metadata(ManejadorArchivosYMetadatos* manejadorArchYMet);
 	virtual ~Metadata();

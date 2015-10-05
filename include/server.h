@@ -10,6 +10,7 @@
 #include "logger.h"
 #include "profile.h"
 #include "session.h"
+#include "metadata.h"
 #include "file.h"
 #include "mongoose.h"
 #include "bd.h"
