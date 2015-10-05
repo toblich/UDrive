@@ -52,8 +52,6 @@ mg_result File::PUTHandler(mg_connection* connection) {
 	ParserURI parser;
 	ParserJson parserJson;
 	list<string> habilitados;
-	time_t now;
-	tm *ltm = localtime(&now);
 
 	string uri = string(connection->uri);
 	vector<string> uris = parser.parsear(uri, '/');
@@ -89,7 +87,17 @@ mg_result File::PUTHandler(mg_connection* connection) {
 			metArch.nombre += nombreYExtension[0];
 			metArch.extension = "none";
 		}
-		metArch.fechaUltimaModificacion = string(asctime(ltm));
+
+		struct tm *tiempo;
+		time_t fecha_sistema;
+		time(&fecha_sistema);
+		tiempo = localtime(&fecha_sistema);
+		int anio = tiempo->tm_year + 1900;
+		int mes = tiempo->tm_mon + 1;
+		int dia = tiempo->tm_mday;
+		string fecha = to_string(dia) + "/" + to_string(mes) + "/" + to_string(anio);
+		metArch.fechaUltimaModificacion = fecha;
+
 		metArch.usuarioUltimaModificacion = user;
 		metArch.propietario = uris[1];
 		metArch.etiquetas = list<string>();

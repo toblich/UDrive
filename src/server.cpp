@@ -17,9 +17,10 @@ Server::Server(std::string listeningPort, BD* perfiles, BD* sesiones, BD* passwo
 
 	running = true;
 
-	mapaURI.insert(std::pair<string,RealizadorDeEventos*>("profile", new Profile(manejadorUsuarios, manejadorAYM)));
-	mapaURI.insert(std::pair<string,RealizadorDeEventos*>("session", new Session(manejadorUsuarios)));
-	mapaURI.insert(std::pair<string,RealizadorDeEventos*>("file", new File(manejadorUsuarios, manejadorAYM)));
+	mapaURI.insert(pair<string,RealizadorDeEventos*>("profile", new Profile(manejadorUsuarios, manejadorAYM)));
+	mapaURI.insert(pair<string,RealizadorDeEventos*>("session", new Session(manejadorUsuarios)));
+	mapaURI.insert(pair<string,RealizadorDeEventos*>("file", new File(manejadorUsuarios, manejadorAYM)));
+	mapaURI.insert(pair<string,RealizadorDeEventos*>("metadata", new Metadata(manejadorAYM)));
 }
 
 Server::~Server() {
@@ -73,13 +74,21 @@ mg_result Server::requestHandler(mg_connection* connection) {
 	string uri = string(connection->uri);
 	vector<string> uris = parser.parsear(uri, '/');
 
-	if (uris[0] == "close"){
-		running = false;
-		mg_printf_data(connection, "Se cerro el servidor\n");
-		return MG_TRUE;
+	if (uris.size() > 0){
+		if (uris[0] == "close"){
+			running = false;
+			mg_printf_data(connection, "Se cerro el servidor\n");
+			return MG_TRUE;
+		}
+		try {
+			RealizadorDeEventos* evento = mapaURI.at(uris[0]);
+			return evento->handler(connection);
+
+		}catch (const out_of_range& oor){
+			mg_printf_data(connection, "Error, recurso no encontrado\n");
+			return MG_TRUE;
+		}
 	}
-
-	RealizadorDeEventos* evento = mapaURI.at(uris[0]);
-
-	return evento->handler(connection);
+	mg_printf_data(connection, "Error, URI incorrecta\n");
+	return MG_TRUE;
 }

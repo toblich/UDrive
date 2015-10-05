@@ -6,6 +6,7 @@
 #include <map>
 #include <iostream>
 #include <fstream>
+#include <stdexcept>
 #include "logger.h"
 #include "profile.h"
 #include "session.h"

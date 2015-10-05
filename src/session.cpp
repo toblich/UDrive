@@ -4,9 +4,7 @@ Session::Session(ManejadorDeUsuarios* manejadorUsuarios) {
 	this->manejadorUs = manejadorUsuarios;
 }
 
-Session::~Session() {
-	// TODO Auto-generated destructor stub
-}
+Session::~Session() { }
 
 mg_result Session::POSTHandler(mg_connection* connection) {
 	string user = getVar(connection, "user");
