@@ -2,21 +2,24 @@
 
 using namespace std;
 
-Server::Server(std::string listeningPort, BD* perfiles, BD* sesiones, BD* passwords, BD* metadatos) {
+Server::Server(string listeningPort, BD* perfiles, BD* sesiones, BD* passwords, BD* metadatos) {
+	//Server
 	server = mg_create_server((void *) this, Server::mgEventHandler);
 	mg_set_option(server, "listening_port", listeningPort.c_str());
 	mg_set_option(server, "document_root", ".");
+	running = true;
 
+	//BD
 	this->perfiles = perfiles;
 	this->sesiones = sesiones;
 	this->passwords = passwords;
 	this->metadatos = metadatos;
 
+	//Manejadores
 	manejadorUsuarios = new ManejadorDeUsuarios(perfiles, sesiones, passwords);
 	manejadorAYM = new ManejadorArchivosYMetadatos(metadatos);
 
-	running = true;
-
+	//API REST
 	mapaURI.insert(pair<string,RealizadorDeEventos*>("profile", new Profile(manejadorUsuarios, manejadorAYM)));
 	mapaURI.insert(pair<string,RealizadorDeEventos*>("session", new Session(manejadorUsuarios)));
 	mapaURI.insert(pair<string,RealizadorDeEventos*>("file", new File(manejadorUsuarios, manejadorAYM)));
@@ -24,19 +27,29 @@ Server::Server(std::string listeningPort, BD* perfiles, BD* sesiones, BD* passwo
 }
 
 Server::~Server() {
+	//Server
 	mg_destroy_server(&server);
-	delete manejadorUsuarios;
-	delete manejadorAYM;
+
 	//TODO: Sacar estas instrucciones para que despues persistan los datos.
-	//TODO: Acordarse de iterar por el map para borrar las tres clases
 	perfiles->deleteBD(); //
 	sesiones->deleteBD(); //
 	passwords->deleteBD(); //
 	metadatos->deleteBD(); //
+	//BD
 	delete perfiles;
 	delete sesiones;
 	delete passwords;
 	delete metadatos;
+
+	//Manejadores
+	delete manejadorUsuarios;
+	delete manejadorAYM;
+
+	//API REST
+	delete mapaURI.at("profile");
+	delete mapaURI.at("session");
+	delete mapaURI.at("file");
+	delete mapaURI.at("metadata");
 }
 
 int Server::mgEventHandler(mg_connection* connection, mg_event event) {
