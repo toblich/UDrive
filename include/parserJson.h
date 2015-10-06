@@ -19,13 +19,12 @@ public:
 	std::string serializarMetadatoArchivo(MetadatoArchivo metadato);
 	std::string serializarMetadatoUsuario(MetadatoUsuario metadato);
 	std::string serializarMetadatoSesion(MetadatosSesion metadato);
-
 	std::string serializarMapa(std::map<std::string, std::string>& mapa);
-	std::map<std::string, std::string> deserializarMapa(std::string json);
 
 	MetadatoArchivo deserializarMetadatoArchivo(std::string json);
 	MetadatoUsuario deserializarMetadatoUsuario(std::string json);
 	MetadatosSesion deserializarMetadatoSesion(std::string json);
+	std::map<std::string, std::string> deserializarMapa(std::string json);
 };
 
 #endif /* INCLUDE_PARSERJSON_H_ */

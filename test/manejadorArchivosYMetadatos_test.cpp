@@ -321,6 +321,44 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaEliminarCarpetaConMetodoEliminar)
 	EXPECT_FALSE(stat(pathCarpetaEliminada.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode));
 }
 
+TEST_F(ManejadorArchivosYMetadatosTest, deberiaObtenerBienLaEstructuraDeLasCarpetas) {
+	ParserJson parser;
+	string filepath1 = "pablo/como estas/bien/saludo.txt";
+	MetadatoArchivo metadato1;
+	metadato1.nombre = "saludo";
+	metadato1.extension = "txt";
+	string metadatos1 = parser.serializarMetadatoArchivo(metadato1);
+
+	string filepath2 = "pablo/como estas/bien/juan";
+	MetadatoArchivo metadato2;
+	metadato2.nombre = "juan";
+	metadato2.extension = "none";
+	string metadatos2 = parser.serializarMetadatoArchivo(metadato2);
+
+	string filepath3 = "pablo/como estas/bien/pepe.hola";
+	MetadatoArchivo metadato3;
+	metadato3.nombre = "pepe";
+	metadato3.extension = "hola";
+	string metadatos3 = parser.serializarMetadatoArchivo(metadato3);
+
+	manejador->crearUsuario("pablo");
+	manejador->crearCarpetaSegura("pablo","pablo/como estas/bien/vos?");
+	manejador->crearCarpetaSegura("pablo","pablo/como estas/bien/hola");
+	manejador->subirArchivo("pablo", filepath1, "hola pablo", 10, metadatos1);
+	manejador->subirArchivo("pablo", filepath2, "hola pablo", 10, metadatos2);
+	manejador->subirArchivo("pablo", filepath3, "hola pablo", 10, metadatos3);
+	string estructura = manejador->obtenerEstructuraCarpeta("pablo/como estas/bien");
+
+	map<string, string> mapa = parser.deserializarMapa(estructura);
+
+	EXPECT_EQ(mapa.at("saludo.txt"), "txt");
+	EXPECT_EQ(mapa.at("juan"), "none");
+	EXPECT_EQ(mapa.at("pepe.hola"), "hola");
+	EXPECT_EQ(mapa.at("vos?"), "#folder");
+	EXPECT_EQ(mapa.at("hola"), "#folder");
+}
+
+
 TEST_F(ManejadorArchivosYMetadatosTest, deberiaBorrarElFileSystem) {
 	struct stat sb;
 	string path = "pablo/hola";

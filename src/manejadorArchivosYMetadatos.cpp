@@ -338,16 +338,17 @@ std::string ManejadorArchivosYMetadatos::obtenerEstructuraCarpeta(std::string pa
 			std::string pathInterno = path + "/" + ent->d_name;
 			std::string pathInternoConFS = this->pathFileSystem + "/" + pathInterno;
 			if ( this->existeCarpeta(pathInternoConFS) ){
-				cout << "PathInterno carpeta: "<< pathInterno << endl;
 				std::vector<std::string> directorios = this->parsearDirectorios(pathInterno);
 				int size = directorios.size();
 				std::string foldername = directorios[size-1];
 				mapa.insert(pair<string, string>(foldername, "#folder"));
 			} else { //Es un archivo
-				cout << "PathInterno archivo: "<< pathInterno << endl;
 				std::string jsonMetadatos = this->dbMetadatos->get(pathInterno);
 				MetadatoArchivo metadato = parser.deserializarMetadatoArchivo(jsonMetadatos);
-				mapa.insert(pair<string, string>(metadato.nombre, metadato.extension));
+				string nombre = metadato.nombre;
+				if ( metadato.extension != "none" )
+					nombre += "." + metadato.extension;
+				mapa.insert(pair<string, string>(nombre, metadato.extension));
 			}
 		}
 		closedir (dir);
