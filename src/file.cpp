@@ -138,16 +138,16 @@ mg_result File::DELETEHandler(mg_connection* connection) {
 		if (manejadorArchYMet->eliminar(user, filepath)){
 			mg_send_status(connection, CODESTATUS_SUCCES);
 			mg_send_header(connection, contentType.c_str(), jsonType.c_str());
-			printfData(connection, "{\"success\": \"Se elimino el recurso exitosamente\"}");
+			printfData(connection, "{\"success\": \"Se elimino el archivo exitosamente.\"}");
 		}else{
 			mg_send_status(connection, CODESTATUS_RESOURCE_NOT_FOUND);
 			mg_send_header(connection, contentType.c_str(), jsonType.c_str());
-			printfData(connection, "{\"error\": \"No se encontro el resurso\"}");
+			printfData(connection, "{\"error\": \"Path invalido, no se encontro el archivo.\"}");
 		}
 	}else{
 		mg_send_status(connection, CODESTATUS_UNAUTHORIZED_CLIENT);
 		mg_send_header(connection, contentType.c_str(), jsonType.c_str());
-		printfData(connection, "{\"error\": \"El token no corresponde con la sesion del usuario\"}");
+		printfData(connection, "{\"error\": \"El token no corresponde con la sesion del usuario.\"}");
 	}
 	return MG_TRUE;
 }
