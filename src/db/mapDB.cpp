@@ -2,18 +2,12 @@
 
 using namespace std;
 
-MapDB::MapDB() : mapa() {
-	// TODO Auto-generated constructor stub
-}
+MapDB::MapDB() : mapa() {}
 
-MapDB::~MapDB() {
-	// TODO Auto-generated destructor stub
-}
+MapDB::~MapDB() {}
 
 bool MapDB::put(string key, string value) {
-	try {
-		mapa.at(key);
-	} catch (out_of_range& e) {	// No habia valor con esa clave
+	if (not contains(key)) {
 		mapa.insert(pair<string, string> (key, value));
 		return true;
 	}
@@ -29,32 +23,29 @@ string MapDB::get(string key) {
 }
 
 void MapDB::erase(string key) {
-	try {
-		mapa.at(key); //aca podria lanzar la excepcion si no existe
+	if (contains(key))
 		mapa.erase(key);
-	} catch (out_of_range& e) {
+	else
 		throw KeyNotFound("mapDB.erase: " + key);
-	}
 }
 
 void MapDB::modify(string key, string value) {
-	try {
+	if (contains(key))
 		mapa.at(key) = value;
-	} catch (out_of_range& e) {
+	else
 		throw KeyNotFound("mapDB.modify: " + key);
-	}
 }
 
 bool MapDB::writeBatch(const Batch& batch) {
 	list<DBAction>::const_iterator it = batch.getAcciones().cbegin();
-	list<DBAction>::const_iterator end = batch.getAcciones().cend();
+	const list<DBAction>::const_iterator END = batch.getAcciones().cend();
 	bool ok = true;
-	for (; it != end and ok; it++) {
+	for (; it != END and ok; it++) {
 		ok = checkAction(*it);
 	}
-	if (ok){
+	if (ok) {
 		it = batch.getAcciones().cbegin(); //reinicia
-		for (; it != end; it++) {
+		for (; it != END; it++) {
 			executeAction(*it);
 		}
 	}
