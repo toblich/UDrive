@@ -8,9 +8,7 @@ ManejadorDeUsuarios::ManejadorDeUsuarios(BD* perfiles, BD* sesiones, BD* passwor
 	this->passwords = passwords;
 }
 
-ManejadorDeUsuarios::~ManejadorDeUsuarios() {
-	// TODO Auto-generated destructor stub
-}
+ManejadorDeUsuarios::~ManejadorDeUsuarios() {}
 
 bool ManejadorDeUsuarios::validarLogin(string username, string password) {
 	string realPassword;
@@ -61,25 +59,25 @@ string ManejadorDeUsuarios::generarToken(string username, time_t timestamp) {
 	return to_string(funcionHash(username + time));
 }
 
-bool ManejadorDeUsuarios::esPerfilValido(string perfil) {
-	return true; //TODO: implementar
+bool ManejadorDeUsuarios::esPerfilValido(const string& perfilJson) {
+	MetadatoUsuario perfil = ParserJson().deserializarMetadatoUsuario(perfilJson);
+	return regex_match(perfil.nombre, REGEX_NOMBRE) and regex_match(perfil.email, REGEX_EMAIL);
 }
 
-bool ManejadorDeUsuarios::esUsernameValido(string username) {
-	for (int i = 0; i < username.size(); i++){
-		char c = username[i];
-		if (esCaracterInvalido(c))
+bool ManejadorDeUsuarios::esUsernameValido(const string& username) {
+	const size_t SIZE = username.size();
+	for (size_t i = 0; i < SIZE; i++){
+		if (esCaracterInvalido(username[i]))
 			return false;
 	}
 	return true;
 }
 
 bool ManejadorDeUsuarios::esCaracterInvalido(char c) {
-	const string invalidos = "/ ~#?=&";
-	return (invalidos.find(c) != string::npos);
+	return (CHARS_INVALIDOS.find(c) != string::npos);
 }
 
-bool ManejadorDeUsuarios::esPasswordValida(string password) {
+bool ManejadorDeUsuarios::esPasswordValida(const string& password) {
 	// TODO: forzar Alfanumerica?
 	return (password.size() >= 8);
 }

@@ -12,8 +12,17 @@ class ManejadorDeUsuariosTest : public ::testing::Test {
 	  passwords = new MapDB();
 	  manejador = new ManejadorDeUsuarios(perfiles, sesiones, passwords);
 	  username = "tobi";
+	  unregisteredUsername = "nombreSinRegistrar";
 	  password = "pancheitor";
-	  perfil = "{\"pablo\": \"santi\"}";	// TODO: cambiar a perfil completo
+	  perfil = "{\n"
+				"\t\"email\" : \"panch@eitor.com.ar\",\n"
+				"\t\"nombre\" : \"Pancheitor\",\n"
+				"\t\"path foto de perfil\" : \"fotos/pancheitor.jpg\",\n"
+				"\t\"ultima ubicacion\" : {\n"
+					"\t \t\"latitud\" : 45.0123,\n"
+					"\t \t\"longitud\" : -37.1293\n"
+				"\t}\n"
+				"}";
 	  manejador->registrarUsuario(username, password, perfil);
   }
 
@@ -28,13 +37,18 @@ class ManejadorDeUsuariosTest : public ::testing::Test {
    }
 
    string username;
+   string unregisteredUsername;
    string password;
    string perfil;
    ManejadorDeUsuarios* manejador;
-   MapDB* perfiles;
-   MapDB* sesiones;
-   MapDB* passwords;
+   BD* perfiles;
+   BD* sesiones;
+   BD* passwords;
 };
+
+TEST_F(ManejadorDeUsuariosTest, previo_testsuite_validacion_datos_testfile) {
+	EXPECT_TRUE(manejador->registrarUsuario(unregisteredUsername, password, perfil));
+}
 
 TEST_F(ManejadorDeUsuariosTest, deberiaValidarLoginDeUsuarioRecienRegistrado) {
 	EXPECT_TRUE(manejador->validarLogin(username, password));
@@ -90,3 +104,42 @@ TEST_F(ManejadorDeUsuariosTest, noDeberiaPermitirCrearUsuarioConPasswordCorta) {
 	string passw = "corta";
 	EXPECT_FALSE(manejador->registrarUsuario(username, passw, perfil));
 }
+
+inline string perfilConNombre(const string& nombre) {
+	return "{ \"nombre\": \"" + nombre + "\"}";
+};
+
+TEST_F(ManejadorDeUsuariosTest, noDeberiaCrearUsuariosConNombresEnPerfilInvalidos) {
+	list<string> invalidos;
+	invalidos.push_back("Ju4n");
+	invalidos.push_back("/");
+	invalidos.push_back("Hola.");
+	invalidos.push_back("á");
+
+	list<string>::const_iterator it = invalidos.cbegin();
+	const list<string>::const_iterator END = invalidos.cend();
+	for (; it != END; it++) {
+		string perfilInvalido = perfilConNombre(*it);
+		EXPECT_FALSE(manejador->registrarUsuario(unregisteredUsername, password, perfilInvalido));
+	}
+}
+
+inline string perfilConEmail(const string& email) {
+	return "{ \"email\": \"" + email + "\"}";
+}
+
+TEST_F(ManejadorDeUsuariosTest, noDeberiaCrearUsuariosConEmailsInvalidos) {
+	list<string> invalidos;
+	invalidos.push_back("con espacio@gmail.com");
+	invalidos.push_back("sindominio.gmail.com");
+	invalidos.push_back("sin.com@mailinator");
+	invalidos.push_back("con_caracter_invÁlido@yahoo.com.ar");
+
+	list<string>::const_iterator it = invalidos.cbegin();
+	const list<string>::const_iterator END = invalidos.cend();
+	for (; it != END; it++) {
+		string perfilInvalido = perfilConEmail(*it);
+		EXPECT_FALSE(manejador->registrarUsuario(unregisteredUsername, password, perfilInvalido));
+	}
+}
+

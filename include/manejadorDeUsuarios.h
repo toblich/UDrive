@@ -6,7 +6,9 @@
 #include <iostream>
 #include <functional>
 #include <unistd.h>
+#include <regex>
 #include "bd.h"
+#include "parserJson.h"
 
 using std::string;
 
@@ -35,9 +37,13 @@ private:
 	BD* passwords;
 	string generarToken(string username, time_t timestamp);
 	bool esCaracterInvalido(char c);
-	bool esPerfilValido(string perfil);
-	bool esUsernameValido(string username);
-	bool esPasswordValida(string password);
+	bool esPerfilValido(const string& perfil);
+	bool esUsernameValido(const string& username);
+	bool esPasswordValida(const string& password);
+
+	const string CHARS_INVALIDOS = "/ ~#?=&";
+	const regex REGEX_NOMBRE = regex("^[ [:alpha:]]+$", std::regex_constants::ECMAScript);	 //TODO: ver si requiere aceptar tildes
+	const regex REGEX_EMAIL = regex("^[-_[:alnum:]]+@[[:alpha:]]+\\.([.[:alpha:]]+)+$");
 };
 
 #endif /* MANEJADORDEUSUARIOS_H_ */
