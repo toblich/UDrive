@@ -244,6 +244,14 @@ bool ManejadorArchivosYMetadatos::actualizarArchivo(std::string username,
 				}
 				std::string pathConFileSystem = this->pathFileSystem + "/" + filepath;
 
+				if ( dbMetadatos->contains(filepath) ){ //Significa que no fui llamado desde el subirArchivo, por lo que la actualizacion se hará ahí
+					string metadatos = dbMetadatos->get(filepath);
+					string nuevosMetadatos = this->actualizarUsuarioFechaModificacion(metadatos, username);
+					dbMetadatos->modify(filepath, nuevosMetadatos);
+//					this->logWarn("Se quiso consultar los metadatos del archivo " + filepath + " pero este no existe.");
+//					return false;
+				}
+
 				ofstream outFile(pathConFileSystem, std::ofstream::binary);
 				outFile.write(data, dataLen);
 				outFile.close();
@@ -301,7 +309,8 @@ bool ManejadorArchivosYMetadatos::agregarPermiso(std::string usernameOrigen,
 		MetadatoArchivo metadato = parser.deserializarMetadatoArchivo(jsonArchivo);
 		metadato.usuariosHabilitados.push_back(usernameDestino);
 		std::string jsonModificado = parser.serializarMetadatoArchivo(metadato);
-		dbMetadatos->modify(filepath,jsonModificado);
+		std::string nuevosMetadatos = this->actualizarUsuarioFechaModificacion(jsonModificado, usernameOrigen);
+		dbMetadatos->modify(filepath, nuevosMetadatos);
 		return true;
 	} else
 		return false;
@@ -326,10 +335,12 @@ bool ManejadorArchivosYMetadatos::eliminarArchivo(std::string username, std::str
 			int result = rename( filepathCompleto.c_str(), pathArchivoPapelera.c_str() );
 			if ( result == 0 ) {
 				this->logInfo("La eliminacion del archivo " + filepath + " fue correcta.");
-				std::string json = this->dbMetadatos->get(filepath);
 				Batch batch;
+				string metadatos = dbMetadatos->get(filepath);
+				string nuevosMetadatos = this->actualizarUsuarioFechaModificacion(metadatos, username);
+				batch.modify(filepath, nuevosMetadatos);
 				batch.erase(filepath);
-				batch.put(pathCompletoPapelera, json);
+				batch.put(pathCompletoPapelera, nuevosMetadatos);
 				// TODO: Tener en cuenta que hay que cambiar en ~permisos
 				if ( this->dbMetadatos->writeBatch(batch) )
 					return true;
