@@ -219,5 +219,4 @@ MetadatosSesion ParserJson::deserializarMetadatoSesion(std::string json){
 }
 
 std::map<std::string, std::string> ParserJson::deserializarMapa(std::string json) {
-	return NULL;
 }
