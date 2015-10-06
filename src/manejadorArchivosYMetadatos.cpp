@@ -92,7 +92,7 @@ bool ManejadorArchivosYMetadatos::eliminar(std::string username, std::string pat
 	std::string pathConFS = this->pathFileSystem + "/" + path;
 	if ( this->verificarPermisos(username, path) ) {
 		if ( this->existeCarpeta(pathConFS) )
-			return this->borrarCarpeta(username, path);
+			return this->eliminarCarpeta(username, path);
 		else
 			return this->eliminarArchivo(username, path);
 	} else
@@ -174,7 +174,7 @@ bool ManejadorArchivosYMetadatos::crearUsuario(std::string username) {
 }
 
 //Borrara todos los archivos de la carpeta y, en caso de que quede vacia, la carpeta fisica del fileSystem tambien
-bool ManejadorArchivosYMetadatos::borrarCarpeta(std::string username, std::string path) {
+bool ManejadorArchivosYMetadatos::eliminarCarpeta(std::string username, std::string path) {
 	std::string pathConFS = this->pathFileSystem + "/" + path;
 	DIR* dir;
 	struct dirent* ent;
@@ -185,7 +185,7 @@ bool ManejadorArchivosYMetadatos::borrarCarpeta(std::string username, std::strin
 			std::string pathInterno = path + "/" + ent->d_name;
 			std::string pathInternoConFS = this->pathFileSystem + "/" + pathInterno;
 			if ( this->existeCarpeta(pathInternoConFS) )
-				this->borrarCarpeta(username, pathInterno);
+				this->eliminarCarpeta(username, pathInterno);
 			else
 				this->eliminarArchivo(username, pathInterno);
 		}
@@ -209,6 +209,7 @@ bool ManejadorArchivosYMetadatos::subirArchivo(std::string username,
 			dbMetadatos->put(filepath, jsonMetadatos);
 			return true;
 		} else
+			// TODO: Versionado
 			return false;
 	} else
 		return false;
@@ -322,6 +323,41 @@ bool ManejadorArchivosYMetadatos::eliminarArchivo(std::string username, std::str
 			return false;
 	} else
 		return false;
+}
+
+std::string ManejadorArchivosYMetadatos::obtenerEstructuraCarpeta(std::string path){
+	std::string pathCompleto = this->pathFileSystem + "/" + path;
+	std::map<std::string, std::string> mapa;
+	DIR* dir;
+	struct dirent* ent;
+	if ( ( dir = opendir(pathCompleto.c_str()) ) != NULL ) {
+		ParserJson parser;
+		while ( (ent = readdir (dir)) != NULL ) {
+			if ( strcmp(ent->d_name, ".") == 0 ) continue;
+			if ( strcmp(ent->d_name, "..") == 0 ) continue;
+			std::string pathInterno = path + "/" + ent->d_name;
+			std::string pathInternoConFS = this->pathFileSystem + "/" + pathInterno;
+			if ( this->existeCarpeta(pathInternoConFS) ){
+				cout << "PathInterno carpeta: "<< pathInterno << endl;
+				std::vector<std::string> directorios = this->parsearDirectorios(pathInterno);
+				int size = directorios.size();
+				std::string foldername = directorios[size-1];
+				mapa.insert(pair<string, string>(foldername, "#folder"));
+			} else { //Es un archivo
+				cout << "PathInterno archivo: "<< pathInterno << endl;
+				std::string jsonMetadatos = this->dbMetadatos->get(pathInterno);
+				MetadatoArchivo metadato = parser.deserializarMetadatoArchivo(jsonMetadatos);
+				mapa.insert(pair<string, string>(metadato.nombre, metadato.extension));
+			}
+		}
+		closedir (dir);
+		std::string json = parser.serializarMapa(mapa);
+		cout << json << endl;
+		return json;
+	} else
+		this->logWarn("No existe el directorio " + path);
+	return "";
+//
 }
 
 std::string ManejadorArchivosYMetadatos::descargarArchivo(std::string username, std::string filepath) {

@@ -1,3 +1,5 @@
+#define private public
+
 #include "manejadorArchivosYMetadatos.h"
 #include "mapDB.h"
 #include <gtest/gtest.h>
@@ -197,7 +199,7 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaVerificarBienQueCarpetaNoEstaVaci
 
 TEST_F(ManejadorArchivosYMetadatosTest, deberiaBorrarBienCarpetaSinArchivosNiCarpetas) {
 	manejador->crearCarpetaSegura("pablo","pablo/como estas/bien");
-	EXPECT_TRUE( manejador->borrarCarpeta("pablo","pablo/como estas/bien") );
+	EXPECT_TRUE( manejador->eliminarCarpeta("pablo","pablo/como estas/bien") );
 }
 
 TEST_F(ManejadorArchivosYMetadatosTest, deberiaBorrarBienCarpetaConArchivosPeroSinCarpetas) {
@@ -207,13 +209,13 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaBorrarBienCarpetaConArchivosPeroS
 	manejador->crearCarpetaSegura("pablo","pablo/como estas/bien");
 	manejador->subirArchivo("pablo", filepath, "hola pablo", 10, "un metadato");
 	manejador->subirArchivo("pablo", filepath2, "hola pablo", 10, "un metadato");
-	EXPECT_TRUE( manejador->borrarCarpeta("pablo","pablo/como estas/bien") );
+	EXPECT_TRUE( manejador->eliminarCarpeta("pablo","pablo/como estas/bien") );
 }
 
 TEST_F(ManejadorArchivosYMetadatosTest, deberiaBorrarBienCarpetaSinArchivosPeroConCarpetas) {
 	manejador->crearUsuario("pablo");
 	manejador->crearCarpetaSegura("pablo","pablo/como estas/bien/vos?");
-	EXPECT_TRUE( manejador->borrarCarpeta("pablo","pablo/como estas") );
+	EXPECT_TRUE( manejador->eliminarCarpeta("pablo","pablo/como estas") );
 }
 
 TEST_F(ManejadorArchivosYMetadatosTest, deberiaBorrarBienCarpetaConArchivosYCarpetas) {
@@ -225,7 +227,7 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaBorrarBienCarpetaConArchivosYCarp
 	manejador->subirArchivo("pablo", filepath, "hola pablo", 10, "un metadato");
 	manejador->subirArchivo("pablo", filepath2, "hola pablo", 10, "un metadato");
 	manejador->subirArchivo("pablo", filepath3, "hola pablo", 10, "un metadato");
-	EXPECT_TRUE( manejador->borrarCarpeta("pablo","pablo/como estas") );
+	EXPECT_TRUE( manejador->eliminarCarpeta("pablo","pablo/como estas") );
 }
 
 TEST_F(ManejadorArchivosYMetadatosTest, deberiaCambiarBienFechaYUsuarioUltimaModificacion) {
