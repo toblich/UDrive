@@ -71,7 +71,6 @@ mg_result Profile::POSTHandler(mg_connection* connection) {
 	string password = getVar(connection, "pass");
 	string profile = getVar(connection, "profile");
 
-	//TODO: falta revisar si hay errores
 	if( manejadorUs->registrarUsuario(username, password, profile) and manejadorAyM->crearUsuario(username)){
 		mg_send_status(connection, CODESTATUS_RESOURCE_CREATED);
 		mg_send_header(connection, contentType.c_str(), jsonType.c_str());

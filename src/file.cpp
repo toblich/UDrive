@@ -58,10 +58,6 @@ mg_result File::PUTHandler(mg_connection* connection) {
 
 	string varFile = "file";
 	datosArch = getMultipartData(connection, varFile);
-	//Esto es temporal, ya que curl no me deja la opcion de -d y --form a la vez
-	//Si despues con python requests se puede vuelvo a como estaba antes
-//	string token = getVar(connection, "token");
-//	string user = getVar(connection, "user");
 	string token = datosArch.token;
 	string user = datosArch.user;
 
@@ -107,7 +103,7 @@ mg_result File::PUTHandler(mg_connection* connection) {
 		string jsonMetadata = parserJson.serializarMetadatoArchivo(metArch);
 
 		if(manejadorArchYMet->subirArchivo(user, filepath, datosArch.fileData, datosArch.dataLength, jsonMetadata)){
-			mg_send_status(connection, CODESTATUS_SUCCES);
+			mg_send_status(connection, CODESTATUS_RESOURCE_CREATED);
 			//mg_send_header(connection, contentType.c_str(), jsonType.c_str());
 			printfData(connection, "{\"success\": \"Se subio el archivo exitosamente\"}");
 		}else{
@@ -125,6 +121,33 @@ mg_result File::PUTHandler(mg_connection* connection) {
 }
 
 mg_result File::DELETEHandler(mg_connection* connection) {
-	//Ver si tambien va DELETE para borrar los archivos.
+	ParserURI parser;
+	string uri = string(connection->uri);
+	vector<string> uris = parser.parsear(uri, '/');
+	string token = getVar(connection, "token");
+	string user = getVar(connection, "user");
+
+	if (manejadorUs->autenticarToken(token, user)){
+		string filepath = "";
+		for (int i = 1; i <= uris.size() - 1; i++){
+			filepath += uris[i];
+			if (i != uris.size() - 1){
+				filepath += "/";
+			}
+		}
+		if (manejadorArchYMet->eliminar(user, filepath)){
+			mg_send_status(connection, CODESTATUS_SUCCES);
+			mg_send_header(connection, contentType.c_str(), jsonType.c_str());
+			printfData(connection, "{\"success\": \"Se elimino el recurso exitosamente\"}");
+		}else{
+			mg_send_status(connection, CODESTATUS_RESOURCE_NOT_FOUND);
+			mg_send_header(connection, contentType.c_str(), jsonType.c_str());
+			printfData(connection, "{\"error\": \"No se encontro el resurso\"}");
+		}
+	}else{
+		mg_send_status(connection, CODESTATUS_UNAUTHORIZED_CLIENT);
+		mg_send_header(connection, contentType.c_str(), jsonType.c_str());
+		printfData(connection, "{\"error\": \"El token no corresponde con la sesion del usuario\"}");
+	}
 	return MG_TRUE;
 }
