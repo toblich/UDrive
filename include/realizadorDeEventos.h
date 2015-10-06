@@ -7,6 +7,7 @@
 #include <stdarg.h>
 #include <list>
 #include <ctime>
+#include "logger.h"
 #include "mongoose.h"
 #include "manejadorDeUsuarios.h"
 #include "manejadorArchivosYMetadatos.h"
@@ -49,6 +50,9 @@ protected:
 	string contentType = "Content-Type";
 	string jsonType = "application/json";
 
+	void logInfo(std::string mensaje);
+	void logWarn(std::string mensaje);
+	void logError(std::string mensaje);
 	size_t printfData(mg_connection* connection, const char* format, ...);
 	bool sendFile(mg_connection* connection, string filePath);
 	DatosArchivo getMultipartData(mg_connection* connection, string variable);
