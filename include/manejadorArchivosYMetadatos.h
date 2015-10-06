@@ -34,6 +34,7 @@ public:
 	bool verificarPathValido(std::string path);
 	bool verificarPermisos(std::string username, std::string path);
 
+	bool eliminar(std::string username, std::string path);
 
 	std::vector<std::string> parsearDirectorios(std::string pathCompleto);
 	bool tamanioCarpeta(std::string path, unsigned long int & size);

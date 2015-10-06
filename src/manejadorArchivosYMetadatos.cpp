@@ -87,6 +87,18 @@ bool ManejadorArchivosYMetadatos::verificarPermisos(std::string username, std::s
 	return false; //Esto no deberia pasar jamás, pero bueno
 }
 
+
+bool ManejadorArchivosYMetadatos::eliminar(std::string username, std::string path) {
+	std::string pathConFS = this->pathFileSystem + "/" + path;
+	if ( this->verificarPermisos(username, path) ) {
+		if ( this->existeCarpeta(pathConFS) )
+			return this->borrarCarpeta(username, path);
+		else
+			return this->eliminarArchivo(username, path);
+	} else
+		return false;
+}
+
 std::vector<std::string> ManejadorArchivosYMetadatos::parsearDirectorios(std::string pathCompleto) {
 	std::vector<std::string> directorios;
 	unsigned int size = pathCompleto.size();
@@ -369,4 +381,3 @@ bool ManejadorArchivosYMetadatos::tamanioCarpeta(std::string path, unsigned long
 bool ManejadorArchivosYMetadatos::deleteFileSystem() {
 	return this->deleteCarpeta(this->pathFileSystem);
 }
-
