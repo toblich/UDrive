@@ -45,6 +45,7 @@ public:
 
 	bool crearUsuario(std::string username);
 	bool crearCarpetaSegura(std::string username, std::string path);
+	std::string obtenerEstructuraCarpeta(std::string path);
 
 	bool eliminar(std::string username, std::string path); //Sirve para carpetas y archivos
 
