@@ -7,8 +7,8 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update  && \
     DEBIAN_FRONTEND=noninteractive apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y g++ g++-4.9 libgflags-dev libsnappy-dev zlib1g-dev libbz2-dev libgtest-dev cmake wget unzip
 
-RUN ls && wget https://github.com/toblich/UDrive/archive/feature/docker.zip && ls && unzip docker.zip && ls
-RUN cd UDrive-feature-docker && chmod +x docker/rocksdb.sh && sync && ./docker/rocksdb.sh 
-RUN cd UDrive-feature-docker && chmod +x docker/gtest.sh && sync && ./docker/gtest.sh 
+RUN ls && wget https://github.com/toblich/UDrive/archive/develop.zip && ls && unzip develop.zip && ls
+RUN cd UDrive-develop && chmod +x docker/rocksdb.sh && sync && ./docker/rocksdb.sh 
+RUN cd UDrive-develop && chmod +x docker/gtest.sh && sync && ./docker/gtest.sh 
 
-CMD echo ------------------------------------------------------------------------------------------------------------------------------------------------------- && cd UDrive-feature-docker && find . -type d  && chmod +x build.sh && sync && ./build.sh -t -x
+CMD echo ------------------------------------------------------------------------------------------------------------------------------------------------------- && cd UDrive-develop && find . -type d  && chmod +x build.sh && sync && ./build.sh -t -x
