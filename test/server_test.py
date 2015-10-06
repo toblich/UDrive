@@ -1,8 +1,11 @@
 import unittest
 import requests
+import json
 from subprocess import Popen
 from time import sleep
-import json
+from shutil import rmtree
+from os.path import exists
+from ast import literal_eval
 
 
 def definirConstantesGlobales():
@@ -17,6 +20,12 @@ def definirConstantesGlobales():
 	
 	global FILE
 	FILE = BASE + "file/"
+
+	global METADATA
+	METADATA = BASE + "metadata/"
+
+	global FOLDER
+	FOLDER = BASE + "folder/"
 
 	global PERFIL 
 	PERFIL = '{ "nombre": "Tobias", "email": "santi@pancho.pablo"}' # TODO: completar
@@ -55,6 +64,8 @@ def registrarYLoguearUser(dictUser):
 class ServerTest(unittest.TestCase):
 	def setUp(self):
 		print
+		if exists("FileSystem"):
+			rmtree("FileSystem")
 		self.serverProcess = Popen(["./udrive", "&"])
 
 
@@ -124,6 +135,7 @@ class ServerTest(unittest.TestCase):
 		s = requests.put(PROFILE + username, data={"nombre": "otroNombre", "email": 'otro@e.mail',
 			"token": token, "latitud" : "0.0", "longitud" : 10.0}) # actualizar perfil
 		self.assertEquals(s.status_code, SUCCESS)
+		
 		t = requests.get(PROFILE + username, data={"token": token})	# obtener nuevo perfil
 		self.assertEquals(t.status_code, SUCCESS)
 		nuevoPerfilObtenido = t.json().get("perfil")
@@ -134,10 +146,8 @@ class ServerTest(unittest.TestCase):
 
 
 	def test_subirBajarYBorrarArchivoTexto(self):
-		# TODO: borrar
 		token = registrarYLoguearUser(USER_SIMPLE)
 		FILENAME = "Makefile"
-		# Popen(["rm", "FileSystem/" + USER_SIMPLE["user"] + "/" + FILENAME])	# elimina el archivo, si llega a existir
 
 		uri = FILE + USER_SIMPLE["user"] + "/" + FILENAME
 		r = requests.put(uri, files={'file': open(FILENAME, 'rb'), "token": token, "user": USER_SIMPLE["user"]})	# lo sube
@@ -146,18 +156,58 @@ class ServerTest(unittest.TestCase):
 		s = requests.get(uri, data={"user": USER_SIMPLE["user"], "token": token})	# lo baja
 		self.assertEquals(s.status_code, SUCCESS)
 
-		contenido = open(FILENAME, 'rb').read()
+		contenido = open(FILENAME, 'rb').read()	# compara el archivo bajado con el original
 		self.assertEquals(s.content, contenido)
 
 		t = requests.delete(uri, data={"user": USER_SIMPLE["user"], "token": token}) # lo borra
 		self.assertEquals(t.status_code, SUCCESS)
 
-		# u = requests.delete(uri, data={"user": USER_SIMPLE["user"], "token": token}) # trata de borrar otra vez
-		# self.assertEquals(t.status_code, NOT_FOUND)
+		u = requests.delete(uri, data={"user": USER_SIMPLE["user"], "token": token}) # trata de borrar otra vez
+		self.assertEquals(u.status_code, NOT_FOUND)
+
+		v = requests.get(uri, data={"user": USER_SIMPLE["user"], "token": token})	# trata de bajarlo
+		self.assertEquals(v.status_code, NOT_FOUND)
 
 
 	def test_obtenerYActualizarMetadatos(self):
-		pass
+		token = registrarYLoguearUser(USER_SIMPLE)
+		FILENAME = "CMakeFiles/2.8.12.2/CMakeSystem.cmake"
+
+		internalUri = USER_SIMPLE["user"] + "/" + FILENAME
+		requests.put(FILE + internalUri, files={'file': open(FILENAME, 'rb'), "token": token, "user": USER_SIMPLE["user"]})	# sube archivo
+
+		r = requests.get(METADATA + internalUri, data={"user": USER_SIMPLE["user"], "token": token})	# consulta metadatos
+		self.assertEquals(r.status_code, SUCCESS)
+
+		metadata = r.json().get("metadatos")
+		self.assertEquals(metadata.get("propietario"), USER_SIMPLE["user"])
+		self.assertEquals(metadata.get("nombre"), "CMakeSystem")
+		self.assertEquals(metadata.get("usuario ultima modificacion"), USER_SIMPLE["user"])
+		self.assertEquals(metadata.get("extension"), "cmake")
+		self.assertEquals(metadata.get("etiquetas"), [])
+		self.assertEquals(metadata.get("usuarios"), [USER_SIMPLE["user"]])
+
+		t = requests.delete(FILE + internalUri, data={"user": USER_SIMPLE["user"], "token": token}) # lo borra
+		self.assertEquals(t.status_code, SUCCESS)
+
+
+	def test_obtenerEstructuraDeCarpeta(self):
+		token = registrarYLoguearUser(USER_SIMPLE)
+		FILENAME = "CMakeFiles/2.8.12.2/CMakeSystem.cmake"
+		BASE_FOLDER = FOLDER + USER_SIMPLE["user"] + "/CMakeFiles/"
+
+		internalUri = USER_SIMPLE["user"] + "/" + FILENAME + "sarasa"
+		requests.put(FILE + internalUri, files={'file': open(FILENAME, 'rb'), "token": token, "user": USER_SIMPLE["user"]})	# sube archivo
+
+		r = requests.put(BASE_FOLDER + "subcarpeta", data={"token": token, "user": USER_SIMPLE["user"]})
+		self.assertEquals(r.status_code, RESOURCE_CREATED)
+
+		s = requests.get(BASE_FOLDER, data={"token": token, "user": USER_SIMPLE["user"]})	#obtiene la estructura de /CMakeFiles
+		self.assertEquals(s.status_code, SUCCESS)
+
+		estructura = literal_eval(s.content)
+		expected = {"estructura" : {"2.8.12.2" : "#folder", "subcarpeta": "#folder"} }
+		self.assertDictEqual(expected, estructura) 
 
 
 
