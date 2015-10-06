@@ -291,6 +291,34 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaTenerCarpetaTamanioIgualASumaDeAr
 	EXPECT_EQ(19, sizeVos);
 }
 
+TEST_F(ManejadorArchivosYMetadatosTest, deberiaEliminarArchivoConMetodoEliminar) {
+	string path = "pablo/archivos";
+	string filepath = "pablo/archivos/saludo.txt";
+	manejador->crearUsuario("pablo");
+	manejador->crearCarpetaSegura("pablo", path);
+	manejador->subirArchivo("pablo", filepath, "hola pablo", 10, "");
+	string filepathCompleto = pathFS + "/" + filepath;
+	manejador->eliminar("pablo", filepath);
+	struct stat buffer;
+	EXPECT_FALSE(stat (filepathCompleto.c_str(), &buffer) == 0); //No existe en el filesystem
+}
+
+TEST_F(ManejadorArchivosYMetadatosTest, deberiaEliminarCarpetaConMetodoEliminar) {
+	string filepath = "pablo/como estas/bien/saludo.txt";
+	string filepath2 = "pablo/como estas/bien/juan";
+	string filepath3 = "pablo/como estas/bien/vos?/juan";
+	manejador->crearUsuario("pablo");
+	manejador->crearCarpetaSegura("pablo","pablo/como estas/bien/vos?");
+	manejador->subirArchivo("pablo", filepath, "hola pablo", 10, "un metadato");
+	manejador->subirArchivo("pablo", filepath2, "hola pablo", 10, "un metadato");
+	manejador->subirArchivo("pablo", filepath3, "hola pablo", 10, "un metadato");
+	manejador->eliminar("pablo", "pablo/como estas");
+
+	string pathCarpetaEliminada = pathFS + "/pablo/como estas";
+	struct stat sb;
+	EXPECT_FALSE(stat(pathCarpetaEliminada.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode));
+}
+
 TEST_F(ManejadorArchivosYMetadatosTest, deberiaBorrarElFileSystem) {
 	struct stat sb;
 	string path = "pablo/hola";
