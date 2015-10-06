@@ -105,6 +105,19 @@ string ParserJson::serializarMetadatoSesion(MetadatosSesion metadato){
 	return serializado;
 }
 
+string ParserJson::serializarMapa(map<string, string>& mapa){
+	Value json;
+
+	map<string, string>::iterator it = mapa.begin();
+	for( ; it != mapa.end(); it++) {
+		json[it->first] = it->second;
+	}
+
+	string serializado = json.toStyledString();
+	return serializado;
+}
+
+
 MetadatoArchivo ParserJson::deserializarMetadatoArchivo(string json) {
 	Value raiz;
 	Features f = Features::strictMode();
@@ -203,4 +216,8 @@ MetadatosSesion ParserJson::deserializarMetadatoSesion(std::string json){
 		logger.loggear(error, WARN);
 	}
 	return metadatos;
+}
+
+std::map<std::string, std::string> ParserJson::deserializarMapa(std::string json) {
+	return NULL;
 }
