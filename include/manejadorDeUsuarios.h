@@ -1,5 +1,5 @@
-#ifndef INCLUDE_MANEJADORDEUSUARIOS_H_
-#define INCLUDE_MANEJADORDEUSUARIOS_H_
+#ifndef MANEJADORDEUSUARIOS_H_
+#define MANEJADORDEUSUARIOS_H_
 
 #include <time.h>
 #include <string>
@@ -28,6 +28,9 @@ public:
 
 	//bool eliminarUsuario();
 
+	string getPerfil(string username);
+	void modifyPerfil(string username, string perfil);
+
 private:
 	BD* perfiles;
 	BD* sesiones;
@@ -43,4 +46,4 @@ private:
 	const regex REGEX_EMAIL = regex("^[-_[:alnum:]]+@[[:alpha:]]+\\.([.[:alpha:]]+)+$");
 };
 
-#endif /* INCLUDE_MANEJADORDEUSUARIOS_H_ */
+#endif /* MANEJADORDEUSUARIOS_H_ */

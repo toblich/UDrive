@@ -33,8 +33,8 @@ string ManejadorDeUsuarios::iniciarSesion(string username) {
 	string token = generarToken(username, timestamp);
 	if (sesiones->put(token, username))	//TODO agregar timestamp en la BD?
 		return token;
-	usleep(1000);	//Vuelve a probar 1 miliseg despues. TODO: revisar si esta bien.
-	iniciarSesion(username);
+	usleep(100000);	//Vuelve a probar 100 miliseg despues
+	return iniciarSesion(username);
 }
 
 bool ManejadorDeUsuarios::autenticarToken(string token, string username) {
@@ -54,9 +54,9 @@ bool ManejadorDeUsuarios::cerrarSesion(string token, string username) {
 }
 
 string ManejadorDeUsuarios::generarToken(string username, time_t timestamp) {
-	string time = to_string(timestamp);
+	string timeAsString = to_string(timestamp);
 	hash<string> funcionHash;
-	return to_string(funcionHash(username + time));
+	return to_string(funcionHash(username + timeAsString));
 }
 
 bool ManejadorDeUsuarios::esPerfilValido(const string& perfilJson) {
@@ -80,4 +80,20 @@ bool ManejadorDeUsuarios::esCaracterInvalido(char c) {
 bool ManejadorDeUsuarios::esPasswordValida(const string& password) {
 	// TODO: forzar Alfanumerica?
 	return (password.size() >= 8);
+}
+
+string ManejadorDeUsuarios::getPerfil(string username) {
+	if (perfiles->contains(username)){
+		return perfiles->get(username);
+	} else {
+		return string();
+	}
+}
+
+void ManejadorDeUsuarios::modifyPerfil(string username, string perfil){
+	if (perfiles->contains(username)){
+		perfiles->modify(username, perfil);
+	}else {
+		perfiles->put(username, perfil);
+	}
 }

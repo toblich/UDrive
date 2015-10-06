@@ -74,8 +74,11 @@ TEST(ParserJsonTest, deberiaDeserializarBienEtiquetasCorrectasMetadatoArchivo){
 	int i = 0;
 	for ( ; itEtiq != etiq.end() ; itEtiq++, i++){
 		if (i==0) EXPECT_EQ("23", (*itEtiq));
-		if (i==1) EXPECT_EQ("true", (*itEtiq));
-		if (i==2) EXPECT_EQ("juan", (*itEtiq));
+		else {
+			if (i==1) EXPECT_EQ("true", (*itEtiq));
+			else if (i==2) EXPECT_EQ("juan", (*itEtiq));
+				else EXPECT_TRUE(false); //Rompo
+		}
 	}
 }
 
@@ -244,4 +247,18 @@ TEST(ParserJsonTest, deberiaObtenerLoMismoAlSerializarYDeserializarMetadatoSesio
 	EXPECT_EQ(original.username, deserializado.username);
 	EXPECT_EQ(original.password, deserializado.password);
 	EXPECT_EQ(original.token, deserializado.token);
+}
+
+TEST(ParserJsonTest, deberiaObtenerLoMismoAlSerializarYDeserializarMapa){
+	map<string, string> original;
+	original.insert(pair<string, string>("chau", "como estas"));
+	original.insert(pair<string, string>("hola", "pepe"));
+	original.insert(pair<string, string>("juan", "cito"));
+	ParserJson parser;
+	string json = parser.serializarMapa(original);
+	map<string, string> deserializado = parser.deserializarMapa(json);
+
+	EXPECT_EQ(original.at("chau"), deserializado.at("chau"));
+	EXPECT_EQ(original.at("hola"), deserializado.at("hola"));
+	EXPECT_EQ(original.at("juan"), deserializado.at("juan"));
 }

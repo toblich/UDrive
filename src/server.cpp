@@ -2,131 +2,108 @@
 
 using namespace std;
 
-Server::Server(std::string listeningPort, BD* perfiles, BD* sesiones, BD* passwords) {
-	server = mg_create_server(NULL, Server::eventHandler);
+Server::Server(string listeningPort, BD* perfiles, BD* sesiones, BD* passwords, BD* metadatos) {
+	//Server
+	server = mg_create_server((void *) this, Server::mgEventHandler);
 	mg_set_option(server, "listening_port", listeningPort.c_str());
 	mg_set_option(server, "document_root", ".");
+	running = true;
 
+	//BD
 	this->perfiles = perfiles;
 	this->sesiones = sesiones;
 	this->passwords = passwords;
+	this->metadatos = metadatos;
 
-	manejador = new ManejadorDeUsuarios(perfiles, sesiones, passwords);
+	//Manejadores
+	manejadorUsuarios = new ManejadorDeUsuarios(perfiles, sesiones, passwords);
+	manejadorAYM = new ManejadorArchivosYMetadatos(metadatos);
+
+	//API REST
+	mapaURI.insert(pair<string,RealizadorDeEventos*>("profile", new Profile(manejadorUsuarios, manejadorAYM)));
+	mapaURI.insert(pair<string,RealizadorDeEventos*>("session", new Session(manejadorUsuarios)));
+	mapaURI.insert(pair<string,RealizadorDeEventos*>("file", new File(manejadorUsuarios, manejadorAYM)));
+	mapaURI.insert(pair<string,RealizadorDeEventos*>("metadata", new Metadata(manejadorUsuarios, manejadorAYM)));
+	mapaURI.insert(pair<string,RealizadorDeEventos*>("folder", new Folder(manejadorUsuarios, manejadorAYM)));
 }
 
 Server::~Server() {
+	//Server
 	mg_destroy_server(&server);
-	delete manejador;
+
 	//TODO: Sacar estas instrucciones para que despues persistan los datos.
 	perfiles->deleteBD(); //
 	sesiones->deleteBD(); //
 	passwords->deleteBD(); //
+	metadatos->deleteBD(); //
+	//BD
 	delete perfiles;
 	delete sesiones;
 	delete passwords;
+	delete metadatos;
+
+	//Manejadores
+	delete manejadorUsuarios;
+	delete manejadorAYM;
+
+	//API REST
+	delete mapaURI.at("profile");
+	delete mapaURI.at("session");
+	delete mapaURI.at("file");
+	delete mapaURI.at("metadata");
+	delete mapaURI.at("folder");
 }
 
-int Server::eventHandler(mg_connection* connection, mg_event event) {
+int Server::mgEventHandler(mg_connection* connection, mg_event event) {
+	Server* _server = (Server*) connection->server_param;
+	return _server->eventHandler(connection, event);
+}
+
+mg_result Server::eventHandler(mg_connection* connection, mg_event event) {
 	switch (event) {
 
-		case MG_AUTH:
-			cout << "entro en auth" << endl;
-			return MG_TRUE;
+		case MG_AUTH: return MG_TRUE;
 
-		case MG_REQUEST:
-			cout << "entro en request" << endl;
-			return requestHandler(connection);
+		case MG_REQUEST: return requestHandler(connection);
 
-		case MG_CLOSE:
-			cout << "entro en close" << endl;
-			closeHandler(connection);
-			return MG_TRUE;
+		case MG_CLOSE: return closeHandler(connection);
 
 		default: return MG_FALSE;
 	}
 }
 
-void Server::closeHandler(mg_connection* connection){
+mg_result Server::closeHandler(mg_connection* connection){
 	if(connection){
 		free(connection->connection_param);
 		connection->connection_param = NULL;
 	}
+	return MG_TRUE;
 }
 
 void Server::pollServer(int milliseconds) {
 	mg_poll_server(server, milliseconds);
 }
 
-string Server::mensajeSegunURI(string uri) {
-	if (uri == "/")
-		return "Root";
-	if (uri == "/santi")
-		return "Roro";
-	else return "Te equivocaste MUAJAJAJAJA";
-}
+mg_result Server::requestHandler(mg_connection* connection) {
+	ParserURI parser;
+	string uri = string(connection->uri);
+	vector<string> uris = parser.parsear(uri, '/');
 
-enum mg_result Server::requestHandler(mg_connection* connection) {
-	string verb = string(connection->request_method);
-	if (verb == "GET"){
-		return GETHandler(connection);
-	}
-	else if (verb == "POST"){
-		return POSTHandler(connection);
-	}
-	else if (verb == "PUT"){
-		return PUTHandler(connection);
-	}
-	else if (verb == "DELETE"){
-		return DELETEHandler(connection);
-	}
-	else{
-		cout << "WTF? No existe este verbo: " << verb << endl;
-		return MG_TRUE;
-	}
-}
+	if (uris.size() > 0){
+		if (uris[0] == "close"){
+			running = false;
+			mg_printf_data(connection, "Se cerro el servidor\n");
+			return MG_TRUE;
+		}
+		try {
+			RealizadorDeEventos* evento = mapaURI.at(uris[0]);
+			return evento->handler(connection);
 
-enum mg_result Server::GETHandler(mg_connection* connection) {
-	string uri(connection->uri);
-	if (uri == "/archivo"){
-		mg_send_file(connection, "compilar.sh", NULL);
-		return MG_MORE;
-	}else{
-		mg_printf_data(connection, "Hola!: [%s]\n", Server::mensajeSegunURI(uri).c_str());
-		return MG_TRUE;
+		}catch (const out_of_range& oor){
+			mg_printf_data(connection, "Error, recurso no encontrado\n");
+			return MG_TRUE;
+		}
 	}
-}
-
-enum mg_result Server::PUTHandler(mg_connection* connection) {
-	//Recibe un archivo de texto
-	string uri(connection->uri);
-	string filename = uri.substr(1, uri.length()-1); // Supone que no hay carpetas
-	ofstream outFile(filename.data(), std::ofstream::binary);
-	outFile.write(connection->content, connection->content_len);
-	outFile.close();
-	mg_printf_data(connection, "PUT [%s]\n", Server::mensajeSegunURI(uri).c_str());
-	return MG_TRUE;
-}
-
-enum mg_result Server::POSTHandler(mg_connection* connection) {
-	//Recibe un archivo binario
-	string uri(connection->uri);
-	const char *data;
-	int data_len, n1, n2;
-	char var_name[100], file_name[100];
-	n1 = n2 = 0;
-	while ((n2 = mg_parse_multipart(connection->content + n1, connection->content_len - n1,
-							  var_name, sizeof(var_name), file_name, sizeof(file_name), &data, &data_len)) > 0) {
-		mg_printf_data(connection, "var: %s, file_name: %s, size: %d bytes<br>\n", var_name, file_name, data_len);
-		n1 += n2;
-	}
-	ofstream outFile(file_name, std::ofstream::binary);
-	outFile.write(data, data_len);
-	outFile.close();
-	return MG_TRUE;
-}
-
-enum mg_result Server::DELETEHandler(mg_connection* connection) {
-	string uri(connection->uri);
-	mg_printf_data(connection, "DELETE [%s]\n", Server::mensajeSegunURI(uri).c_str());
+	mg_printf_data(connection, "Error, URI incorrecta\n");
 	return MG_TRUE;
 }

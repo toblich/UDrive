@@ -105,6 +105,19 @@ string ParserJson::serializarMetadatoSesion(MetadatosSesion metadato){
 	return serializado;
 }
 
+string ParserJson::serializarMapa(map<string, string>& mapa){
+	Value json;
+
+	map<string, string>::iterator it = mapa.begin();
+	for( ; it != mapa.end(); it++) {
+		json[it->first] = it->second;
+	}
+
+	string serializado = json.toStyledString();
+	return serializado;
+}
+
+
 MetadatoArchivo ParserJson::deserializarMetadatoArchivo(string json) {
 	Value raiz;
 	Features f = Features::strictMode();
@@ -140,7 +153,7 @@ MetadatoArchivo ParserJson::deserializarMetadatoArchivo(string json) {
 			unsigned int size = usu.size();
 			for (unsigned int i=0; i < size; i++){
 				// No veo que sean un tipo en especial porque podrian ser cualquier
-				// cosa las etiquetas (mismo numeros).
+				// cosa los usernames (mismo numeros).
 				usuarios.push_back(usu[i].asString());
 			}
 		} else {
@@ -203,4 +216,26 @@ MetadatosSesion ParserJson::deserializarMetadatoSesion(std::string json){
 		logger.loggear(error, WARN);
 	}
 	return metadatos;
+}
+
+std::map<std::string, std::string> ParserJson::deserializarMapa(std::string json) {
+	Value raiz;
+	Features f = Features::strictMode();
+	Reader reader(f);
+	map<string, string> mapa;
+	bool parseadoExitoso = reader.parse(json, raiz);
+	if (parseadoExitoso){
+		if( raiz.size() > 0 ) {
+	        for( Json::ValueIterator itr = raiz.begin() ; itr != raiz.end() ; itr++ ) {
+	        	string key = itr.key().asString();
+	        	string value = (*itr).asString();
+	        	mapa.insert(pair<string, string>(key, value));
+	        }
+	    }
+	} else {
+		Logger logger;
+		string error = "Fallo el parseo de un Json metadato de mapa.";
+		logger.loggear(error, WARN);
+	}
+	return mapa;
 }
