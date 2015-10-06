@@ -363,7 +363,7 @@ std::string ManejadorArchivosYMetadatos::obtenerEstructuraCarpeta(std::string pa
 				std::string foldername = directorios[size-1];
 				mapa.insert(pair<string, string>(foldername, "#folder"));
 			} else { //Es un archivo
-				if ( not dbMetadatos->contains(path) ){
+				if ( not dbMetadatos->contains(pathInterno) ){
 					this->logWarn("Se quiso obtener los metadatos del archivo " + path + " pero este no existe.");
 					return "";
 				}
