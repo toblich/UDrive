@@ -24,6 +24,7 @@ Server::Server(string listeningPort, BD* perfiles, BD* sesiones, BD* passwords, 
 	mapaURI.insert(pair<string,RealizadorDeEventos*>("session", new Session(manejadorUsuarios)));
 	mapaURI.insert(pair<string,RealizadorDeEventos*>("file", new File(manejadorUsuarios, manejadorAYM)));
 	mapaURI.insert(pair<string,RealizadorDeEventos*>("metadata", new Metadata(manejadorUsuarios, manejadorAYM)));
+	mapaURI.insert(pair<string,RealizadorDeEventos*>("folder", new Folder(manejadorUsuarios, manejadorAYM)));
 }
 
 Server::~Server() {
@@ -50,6 +51,7 @@ Server::~Server() {
 	delete mapaURI.at("session");
 	delete mapaURI.at("file");
 	delete mapaURI.at("metadata");
+	delete mapaURI.at("folder");
 }
 
 int Server::mgEventHandler(mg_connection* connection, mg_event event) {

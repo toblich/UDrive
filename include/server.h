@@ -11,6 +11,7 @@
 #include "profile.h"
 #include "session.h"
 #include "metadata.h"
+#include "folder.h"
 #include "file.h"
 #include "mongoose.h"
 #include "bd.h"
