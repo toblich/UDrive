@@ -12,7 +12,7 @@ mg_result Session::POSTHandler(mg_connection* connection) {
 
 	if(manejadorUs->validarLogin(user, pass)){
 		string token = manejadorUs->iniciarSesion(user);
-		mg_send_status(connection, CODESTATUS_SUCCES);
+		mg_send_status(connection, CODESTATUS_RESOURCE_CREATED);
 		mg_send_header(connection, contentType.c_str(), jsonType.c_str());
 		printfData(connection, "{\"token\": \"%s\"}", token.c_str());
 	}else{
