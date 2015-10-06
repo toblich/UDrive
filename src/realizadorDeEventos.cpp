@@ -1,12 +1,22 @@
 #include "realizadorDeEventos.h"
 
-RealizadorDeEventos::RealizadorDeEventos() {
-	// TODO Auto-generated constructor stub
+RealizadorDeEventos::RealizadorDeEventos() { }
 
+RealizadorDeEventos::~RealizadorDeEventos() { }
+
+void RealizadorDeEventos::logInfo(std::string mensaje) {
+	Logger logger;
+	logger.loggear(mensaje,INFO);
 }
 
-RealizadorDeEventos::~RealizadorDeEventos() {
-	// TODO Auto-generated destructor stub
+void RealizadorDeEventos::logWarn(std::string mensaje) {
+	Logger logger;
+	logger.loggear(mensaje,WARN);
+}
+
+void RealizadorDeEventos::logError(std::string mensaje) {
+	Logger logger;
+	logger.loggear(mensaje,ERROR);
 }
 
 size_t RealizadorDeEventos::printfData(mg_connection* connection, const char* format, ...) {
@@ -105,6 +115,7 @@ mg_result RealizadorDeEventos::DELETEHandler(mg_connection* connection) {
 }
 
 void RealizadorDeEventos::unsupportedMethod(mg_connection* connection) {
+	logWarn("El método al que se intentó acceder no está permitido por ésta clase.");
 	mg_send_status(connection, CODESTATUS_UNSUPPORTED_METHOD);
 	mg_send_header(connection, contentType.c_str(), jsonType.c_str());
 	printfData(connection, "{\"error\": \"metodo no soportado por esta clase\"}");

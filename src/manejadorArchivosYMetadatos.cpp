@@ -204,6 +204,10 @@ bool ManejadorArchivosYMetadatos::subirArchivo(std::string username,
 	if ( verificarPermisos(username, filepath) ) {
 		std::string filepathCompleto = this->pathFileSystem + "/" + filepath;
 		if ( not this->existeArchivo(filepathCompleto) ) {
+			if ( dbMetadatos->contains(filepath) ){
+				this->logWarn("Se quiso subir el archivo " + filepath + " pero este ya existe. Debe utilizar el metodo actualizarArchivo.");
+				return false;
+			}
 			if ( not this->actualizarArchivo(username, filepath, data, dataLen) )
 				return false;
 			dbMetadatos->put(filepath, jsonMetadatos);
@@ -240,6 +244,14 @@ bool ManejadorArchivosYMetadatos::actualizarArchivo(std::string username,
 				}
 				std::string pathConFileSystem = this->pathFileSystem + "/" + filepath;
 
+				if ( dbMetadatos->contains(filepath) ){ //Significa que no fui llamado desde el subirArchivo, por lo que la actualizacion se hará ahí
+					string metadatos = dbMetadatos->get(filepath);
+					string nuevosMetadatos = this->actualizarUsuarioFechaModificacion(metadatos, username);
+					dbMetadatos->modify(filepath, nuevosMetadatos);
+//					this->logWarn("Se quiso consultar los metadatos del archivo " + filepath + " pero este no existe.");
+//					return false;
+				}
+
 				ofstream outFile(pathConFileSystem, std::ofstream::binary);
 				outFile.write(data, dataLen);
 				outFile.close();
@@ -259,6 +271,10 @@ bool ManejadorArchivosYMetadatos::actualizarArchivo(std::string username,
 // TODO: Ver si lanzar una excepcion mas especifica del tipo Metadato no encontrado
 std::string ManejadorArchivosYMetadatos::consultarMetadatosArchivo(std::string username, std::string filepath) {
 	if ( verificarPermisos(username, filepath) ) {
+		if ( not dbMetadatos->contains(filepath) ){
+			this->logWarn("Se quiso consultar los metadatos del archivo " + filepath + " pero este no existe.");
+			return "";
+		}
 		return dbMetadatos->get(filepath);
 	}
 	return "";
@@ -269,6 +285,10 @@ std::string ManejadorArchivosYMetadatos::consultarMetadatosArchivo(std::string u
 bool ManejadorArchivosYMetadatos::actualizarMetadatos(std::string username,
 		std::string filepath, std::string nuevosMetadatos) {
 	if ( verificarPermisos(username, filepath) ) {
+		if ( not dbMetadatos->contains(filepath) ){
+			this->logWarn("Se quiso actualizar los metadatos del archivo " + filepath + " pero este no existe.");
+			return false;
+		}
 		dbMetadatos->modify(filepath, nuevosMetadatos);
 		return true;
 	} else
@@ -280,12 +300,17 @@ bool ManejadorArchivosYMetadatos::agregarPermiso(std::string usernameOrigen,
 		std::string filepath, std::string usernameDestino) {
 	if ( verificarPermisos(usernameOrigen, filepath) ) {
 		//TODO Falta agregar el hecho de agregar al archivo de permisos que esta descripto en el issue
+		if ( not dbMetadatos->contains(filepath) ){
+			this->logWarn("Se quiso agregar un permiso al archivo " + filepath + " pero este no existe.");
+			return false;
+		}
 		std::string jsonArchivo = dbMetadatos->get(filepath);
 		ParserJson parser;
 		MetadatoArchivo metadato = parser.deserializarMetadatoArchivo(jsonArchivo);
 		metadato.usuariosHabilitados.push_back(usernameDestino);
 		std::string jsonModificado = parser.serializarMetadatoArchivo(metadato);
-		dbMetadatos->modify(filepath,jsonModificado);
+		std::string nuevosMetadatos = this->actualizarUsuarioFechaModificacion(jsonModificado, usernameOrigen);
+		dbMetadatos->modify(filepath, nuevosMetadatos);
 		return true;
 	} else
 		return false;
@@ -297,6 +322,10 @@ bool ManejadorArchivosYMetadatos::eliminarArchivo(std::string username, std::str
 	if ( verificarPermisos(username, filepath) ) {
 		std::string filepathCompleto = this->pathFileSystem + "/" + filepath;
 		if ( this->existeArchivo(filepathCompleto) ) {
+			if ( not dbMetadatos->contains(filepath) ){
+				this->logWarn("Se quiso eliminar el archivo " + filepath + " pero este no existe en la base de datos.");
+				return false;
+			}
 			std::vector<std::string> directorios = parsearDirectorios(filepath);
 			int size = directorios.size();
 			std::string filename = directorios[size-1];
@@ -306,10 +335,12 @@ bool ManejadorArchivosYMetadatos::eliminarArchivo(std::string username, std::str
 			int result = rename( filepathCompleto.c_str(), pathArchivoPapelera.c_str() );
 			if ( result == 0 ) {
 				this->logInfo("La eliminacion del archivo " + filepath + " fue correcta.");
-				std::string json = this->dbMetadatos->get(filepath);
 				Batch batch;
+				string metadatos = dbMetadatos->get(filepath);
+				string nuevosMetadatos = this->actualizarUsuarioFechaModificacion(metadatos, username);
+				batch.modify(filepath, nuevosMetadatos);
 				batch.erase(filepath);
-				batch.put(pathCompletoPapelera, json);
+				batch.put(pathCompletoPapelera, nuevosMetadatos);
 				// TODO: Tener en cuenta que hay que cambiar en ~permisos
 				if ( this->dbMetadatos->writeBatch(batch) )
 					return true;
@@ -338,16 +369,21 @@ std::string ManejadorArchivosYMetadatos::obtenerEstructuraCarpeta(std::string pa
 			std::string pathInterno = path + "/" + ent->d_name;
 			std::string pathInternoConFS = this->pathFileSystem + "/" + pathInterno;
 			if ( this->existeCarpeta(pathInternoConFS) ){
-				cout << "PathInterno carpeta: "<< pathInterno << endl;
 				std::vector<std::string> directorios = this->parsearDirectorios(pathInterno);
 				int size = directorios.size();
 				std::string foldername = directorios[size-1];
 				mapa.insert(pair<string, string>(foldername, "#folder"));
 			} else { //Es un archivo
-				cout << "PathInterno archivo: "<< pathInterno << endl;
+				if ( not dbMetadatos->contains(pathInterno) ){
+					this->logWarn("Se quiso obtener los metadatos del archivo " + path + " pero este no existe.");
+					return "";
+				}
 				std::string jsonMetadatos = this->dbMetadatos->get(pathInterno);
 				MetadatoArchivo metadato = parser.deserializarMetadatoArchivo(jsonMetadatos);
-				mapa.insert(pair<string, string>(metadato.nombre, metadato.extension));
+				string nombre = metadato.nombre;
+				if ( metadato.extension != "none" )
+					nombre += "." + metadato.extension;
+				mapa.insert(pair<string, string>(nombre, metadato.extension));
 			}
 		}
 		closedir (dir);

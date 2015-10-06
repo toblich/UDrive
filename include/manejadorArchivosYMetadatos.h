@@ -52,7 +52,7 @@ public:
 
 	bool subirArchivo(std::string username, std::string filepath, const char* data, int dataLen, std::string jsonMetadatos);
 	std::string consultarMetadatosArchivo(std::string username, std::string filename);
-	bool actualizarMetadatos(std::string username, std::string filepath, std::string nuevosMetadatos);
+	bool actualizarMetadatos(std::string username, std::string filepath, std::string nuevosMetadatos); //TODO fecha modificacion
 	bool actualizarArchivo(std::string username, std::string filepath, const char* data, int dataLen);
 	std::string descargarArchivo(std::string username, std::string filepath);
 	bool agregarPermiso(std::string usernameOrigen, std::string filepath, std::string usernameDestino);

@@ -219,4 +219,23 @@ MetadatosSesion ParserJson::deserializarMetadatoSesion(std::string json){
 }
 
 std::map<std::string, std::string> ParserJson::deserializarMapa(std::string json) {
+	Value raiz;
+	Features f = Features::strictMode();
+	Reader reader(f);
+	map<string, string> mapa;
+	bool parseadoExitoso = reader.parse(json, raiz);
+	if (parseadoExitoso){
+		if( raiz.size() > 0 ) {
+	        for( Json::ValueIterator itr = raiz.begin() ; itr != raiz.end() ; itr++ ) {
+	        	string key = itr.key().asString();
+	        	string value = (*itr).asString();
+	        	mapa.insert(pair<string, string>(key, value));
+	        }
+	    }
+	} else {
+		Logger logger;
+		string error = "Fallo el parseo de un Json metadato de mapa.";
+		logger.loggear(error, WARN);
+	}
+	return mapa;
 }
