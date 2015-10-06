@@ -2,40 +2,54 @@
 
 using namespace std;
 
-Server::Server(std::string listeningPort, BD* perfiles, BD* sesiones, BD* passwords, BD* metadatos) {
+Server::Server(string listeningPort, BD* perfiles, BD* sesiones, BD* passwords, BD* metadatos) {
+	//Server
 	server = mg_create_server((void *) this, Server::mgEventHandler);
 	mg_set_option(server, "listening_port", listeningPort.c_str());
 	mg_set_option(server, "document_root", ".");
+	running = true;
 
+	//BD
 	this->perfiles = perfiles;
 	this->sesiones = sesiones;
 	this->passwords = passwords;
 	this->metadatos = metadatos;
 
+	//Manejadores
 	manejadorUsuarios = new ManejadorDeUsuarios(perfiles, sesiones, passwords);
 	manejadorAYM = new ManejadorArchivosYMetadatos(metadatos);
 
-	running = true;
-
-	mapaURI.insert(std::pair<string,RealizadorDeEventos*>("profile", new Profile(manejadorUsuarios, manejadorAYM)));
-	mapaURI.insert(std::pair<string,RealizadorDeEventos*>("session", new Session(manejadorUsuarios)));
-	mapaURI.insert(std::pair<string,RealizadorDeEventos*>("file", new File(manejadorUsuarios, manejadorAYM)));
+	//API REST
+	mapaURI.insert(pair<string,RealizadorDeEventos*>("profile", new Profile(manejadorUsuarios, manejadorAYM)));
+	mapaURI.insert(pair<string,RealizadorDeEventos*>("session", new Session(manejadorUsuarios)));
+	mapaURI.insert(pair<string,RealizadorDeEventos*>("file", new File(manejadorUsuarios, manejadorAYM)));
+	mapaURI.insert(pair<string,RealizadorDeEventos*>("metadata", new Metadata(manejadorUsuarios, manejadorAYM)));
 }
 
 Server::~Server() {
+	//Server
 	mg_destroy_server(&server);
-	delete manejadorUsuarios;
-	delete manejadorAYM;
+
 	//TODO: Sacar estas instrucciones para que despues persistan los datos.
-	//TODO: Acordarse de iterar por el map para borrar las tres clases
 	perfiles->deleteBD(); //
 	sesiones->deleteBD(); //
 	passwords->deleteBD(); //
 	metadatos->deleteBD(); //
+	//BD
 	delete perfiles;
 	delete sesiones;
 	delete passwords;
 	delete metadatos;
+
+	//Manejadores
+	delete manejadorUsuarios;
+	delete manejadorAYM;
+
+	//API REST
+	delete mapaURI.at("profile");
+	delete mapaURI.at("session");
+	delete mapaURI.at("file");
+	delete mapaURI.at("metadata");
 }
 
 int Server::mgEventHandler(mg_connection* connection, mg_event event) {
@@ -71,15 +85,23 @@ void Server::pollServer(int milliseconds) {
 mg_result Server::requestHandler(mg_connection* connection) {
 	ParserURI parser;
 	string uri = string(connection->uri);
-	vector<string> uris = parser.parsear(uri);
+	vector<string> uris = parser.parsear(uri, '/');
 
-	if (uris[0] == "close"){
-		running = false;
-		mg_printf_data(connection, "Se cerro el servidor\n");
-		return MG_TRUE;
+	if (uris.size() > 0){
+		if (uris[0] == "close"){
+			running = false;
+			mg_printf_data(connection, "Se cerro el servidor\n");
+			return MG_TRUE;
+		}
+		try {
+			RealizadorDeEventos* evento = mapaURI.at(uris[0]);
+			return evento->handler(connection);
+
+		}catch (const out_of_range& oor){
+			mg_printf_data(connection, "Error, recurso no encontrado\n");
+			return MG_TRUE;
+		}
 	}
-
-	RealizadorDeEventos* evento = mapaURI.at(uris[0]);
-
-	return evento->handler(connection);
+	mg_printf_data(connection, "Error, URI incorrecta\n");
+	return MG_TRUE;
 }

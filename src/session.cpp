@@ -4,9 +4,7 @@ Session::Session(ManejadorDeUsuarios* manejadorUsuarios) {
 	this->manejadorUs = manejadorUsuarios;
 }
 
-Session::~Session() {
-	// TODO Auto-generated destructor stub
-}
+Session::~Session() { }
 
 mg_result Session::POSTHandler(mg_connection* connection) {
 	string user = getVar(connection, "user");
@@ -29,7 +27,7 @@ mg_result Session::POSTHandler(mg_connection* connection) {
 mg_result Session::DELETEHandler(mg_connection* connection) {
 	ParserURI parser;
 	string uri = string(connection->uri);
-	vector<string> uris = parser.parsear(uri);
+	vector<string> uris = parser.parsear(uri, '/');
 	string username = getVar(connection, "user");
 
 	if (manejadorUs->cerrarSesion(uris[1],username)){

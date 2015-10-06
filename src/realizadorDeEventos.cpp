@@ -34,20 +34,24 @@ float RealizadorDeEventos::getVarFloat(mg_connection* connection, string varName
 	return stof(getVar(connection, varName));
 }
 
-RealizadorDeEventos::DatosArchivo RealizadorDeEventos::getMultipartData(mg_connection* connection){
+RealizadorDeEventos::DatosArchivo RealizadorDeEventos::getMultipartData(mg_connection* connection, string variable){
 	DatosArchivo datosArch;
 	const char* data;
 	char varName[100], fileName[100];
-	int dataLenght, n1 = 0, n2 = 0;
+	int dataLength, n1 = 0, n2 = 0;
 
 	while ((n2 = mg_parse_multipart(connection->content + n1, connection->content_len - n1,
-			varName, sizeof(varName), fileName, sizeof(fileName), &data, &dataLenght)) > 0) {
-		//mg_printf_data(connection, "var: %s, file_name: %s\n", varName, fileName);
+			varName, sizeof(varName), fileName, sizeof(fileName), &data, &dataLength)) > 0) {
 		n1 += n2;
+		string varNameStr = string(varName);
+		if (varNameStr == variable){
+			datosArch.fileData = data;
+			datosArch.dataLength = dataLength;
+			datosArch.fileName = string(fileName);
+		}
+		if (string(varName) == "user") datosArch.user = string(data, dataLength);
+		if (string(varName) == "token") datosArch.token = string(data, dataLength);
 	}
-
-	datosArch.fileData = data;
-	datosArch.dataLenght = dataLenght;
 
 	return datosArch;
 }

@@ -7,10 +7,11 @@
 #include <sys/stat.h>
 #include "bd.h"
 #include "logger.h"
-
+#include <dirent.h>
 
 const std::string defaultFileSystem = "FileSystem";
 const std::string trash = "#trash";
+const unsigned long int CUOTA = 2147483648; // 2GB
 
 class ManejadorArchivosYMetadatos {
 
@@ -21,20 +22,29 @@ private:
 	void logInfo(std::string mensaje);
 	void logWarn(std::string mensaje);
 	void logError(std::string mensaje);
+	bool existeArchivo(std::string filepath);
+	bool existeCarpeta(std::string path);
+	bool deleteCarpeta(std::string path);
 
 public:
 	ManejadorArchivosYMetadatos(BD* dbMetadatos);
 	ManejadorArchivosYMetadatos(BD* dbMetadatos, std::string path);
 	virtual ~ManejadorArchivosYMetadatos();
 
+
 	bool verificarPathValido(std::string path);
 	bool verificarPermisos(std::string username, std::string path);
 
+
 	std::vector<std::string> parsearDirectorios(std::string pathCompleto);
+	bool tamanioCarpeta(std::string path, unsigned long int & size);
+	bool carpetaVacia(std::string path);
 	bool crearUsuario(std::string username);
 	bool crearCarpeta(std::string username, std::string path);
 	bool crearCarpetaSegura(std::string username, std::string path);
+	bool borrarCarpeta(std::string username, std::string path);
 
+	std::string actualizarUsuarioFechaModificacion(std::string jsonMetadatos, std::string usernameModificacion);
 	bool subirArchivo(std::string username, std::string filepath, const char* data, int dataLen, std::string jsonMetadatos);
 	std::string consultarMetadatosArchivo(std::string username, std::string filename);
 	bool eliminarArchivo(std::string username, std::string filepath);

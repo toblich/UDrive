@@ -10,7 +10,7 @@ Profile::~Profile() { }
 mg_result Profile::GETHandler(mg_connection* connection) {
 	ParserURI parser;
 	string uri = string(connection->uri);
-	vector<string> uris = parser.parsear(uri);
+	vector<string> uris = parser.parsear(uri, '/');
 	string token = getVar(connection, "token");
 
 	if (manejadorUs->autenticarToken(token, uris[1])){
@@ -40,7 +40,7 @@ mg_result Profile::PUTHandler(mg_connection* connection) {
 	MetadatoUsuario nuevoPerfil;
 
 	string uri = string(connection->uri);
-	vector<string> uris = parserURI.parsear(uri);
+	vector<string> uris = parserURI.parsear(uri, '/');
 
 	string token = getVar(connection, "token");
 	nuevoPerfil.nombre = getVar(connection, "nombre");
