@@ -92,7 +92,7 @@ bool ManejadorArchivosYMetadatos::eliminar(std::string username, std::string pat
 	std::string pathConFS = this->pathFileSystem + "/" + path;
 	if ( this->verificarPermisos(username, path) ) {
 		if ( this->existeCarpeta(pathConFS) )
-			return this->borrarCarpeta(username, path);
+			return this->eliminarCarpeta(username, path);
 		else
 			return this->eliminarArchivo(username, path);
 	} else
@@ -174,7 +174,7 @@ bool ManejadorArchivosYMetadatos::crearUsuario(std::string username) {
 }
 
 //Borrara todos los archivos de la carpeta y, en caso de que quede vacia, la carpeta fisica del fileSystem tambien
-bool ManejadorArchivosYMetadatos::borrarCarpeta(std::string username, std::string path) {
+bool ManejadorArchivosYMetadatos::eliminarCarpeta(std::string username, std::string path) {
 	std::string pathConFS = this->pathFileSystem + "/" + path;
 	DIR* dir;
 	struct dirent* ent;
@@ -185,7 +185,7 @@ bool ManejadorArchivosYMetadatos::borrarCarpeta(std::string username, std::strin
 			std::string pathInterno = path + "/" + ent->d_name;
 			std::string pathInternoConFS = this->pathFileSystem + "/" + pathInterno;
 			if ( this->existeCarpeta(pathInternoConFS) )
-				this->borrarCarpeta(username, pathInterno);
+				this->eliminarCarpeta(username, pathInterno);
 			else
 				this->eliminarArchivo(username, pathInterno);
 		}
