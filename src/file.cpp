@@ -128,13 +128,22 @@ mg_result File::DELETEHandler(mg_connection* connection) {
 	string user = getVar(connection, "user");
 
 	if (manejadorUs->autenticarToken(token, user)){
-			string filepath = "";
-			for (int i = 1; i <= uris.size() - 1; i++){
-				filepath += uris[i];
-				if (i != uris.size() - 1){
-					filepath += "/";
-				}
+		string filepath = "";
+		for (int i = 1; i <= uris.size() - 1; i++){
+			filepath += uris[i];
+			if (i != uris.size() - 1){
+				filepath += "/";
 			}
+		}
+		if (manejadorArchYMet->eliminar(user, filepath)){
+			mg_send_status(connection, CODESTATUS_SUCCES);
+			mg_send_header(connection, contentType.c_str(), jsonType.c_str());
+			printfData(connection, "{\"success\": \"Se elimino el recurso exitosamente\"}");
+		}else{
+			mg_send_status(connection, CODESTATUS_RESOURCE_NOT_FOUND);
+			mg_send_header(connection, contentType.c_str(), jsonType.c_str());
+			printfData(connection, "{\"error\": \"No se encontro el resurso\"}");
+		}
 	}else{
 		mg_send_status(connection, CODESTATUS_UNAUTHORIZED_CLIENT);
 		mg_send_header(connection, contentType.c_str(), jsonType.c_str());
