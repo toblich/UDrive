@@ -204,6 +204,10 @@ bool ManejadorArchivosYMetadatos::subirArchivo(std::string username,
 	if ( verificarPermisos(username, filepath) ) {
 		std::string filepathCompleto = this->pathFileSystem + "/" + filepath;
 		if ( not this->existeArchivo(filepathCompleto) ) {
+			if ( dbMetadatos->contains(filepath) ){
+				this->logWarn("Se quiso subir el archivo " + filepath + " pero este ya existe. Debe utilizar el metodo actualizarArchivo.");
+				return false;
+			}
 			if ( not this->actualizarArchivo(username, filepath, data, dataLen) )
 				return false;
 			dbMetadatos->put(filepath, jsonMetadatos);
@@ -259,6 +263,10 @@ bool ManejadorArchivosYMetadatos::actualizarArchivo(std::string username,
 // TODO: Ver si lanzar una excepcion mas especifica del tipo Metadato no encontrado
 std::string ManejadorArchivosYMetadatos::consultarMetadatosArchivo(std::string username, std::string filepath) {
 	if ( verificarPermisos(username, filepath) ) {
+		if ( not dbMetadatos->contains(filepath) ){
+			this->logWarn("Se quiso consultar los metadatos del archivo " + filepath + " pero este no existe.");
+			return "";
+		}
 		return dbMetadatos->get(filepath);
 	}
 	return "";
@@ -269,6 +277,10 @@ std::string ManejadorArchivosYMetadatos::consultarMetadatosArchivo(std::string u
 bool ManejadorArchivosYMetadatos::actualizarMetadatos(std::string username,
 		std::string filepath, std::string nuevosMetadatos) {
 	if ( verificarPermisos(username, filepath) ) {
+		if ( not dbMetadatos->contains(filepath) ){
+			this->logWarn("Se quiso actualizar los metadatos del archivo " + filepath + " pero este no existe.");
+			return false;
+		}
 		dbMetadatos->modify(filepath, nuevosMetadatos);
 		return true;
 	} else
@@ -280,6 +292,10 @@ bool ManejadorArchivosYMetadatos::agregarPermiso(std::string usernameOrigen,
 		std::string filepath, std::string usernameDestino) {
 	if ( verificarPermisos(usernameOrigen, filepath) ) {
 		//TODO Falta agregar el hecho de agregar al archivo de permisos que esta descripto en el issue
+		if ( not dbMetadatos->contains(filepath) ){
+			this->logWarn("Se quiso agregar un permiso al archivo " + filepath + " pero este no existe.");
+			return false;
+		}
 		std::string jsonArchivo = dbMetadatos->get(filepath);
 		ParserJson parser;
 		MetadatoArchivo metadato = parser.deserializarMetadatoArchivo(jsonArchivo);
@@ -297,6 +313,10 @@ bool ManejadorArchivosYMetadatos::eliminarArchivo(std::string username, std::str
 	if ( verificarPermisos(username, filepath) ) {
 		std::string filepathCompleto = this->pathFileSystem + "/" + filepath;
 		if ( this->existeArchivo(filepathCompleto) ) {
+			if ( not dbMetadatos->contains(filepath) ){
+				this->logWarn("Se quiso eliminar el archivo " + filepath + " pero este no existe en la base de datos.");
+				return false;
+			}
 			std::vector<std::string> directorios = parsearDirectorios(filepath);
 			int size = directorios.size();
 			std::string filename = directorios[size-1];
@@ -343,6 +363,10 @@ std::string ManejadorArchivosYMetadatos::obtenerEstructuraCarpeta(std::string pa
 				std::string foldername = directorios[size-1];
 				mapa.insert(pair<string, string>(foldername, "#folder"));
 			} else { //Es un archivo
+				if ( not dbMetadatos->contains(path) ){
+					this->logWarn("Se quiso obtener los metadatos del archivo " + path + " pero este no existe.");
+					return "";
+				}
 				std::string jsonMetadatos = this->dbMetadatos->get(pathInterno);
 				MetadatoArchivo metadato = parser.deserializarMetadatoArchivo(jsonMetadatos);
 				string nombre = metadato.nombre;
