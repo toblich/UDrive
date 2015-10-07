@@ -375,7 +375,6 @@ std::string ManejadorArchivosYMetadatos::obtenerEstructuraCarpeta(std::string pa
 		}
 		closedir (dir);
 		std::string json = parser.serializarMapa(mapa);
-		cout << json << endl;
 		return json;
 	} else
 		this->logWarn("No existe el directorio " + path);
