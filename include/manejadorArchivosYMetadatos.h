@@ -2,6 +2,7 @@
 #define MANEJADORARCHIVOSYMETADATOS_H_
 
 #include "parserJson.h"
+#include "parserURI.h"
 #include <vector>
 #include <unistd.h>
 #include <sys/stat.h>
@@ -28,7 +29,6 @@ private:
 
 	bool verificarPathValido(std::string path);
 	bool verificarPermisos(std::string username, std::string path);
-	std::vector<std::string> parsearDirectorios(std::string pathCompleto);
 
 	bool tamanioCarpeta(std::string path, unsigned long int & size);
 	bool crearCarpeta(std::string username, std::string path);
