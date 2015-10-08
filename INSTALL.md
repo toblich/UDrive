@@ -64,6 +64,16 @@ Alternativamente, ejecutar el script ```docker/gtest.sh``` habiendo instalado pr
 sudo apt-get install lcov
 ```
 
+### Requests (para tests de intergración y coverage)
+Con ```pip``` instalado, ejecutar:
+```
+sudo pip install requests
+```
+
+De no tener ```pip```, instalarlo anteriormente con:
+```
+sudo apt-get install python-pip
+```
 
 ### Compilación y Ejecución
 
