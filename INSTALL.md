@@ -7,7 +7,7 @@ wget -qO- https://get.docker.com/ | sh
 Luego, copiar el archivo ```Dockerfile``` a una carpeta vacía. Desde esa carpeta, ejecutar:
 ```
 sudo docker build -t udrive .
-sudo docker run udrive
+sudo docker run -it udrive
 ```
 Desde otra consola, ejecutar:
 ```
