@@ -72,7 +72,8 @@ bool ManejadorArchivosYMetadatos::verificarPathValido(std::string path) {
 }
 
 bool ManejadorArchivosYMetadatos::verificarPermisos(std::string username, std::string path) {
-	std::vector<std::string> directorios = this->parsearDirectorios(path);
+	ParserURI parserUri;
+	vector<string> directorios = parserUri.parsear(path, '/');
 	if ( directorios.size() > 0){
 		std::string fileOwner = directorios[0];
 		if ( username == fileOwner )
@@ -97,24 +98,6 @@ bool ManejadorArchivosYMetadatos::eliminar(std::string username, std::string pat
 			return this->eliminarArchivo(username, path);
 	} else
 		return false;
-}
-
-std::vector<std::string> ManejadorArchivosYMetadatos::parsearDirectorios(std::string pathCompleto) {
-	std::vector<std::string> directorios;
-	unsigned int size = pathCompleto.size();
-	char delim = '/';
-	std::string buffer = "";
-	for (unsigned int i = 0; i < size; i++){
-		char n = pathCompleto[i];
-		if (n != delim)
-			buffer +=n;
-		else if (n == delim && buffer != ""){ //No hay directorios con nombre vacio
-			directorios.push_back(buffer);
-			buffer = "";
-		}
-	}
-	if (buffer != "") directorios.push_back(buffer);
-	return directorios;
 }
 
 std::string ManejadorArchivosYMetadatos::actualizarUsuarioFechaModificacion(std::string jsonMetadatos,
@@ -142,7 +125,8 @@ bool ManejadorArchivosYMetadatos::crearCarpeta(std::string username, std::string
 	if ( verificarPermisos(username, path) ) {
 		// Agrego el FileSystem para que sea la "raiz"
 		string pathCompletoConFS = this->pathFileSystem + "/" + path;
-		std::vector<std::string> directorios = parsearDirectorios(pathCompletoConFS);
+		ParserURI parserUri;
+		vector<string> directorios = parserUri.parsear(pathCompletoConFS, '/');
 		std::string directorioAcumulado = "";
 		int size = directorios.size();
 		for (int i = 0; i < size; i++){
@@ -227,7 +211,8 @@ bool ManejadorArchivosYMetadatos::actualizarArchivo(std::string username,
 		unsigned long int folderSize = 0;
 		if ( tamanioCarpeta(username, folderSize) ) {
 			if ( folderSize + dataLen <= CUOTA ) {
-				std::vector<std::string> directorios = parsearDirectorios(filepath);
+				ParserURI parserUri;
+				vector<string> directorios = parserUri.parsear(filepath, '/');
 				int size = directorios.size();
 				std::string pathSinArchivo = "";
 				for (int i = 0; i < size-1; i++){ //Saco el nombre del archivo
@@ -326,7 +311,8 @@ bool ManejadorArchivosYMetadatos::eliminarArchivo(std::string username, std::str
 				this->logWarn("Se quiso eliminar el archivo " + filepath + " pero este no existe en la base de datos.");
 				return false;
 			}
-			std::vector<std::string> directorios = parsearDirectorios(filepath);
+			ParserURI parserUri;
+			vector<string> directorios = parserUri.parsear(filepath, '/');
 			int size = directorios.size();
 			std::string filename = directorios[size-1];
 			std::string pathCompletoPapelera = username + "/" + trash + "/" + filename;
@@ -369,7 +355,8 @@ std::string ManejadorArchivosYMetadatos::obtenerEstructuraCarpeta(std::string pa
 			std::string pathInterno = path + "/" + ent->d_name;
 			std::string pathInternoConFS = this->pathFileSystem + "/" + pathInterno;
 			if ( this->existeCarpeta(pathInternoConFS) ){
-				std::vector<std::string> directorios = this->parsearDirectorios(pathInterno);
+				ParserURI parserUri;
+				vector<string> directorios = parserUri.parsear(pathInterno, '/');
 				int size = directorios.size();
 				std::string foldername = directorios[size-1];
 				mapa.insert(pair<string, string>(foldername, "#folder"));
@@ -388,7 +375,6 @@ std::string ManejadorArchivosYMetadatos::obtenerEstructuraCarpeta(std::string pa
 		}
 		closedir (dir);
 		std::string json = parser.serializarMapa(mapa);
-		cout << json << endl;
 		return json;
 	} else
 		this->logWarn("No existe el directorio " + path);

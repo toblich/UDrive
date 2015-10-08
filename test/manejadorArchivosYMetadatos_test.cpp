@@ -29,8 +29,8 @@ class ManejadorArchivosYMetadatosTest : public ::testing::Test {
 
 TEST_F(ManejadorArchivosYMetadatosTest, deberiaParsearBienPathComun) {
 	std::string path = "pablo/hola/como/estas";
-
-	vector<string> directorios = manejador->parsearDirectorios(path);
+	ParserURI parserUri;
+	vector<string> directorios = parserUri.parsear(path, '/');
 	vector<string>::iterator itDir = directorios.begin();
 	ASSERT_TRUE(directorios.size() == 4);
 	int i = 0;
@@ -48,8 +48,8 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaParsearBienPathComun) {
 
 TEST_F(ManejadorArchivosYMetadatosTest, deberiaParsearBienPathConEspacios) {
 	std::string path = "pablo/hola/como estas";
-
-	vector<string> directorios = manejador->parsearDirectorios(path);
+	ParserURI parserUri;
+	vector<string> directorios = parserUri.parsear(path, '/');
 	vector<string>::iterator itDir = directorios.begin();
 	ASSERT_TRUE(directorios.size() == 3);
 	int i = 0;
@@ -67,7 +67,8 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaCrearBienCarpetasSeguras) {
 	string path = "pablo/como estas/bien";
 	manejador->crearCarpetaSegura("pablo", path);
 	string pathCompleto = pathFS + "/" + path;
-	std::vector<std::string> directorios = manejador->parsearDirectorios(pathCompleto);
+	ParserURI parserUri;
+	vector<string> directorios = parserUri.parsear(pathCompleto, '/');
 	std::string directorioAcumulado = "";
 	int size = directorios.size();
 	for (int i = 0; i < size; i++){
