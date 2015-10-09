@@ -27,6 +27,12 @@ public:
 	void loggear(string texto, int tipoDeError);
 	void escribirHoraEnElLog();
 	~Logger();
+
+	static void logInfo(string texto);
+	static void logWarn(string texto);
+	static void logTrace(string texto);
+	static void logError(string texto);
+	static void logDebug(string texto);
 };
 
 #endif /* LOGGER_H_ */

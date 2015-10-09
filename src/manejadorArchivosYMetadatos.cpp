@@ -24,21 +24,6 @@ ManejadorArchivosYMetadatos::ManejadorArchivosYMetadatos (BD* dbMetadatos, strin
 ManejadorArchivosYMetadatos::~ManejadorArchivosYMetadatos () {
 }
 
-void ManejadorArchivosYMetadatos::logInfo (string mensaje) {
-	Logger logger;
-	logger.loggear(mensaje, INFO);
-}
-
-void ManejadorArchivosYMetadatos::logWarn (string mensaje) {
-	Logger logger;
-	logger.loggear(mensaje, WARN);
-}
-
-void ManejadorArchivosYMetadatos::logError (string mensaje) {
-	Logger logger;
-	logger.loggear(mensaje, ERROR);
-}
-
 bool ManejadorArchivosYMetadatos::existeArchivo (string filepath) {
 	struct stat buffer;
 	return (stat(filepath.c_str(), &buffer) == 0);
@@ -55,11 +40,9 @@ bool ManejadorArchivosYMetadatos::carpetaVacia (string pathConFS) {
 	bool vacia = true;
 	if ((dir = opendir(pathConFS.c_str())) != NULL) {
 		while ((ent = readdir(dir)) != NULL && vacia) {
-			if (strcmp(ent->d_name, ".") == 0)
-				continue;
-			if (strcmp(ent->d_name, "..") == 0)
-				continue;
-			vacia = false;
+			string dirName(ent->d_name);
+			if (dirName != "." and dirName != "..")
+				vacia = false;
 		}
 		closedir(dir);
 	} else
@@ -71,7 +54,7 @@ bool ManejadorArchivosYMetadatos::carpetaVacia (string pathConFS) {
 bool ManejadorArchivosYMetadatos::verificarPathValido (string path) {
 	if (path.find('#') == string::npos)
 		return true;
-	this->logWarn("El path " + path + " no es valido.");
+	Logger::logWarn("El path " + path + " no es valido.");
 	return false;
 }
 
@@ -91,7 +74,7 @@ bool ManejadorArchivosYMetadatos::verificarPermisos (string username, string pat
 		string fileOwner = directorios[0];
 		if (username == fileOwner or this->tienePermisos(username, path))
 			return true;
-		this->logWarn("El usuario " + username + " no posee los permisos para el archivo " + path + ".");
+		Logger::logWarn("El usuario " + username + " no posee los permisos para el archivo " + path + ".");
 	}
 	return false; //Esto no deberia pasar jamás, pero bueno
 }
@@ -132,15 +115,15 @@ bool ManejadorArchivosYMetadatos::crearCarpeta (string username, string path) {
 		string pathCompletoConFS = this->pathFileSystem + "/" + path;
 		vector<string> directorios = ParserURI::parsear(pathCompletoConFS, '/');
 		string directorioAcumulado = "";
-		int size = directorios.size();
-		for (int i = 0; i < size; i++) {
+		const int SIZE = directorios.size();
+		for (int i = 0; i < SIZE; i++) {
 			string directorio = directorios[i];
 			string directorioPadre = directorioAcumulado;
 			directorioAcumulado += (directorio + "/");
-			// Me fijo si existe la carpeta, sino la creo
-			if (not existeCarpeta(directorioAcumulado)) {
+
+			if (not existeCarpeta(directorioAcumulado)) { // Me fijo si existe la carpeta, sino la creo
 				mkdir(directorioAcumulado.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-				this->logInfo("La carpeta " + directorio + " no existe dentro de " + directorioPadre + " por lo que ha sido creada.");
+				Logger::logInfo("La carpeta " + directorio + " no existe dentro de " + directorioPadre + " por lo que ha sido creada.");
 			}
 		}
 		return true;
@@ -156,11 +139,7 @@ bool ManejadorArchivosYMetadatos::crearCarpetaSegura (string username, string pa
 
 bool ManejadorArchivosYMetadatos::agregarPermisosABD (string username) {
 	string key = permisos + "/" + username;
-	if (not this->dbMetadatos->contains(key)) {
-		this->dbMetadatos->put(key, "");
-		return true;
-	}
-	return false; // No deberia pasar nunca, ya que implicaria que ya existe ese usuario
+	return this->dbMetadatos->put(key, ""); // PUT devuelve false si ya existia la clave, true si la agrega
 }
 
 bool ManejadorArchivosYMetadatos::crearUsuario (string username) {
@@ -177,11 +156,10 @@ bool ManejadorArchivosYMetadatos::eliminarCarpeta (string username, string path)
 	struct dirent* ent;
 	if ((dir = opendir(pathConFS.c_str())) != NULL) {
 		while ((ent = readdir(dir)) != NULL) {
-			if (strcmp(ent->d_name, ".") == 0)
+			string dirName(ent->d_name);
+			if (dirName == "." or dirName == "..")
 				continue;
-			if (strcmp(ent->d_name, "..") == 0)
-				continue;
-			string pathInterno = path + "/" + ent->d_name;
+			string pathInterno = path + "/" + dirName;
 			string pathInternoConFS = this->pathFileSystem + "/" + pathInterno;
 			if (this->existeCarpeta(pathInternoConFS))
 				this->eliminarCarpeta(username, pathInterno);
@@ -192,7 +170,7 @@ bool ManejadorArchivosYMetadatos::eliminarCarpeta (string username, string path)
 		if (this->carpetaVacia(pathConFS))
 			return this->deleteCarpeta(pathConFS);
 	} else
-		this->logWarn("No existe el directorio " + path);
+		Logger::logWarn("No existe el directorio " + path);
 	return false;
 }
 
@@ -203,13 +181,12 @@ bool ManejadorArchivosYMetadatos::subirArchivo (string username, string filepath
 		string filepathCompleto = this->pathFileSystem + "/" + filepath;
 		if (not this->existeArchivo(filepathCompleto)) {
 			if (dbMetadatos->contains(filepath)) {
-				this->logWarn("Se quiso subir el archivo " + filepath + " pero este ya existe. Debe utilizar el metodo actualizarArchivo.");
+				Logger::logWarn("Se quiso subir el archivo " + filepath + " pero este ya existe. Debe utilizar el metodo actualizarArchivo.");
 				return false;
 			}
 			if (not this->actualizarArchivo(username, filepath, data, dataLen))
 				return false;
-			dbMetadatos->put(filepath, jsonMetadatos);
-			return true;
+			return dbMetadatos->put(filepath, jsonMetadatos);
 		} else
 			// TODO: Versionado
 			return false;
@@ -236,7 +213,7 @@ bool ManejadorArchivosYMetadatos::actualizarArchivo (string username, string fil
 				//Verifico que existan todas las carpetas y sino las creo
 				if (pathSinArchivo != "") {
 					if (not crearCarpetaSegura(username, pathSinArchivo)) {
-						this->logWarn("Al querer actualizar el archivo " + filepath + " no se pudieron crear las carpetas.");
+						Logger::logWarn("Al querer actualizar el archivo " + filepath + " no se pudieron crear las carpetas.");
 						return false;
 					}
 				}
@@ -246,7 +223,7 @@ bool ManejadorArchivosYMetadatos::actualizarArchivo (string username, string fil
 					string metadatos = dbMetadatos->get(filepath);
 					string nuevosMetadatos = this->actualizarUsuarioFechaModificacion(metadatos, username);
 					dbMetadatos->modify(filepath, nuevosMetadatos);
-//					this->logWarn("Se quiso consultar los metadatos del archivo " + filepath + " pero este no existe.");
+//					Logger::logWarn("Se quiso consultar los metadatos del archivo " + filepath + " pero este no existe.");
 //					return false;
 				}
 
@@ -259,7 +236,7 @@ bool ManejadorArchivosYMetadatos::actualizarArchivo (string username, string fil
 			string texto = "No se ha podido subir el archivo " + filepath + " debido a que se ha superado la cuota de "; // + cuotaMB + " MB.";
 			texto += cuotaMB;
 			texto += " MB.";
-			this->logWarn(texto);
+			Logger::logWarn(texto);
 		}
 	}
 	return false;
@@ -268,7 +245,7 @@ bool ManejadorArchivosYMetadatos::actualizarArchivo (string username, string fil
 string ManejadorArchivosYMetadatos::consultarMetadatosArchivo (string username, string filepath) {
 	if (verificarPermisos(username, filepath)) {
 		if (not dbMetadatos->contains(filepath)) {
-			this->logWarn("Se quiso consultar los metadatos del archivo " + filepath + " pero este no existe.");
+			Logger::logWarn("Se quiso consultar los metadatos del archivo " + filepath + " pero este no existe.");
 			return "";
 		}
 		return dbMetadatos->get(filepath);
@@ -285,7 +262,7 @@ string ManejadorArchivosYMetadatos::consultarMetadatosArchivo (string username, 
 bool ManejadorArchivosYMetadatos::actualizarMetadatos (string username, string filepath, string jsonNuevosMetadatos) {
 	if (verificarPermisos(username, filepath)) {
 		if (not dbMetadatos->contains(filepath)) {
-			this->logWarn("Se quiso actualizar los metadatos del archivo " + filepath + " pero este no existe.");
+			Logger::logWarn("Se quiso actualizar los metadatos del archivo " + filepath + " pero este no existe.");
 			return false;
 		}
 		ParserJson parser;
@@ -320,12 +297,12 @@ bool ManejadorArchivosYMetadatos::actualizarMetadatos (string username, string f
 bool ManejadorArchivosYMetadatos::agregarPermiso (string usernameOrigen, string filepath, string usernameDestino) {
 	if (verificarPermisos(usernameOrigen, filepath)) {
 		if (not dbMetadatos->contains(filepath)) {
-			this->logWarn("Se quiso agregar un permiso al archivo " + filepath + " pero este no existe.");
+			Logger::logWarn("Se quiso agregar un permiso al archivo " + filepath + " pero este no existe.");
 			return false;
 		}
 		string pathPermisos = permisos + "/" + usernameDestino;
 		if (not dbMetadatos->contains(pathPermisos)) {
-			this->logWarn("Se quiso agregar un permiso al usuario " + usernameDestino + " pero este no existe.");
+			Logger::logWarn("Se quiso agregar un permiso al usuario " + usernameDestino + " pero este no existe.");
 			return false;
 		}
 		string jsonArchivo = dbMetadatos->get(filepath);
@@ -356,7 +333,7 @@ bool ManejadorArchivosYMetadatos::eliminarArchivo (string username, string filep
 		string filepathCompleto = this->pathFileSystem + "/" + filepath;
 		if (this->existeArchivo(filepathCompleto)) {
 			if (not dbMetadatos->contains(filepath)) {
-				this->logWarn("Se quiso eliminar el archivo " + filepath + " pero este no existe en la base de datos.");
+				Logger::logWarn("Se quiso eliminar el archivo " + filepath + " pero este no existe en la base de datos.");
 				return false;
 			}
 			vector<string> directorios = ParserURI::parsear(filepath, '/');
@@ -369,7 +346,7 @@ bool ManejadorArchivosYMetadatos::eliminarArchivo (string username, string filep
 
 			if (metadato.propietario != directorios[0]) {
 				cout << "El propietario del metadato no coincide con la carpeta del FileSystem. EXIT." << endl;
-				this->logError("El propietario del metadato no coincide con la carpeta del FileSystem. EXIT.");
+				Logger::logError("El propietario del metadato no coincide con la carpeta del FileSystem. EXIT.");
 				exit(1);
 			}
 
@@ -379,7 +356,7 @@ bool ManejadorArchivosYMetadatos::eliminarArchivo (string username, string filep
 
 			int result = rename(filepathCompleto.c_str(), pathCompletoPapeleraConFS.c_str());
 			if (result == 0) {
-				this->logInfo("La eliminacion del archivo " + filepath + " fue correcta.");
+				Logger::logInfo("La eliminacion del archivo " + filepath + " fue correcta.");
 				Batch batch;
 				string jsonMetadatosConFechaModif = this->actualizarUsuarioFechaModificacion(jsonMetadatos, username);
 				MetadatoArchivo metadatoConFechaModif = parser.deserializarMetadatoArchivo(jsonMetadatosConFechaModif);
@@ -403,10 +380,10 @@ bool ManejadorArchivosYMetadatos::eliminarArchivo (string username, string filep
 				batch.put(pathCompletoPapelera, jsonMetadatosConFechaModif);
 				if (this->dbMetadatos->writeBatch(batch))
 					return true;
-				this->logWarn("No se ha podido escribir el batch de eliminacion del archivo " + filepath + ".");
+				Logger::logWarn("No se ha podido escribir el batch de eliminacion del archivo " + filepath + ".");
 				return false;
 			} else {
-				this->logWarn("La eliminacion del archivo " + filepath + " no fue correcta.");
+				Logger::logWarn("La eliminacion del archivo " + filepath + " no fue correcta.");
 				return false;
 			}
 		} else
@@ -436,7 +413,7 @@ string ManejadorArchivosYMetadatos::obtenerEstructuraCarpeta (string path) {
 				mapa.insert(pair<string, string>(foldername, "#folder"));
 			} else { //Es un archivo
 				if (not dbMetadatos->contains(pathInterno)) {
-					this->logWarn("Se quiso obtener los metadatos del archivo " + path + " pero este no existe.");
+					Logger::logWarn("Se quiso obtener los metadatos del archivo " + path + " pero este no existe.");
 					return "";
 				}
 				string jsonMetadatos = this->dbMetadatos->get(pathInterno);
@@ -451,7 +428,7 @@ string ManejadorArchivosYMetadatos::obtenerEstructuraCarpeta (string path) {
 		string json = parser.serializarMapa(mapa);
 		return json;
 	} else
-		this->logWarn("No existe el directorio " + path);
+		Logger::logWarn("No existe el directorio " + path);
 	return "";
 //
 }
@@ -465,7 +442,7 @@ string ManejadorArchivosYMetadatos::descargarArchivo (string username, string fi
 			pathADevolver += "/" + filepathCompleto;
 			return pathADevolver;
 		} else
-			this->logWarn("Se ha querido descargar el archivo de path " + filepath + ", el cual no existe.");
+			Logger::logWarn("Se ha querido descargar el archivo de path " + filepath + ", el cual no existe.");
 	}
 	return "";
 }
@@ -478,7 +455,7 @@ bool ManejadorArchivosYMetadatos::deleteCarpeta (string path) {
 		logger.loggear("Se elimino permanentemente la carpeta " + path + ".", TRACE);
 		return true;
 	} else {
-		this->logWarn("No se ha podido eliminar la carpeta " + path + " porque no existe.");
+		Logger::logWarn("No se ha podido eliminar la carpeta " + path + " porque no existe.");
 		return false;
 	}
 }
@@ -502,13 +479,13 @@ bool ManejadorArchivosYMetadatos::tamanioCarpeta (string path, unsigned long int
 				if (stat(pathInternoConFS.c_str(), &buffer) == 0)
 					size += buffer.st_size;
 				else
-					this->logWarn("No se pudo encontrar el archivo " + pathInterno);
+					Logger::logWarn("No se pudo encontrar el archivo " + pathInterno);
 			}
 		}
 		closedir(dir);
 		return true;
 	}
-	this->logWarn("No existe el directorio " + path);
+	Logger::logWarn("No existe el directorio " + path);
 	return false;
 }
 

@@ -24,9 +24,6 @@ private:
 	BD* dbMetadatos;
 	char homeDirectory[1024];
 	string pathFileSystem;
-	void logInfo(string mensaje);
-	void logWarn(string mensaje);
-	void logError(string mensaje);
 
 	bool existeArchivo(string filepath);
 	bool existeCarpeta(string path);

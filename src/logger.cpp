@@ -98,3 +98,23 @@ void Logger::escribirHoraEnElLog(){
 	log << "===============" << endl;
 	log.close();
 }
+
+void Logger::logInfo (string texto) {
+	Logger().loggear(texto, INFO);
+}
+
+void Logger::logWarn (string texto) {
+	Logger().loggear(texto, WARN);
+}
+
+void Logger::logTrace (string texto) {
+	Logger().loggear(texto, TRACE);
+}
+
+void Logger::logError (string texto) {
+	Logger().loggear(texto, ERROR);
+}
+
+void Logger::logDebug (string texto) {
+	Logger().loggear(texto, DEBUG);
+}
