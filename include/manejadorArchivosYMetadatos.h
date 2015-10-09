@@ -11,9 +11,11 @@
 #include <dirent.h>
 #include <algorithm>
 
-const std::string defaultFileSystem = "FileSystem";
-const std::string trash = "#trash";
-const std::string permisos = "#permisos";
+using std::string;
+
+const string defaultFileSystem = "FileSystem";
+const string trash = "#trash";
+const string permisos = "#permisos";
 const unsigned long int CUOTA = 2147483648; // 2GB
 
 class ManejadorArchivosYMetadatos {
@@ -21,46 +23,46 @@ class ManejadorArchivosYMetadatos {
 private:
 	BD* dbMetadatos;
 	char homeDirectory[1024];
-	std::string pathFileSystem;
-	void logInfo(std::string mensaje);
-	void logWarn(std::string mensaje);
-	void logError(std::string mensaje);
+	string pathFileSystem;
+	void logInfo(string mensaje);
+	void logWarn(string mensaje);
+	void logError(string mensaje);
 
-	bool existeArchivo(std::string filepath);
-	bool existeCarpeta(std::string path);
+	bool existeArchivo(string filepath);
+	bool existeCarpeta(string path);
 
-	bool verificarPathValido(std::string path);
-	bool tienePermisos(std::string username, std::string path);
-	bool verificarPermisos(std::string username, std::string path);
+	bool verificarPathValido(string path);
+	bool tienePermisos(string username, string path);
+	bool verificarPermisos(string username, string path);
 
-	bool tamanioCarpeta(std::string path, unsigned long int & size);
-	bool crearCarpeta(std::string username, std::string path);
-	bool carpetaVacia(std::string path);
-	bool eliminarCarpeta(std::string username, std::string path);
-	bool deleteCarpeta(std::string path);
+	bool tamanioCarpeta(string path, unsigned long int & size);
+	bool crearCarpeta(string username, string path);
+	bool carpetaVacia(string path);
+	bool eliminarCarpeta(string username, string path);
+	bool deleteCarpeta(string path);
 
-	std::string actualizarUsuarioFechaModificacion(std::string jsonMetadatos, std::string usernameModificacion);
-	bool agregarPermisosABD(std::string username);
-	bool eliminarArchivo(std::string username, std::string filepath);
-	bool agregarPermiso(std::string usernameOrigen, std::string filepath, std::string usernameDestino);
+	string actualizarUsuarioFechaModificacion(string jsonMetadatos, string usernameModificacion);
+	bool agregarPermisosABD(string username);
+	bool eliminarArchivo(string username, string filepath);
+	bool agregarPermiso(string usernameOrigen, string filepath, string usernameDestino);
 
 public:
 	ManejadorArchivosYMetadatos(BD* dbMetadatos);
-	ManejadorArchivosYMetadatos(BD* dbMetadatos, std::string path);
+	ManejadorArchivosYMetadatos(BD* dbMetadatos, string path);
 	virtual ~ManejadorArchivosYMetadatos();
 
-	bool crearUsuario(std::string username);
-	bool crearCarpetaSegura(std::string username, std::string path);
-	std::string obtenerEstructuraCarpeta(std::string path);
+	bool crearUsuario(string username);
+	bool crearCarpetaSegura(string username, string path);
+	string obtenerEstructuraCarpeta(string path);
 
-	bool eliminar(std::string username, std::string path); //Sirve para carpetas y archivos
+	bool eliminar(string username, string path); //Sirve para carpetas y archivos
 
-	bool subirArchivo(std::string username, std::string filepath, const char* data, int dataLen, std::string jsonMetadatos);
-	std::string descargarArchivo(std::string username, std::string filepath);
-	bool actualizarArchivo(std::string username, std::string filepath, const char* data, int dataLen);
+	bool subirArchivo(string username, string filepath, const char* data, int dataLen, string jsonMetadatos);
+	string descargarArchivo(string username, string filepath);
+	bool actualizarArchivo(string username, string filepath, const char* data, int dataLen);
 
-	std::string consultarMetadatosArchivo(std::string username, std::string filename);
-	bool actualizarMetadatos(std::string username, std::string filepath, std::string jsonNuevosMetadatos);
+	string consultarMetadatosArchivo(string username, string filename);
+	bool actualizarMetadatos(string username, string filepath, string jsonNuevosMetadatos);
 
 	bool deleteFileSystem();
 };
