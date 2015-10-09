@@ -176,9 +176,9 @@ class ServerTest(unittest.TestCase):
 
 	def test_obtenerYActualizarMetadatos(self):
 		token = registrarYLoguearUser(USER_SIMPLE)
-		FILENAME = "CMakeFiles/2.8.12.2/CMakeSystem.cmake"
+		FILENAME = "../src/db/batch.cpp"
 
-		internalUri = USER_SIMPLE["user"] + "/" + FILENAME
+		internalUri = USER_SIMPLE["user"] + FILENAME[2:] # saca los '..'
 		requests.put(FILE + internalUri, files={'file': open(FILENAME, 'rb'), "token": token, "user": USER_SIMPLE["user"]})	# sube archivo
 
 		r = requests.get(METADATA + internalUri, data={"user": USER_SIMPLE["user"], "token": token})	# consulta metadatos
@@ -186,9 +186,9 @@ class ServerTest(unittest.TestCase):
 
 		metadata = r.json().get("metadatos")
 		self.assertEquals(metadata.get("propietario"), USER_SIMPLE["user"])
-		self.assertEquals(metadata.get("nombre"), "CMakeSystem")
+		self.assertEquals(metadata.get("nombre"), "batch")
 		self.assertEquals(metadata.get("usuario ultima modificacion"), USER_SIMPLE["user"])
-		self.assertEquals(metadata.get("extension"), "cmake")
+		self.assertEquals(metadata.get("extension"), "cpp")
 		self.assertEquals(metadata.get("etiquetas"), [])
 		self.assertEquals(metadata.get("usuarios"), [USER_SIMPLE["user"]])
 
@@ -198,10 +198,10 @@ class ServerTest(unittest.TestCase):
 
 	def test_obtenerEstructuraDeCarpetaYBorrarCarperta(self):
 		token = registrarYLoguearUser(USER_SIMPLE)
-		FILENAME = "CMakeFiles/2.8.12.2/CMakeSystem.cmake"
-		BASE_FOLDER = FOLDER + USER_SIMPLE["user"] + "/CMakeFiles/"
+		FILENAME = "../src/db/batch.cpp"
+		BASE_FOLDER = FOLDER + USER_SIMPLE["user"] + "/src/"
 
-		internalUri = USER_SIMPLE["user"] + "/" + FILENAME + "sarasa"
+		internalUri = USER_SIMPLE["user"] + FILENAME[2:] # saca los '..'
 		requests.put(FILE + internalUri, files={'file': open(FILENAME, 'rb'), "token": token, "user": USER_SIMPLE["user"]})	# sube archivo
 
 		r = requests.put(BASE_FOLDER + "subcarpeta", data={"token": token, "user": USER_SIMPLE["user"]})
@@ -211,7 +211,7 @@ class ServerTest(unittest.TestCase):
 		self.assertEquals(s.status_code, SUCCESS)
 
 		estructura = literal_eval(s.content)
-		expected = {"estructura" : {"2.8.12.2" : "#folder", "subcarpeta": "#folder"} }
+		expected = {"estructura" : {"db" : "#folder", "subcarpeta": "#folder"} }
 		self.assertDictEqual(expected, estructura) 
 
 		t = requests.delete(BASE_FOLDER, data={"token": token, "user": USER_SIMPLE["user"]})
