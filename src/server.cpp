@@ -85,9 +85,8 @@ void Server::pollServer(int milliseconds) {
 }
 
 mg_result Server::requestHandler(mg_connection* connection) {
-	ParserURI parser;
 	string uri = string(connection->uri);
-	vector<string> uris = parser.parsear(uri, '/');
+	vector<string> uris = ParserURI::parsear(uri, '/');
 
 	if (uris.size() > 0){
 		if (uris[0] == "close"){

@@ -32,9 +32,8 @@ void File::enviarArchivo(const string& completePath, mg_connection* connection) 
 
 
 mg_result File::GETHandler(mg_connection* connection) {
-	ParserURI parser;
 	string uri = string(connection->uri);
-	vector<string> uris = parser.parsear(uri, '/');
+	vector<string> uris = ParserURI::parsear(uri, '/');
 	this->logInfo("Se parseó la uri correctamente.");
 	string token = getVar(connection, "token");
 	this->logInfo("Se obtuvo la variable token con valor: " + token);
@@ -85,16 +84,14 @@ MetadatoArchivo File::extractMetadataFrom(const vector<string>& nombreYExtension
 
 
 mg_result File::PUTHandler(mg_connection* connection) {
-	DatosArchivo datosArch;
-	ParserURI parser;
 	ParserJson parserJson;
 
 	string uri = string(connection->uri);
-	vector<string> uris = parser.parsear(uri, '/');
+	vector<string> uris = ParserURI::parsear(uri, '/');
 	this->logInfo("Se parseó la uri correctamente.");
 
 	string varFile = "file";
-	datosArch = getMultipartData(connection, varFile);
+	DatosArchivo datosArch = getMultipartData(connection, varFile);
 	this->logInfo("Se obtuvo el archivo correctamente con tamaño: " + datosArch.dataLength);
 	string token = datosArch.token;
 	this->logInfo("Se obtuvo la variable token con valor: " + token);
@@ -105,7 +102,7 @@ mg_result File::PUTHandler(mg_connection* connection) {
 		this->logInfo("Se autenticó la sesión correctamente.");
 		string filepath = getFilepathFrom(uris);
 
-		vector<string> nombreYExtension = parser.parsear(datosArch.fileName, '.');
+		vector<string> nombreYExtension = ParserURI::parsear(datosArch.fileName, '.');
 		this->logInfo("Se parseó el nombre del archivo correctamente.");
 		MetadatoArchivo metArch = extractMetadataFrom(nombreYExtension, user, uris);
 		string jsonMetadata = parserJson.serializarMetadatoArchivo(metArch);
@@ -132,9 +129,8 @@ mg_result File::PUTHandler(mg_connection* connection) {
 
 
 mg_result File::DELETEHandler(mg_connection* connection) {
-	ParserURI parser;
 	string uri = string(connection->uri);
-	vector<string> uris = parser.parsear(uri, '/');
+	vector<string> uris = ParserURI::parsear(uri, '/');
 	this->logInfo("Se parseó la uri correctamente.");
 	string token = getVar(connection, "token");
 	this->logInfo("Se obtuvo la variable token con valor: " + token);

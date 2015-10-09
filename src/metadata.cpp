@@ -10,9 +10,8 @@ Metadata::~Metadata() {
 
 //Consultar: GET en /metadata/<username_de_propietario>/<filename>
 mg_result Metadata::GETHandler(mg_connection* connection) {
-	ParserURI parser;
 	string uri = string(connection->uri);
-	vector<string> uris = parser.parsear(uri, '/');
+	vector<string> uris = ParserURI::parsear(uri, '/');
 	this->logInfo("Se parseó la uri correctamente.");
 	string token = getVar(connection, "token");
 	this->logInfo("Se obtuvo la variable token con valor: " + token);
