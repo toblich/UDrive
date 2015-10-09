@@ -43,11 +43,17 @@ def definirConstantesGlobales():
 	global NOT_FOUND
 	NOT_FOUND = 404
 
+	global UNAUTHORIZED
+	UNAUTHORIZED = 401
+
 	global RESOURCE_CREATED
 	RESOURCE_CREATED = 201
 
 	global SUCCESS
 	SUCCESS = 200
+
+	global UNSUPPORTED_METHOD
+	UNSUPPORTED_METHOD = 405
 
 
 def registrarYLoguear(username, password, profile):
@@ -192,7 +198,7 @@ class ServerTest(unittest.TestCase):
 		self.assertEquals(t.status_code, SUCCESS)
 
 
-	def test_obtenerEstructuraDeCarpeta(self):
+	def test_obtenerEstructuraDeCarpetaYBorrarCarperta(self):
 		token = registrarYLoguearUser(USER_SIMPLE)
 		FILENAME = "CMakeFiles/2.8.12.2/CMakeSystem.cmake"
 		BASE_FOLDER = FOLDER + USER_SIMPLE["user"] + "/CMakeFiles/"
@@ -210,7 +216,35 @@ class ServerTest(unittest.TestCase):
 		expected = {"estructura" : {"2.8.12.2" : "#folder", "subcarpeta": "#folder"} }
 		self.assertDictEqual(expected, estructura) 
 
+		t = requests.delete(BASE_FOLDER, data={"token": token, "user": USER_SIMPLE["user"]})
+		self.assertEquals(t.status_code, SUCCESS)
 
+		u = requests.delete(BASE_FOLDER, data={"token": token, "user": USER_SIMPLE["user"]})
+		self.assertEquals(u.status_code, NOT_FOUND)
+
+		v = requests.delete(BASE_FOLDER, data={"token": 1234567890, "user": USER_SIMPLE["user"]})
+		self.assertEquals(v.status_code, UNAUTHORIZED)
+
+	def test_DeberiaDarErrorAlQuererIngresarAUnRecursoInexistente(self):
+		r = requests.get(BASE)
+		self.assertEquals(r.status_code, NOT_FOUND)
+
+		INEXISTENTE = BASE + "/sarasa"
+		s = requests.get(INEXISTENTE)
+		self.assertEquals(s.status_code, NOT_FOUND)
+
+	def test_DeberiaDarErrorAlQuererUsarUnMetodoNoSoportado(self):
+		r = requests.get(SESSION)
+		self.assertEquals(r.status_code, UNSUPPORTED_METHOD)
+
+		s = requests.put(SESSION)
+		self.assertEquals(s.status_code, UNSUPPORTED_METHOD)
+
+		t = requests.post(FOLDER)
+		self.assertEquals(t.status_code, UNSUPPORTED_METHOD)
+
+		u = requests.delete(METADATA)
+		self.assertEquals(u.status_code, UNSUPPORTED_METHOD)
 
 if __name__ == '__main__':
 	definirConstantesGlobales()
