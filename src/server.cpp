@@ -100,10 +100,12 @@ mg_result Server::requestHandler(mg_connection* connection) {
 			return evento->handler(connection);
 
 		}catch (const out_of_range& oor){
+			mg_send_status(connection, NOTFOUND);
 			mg_printf_data(connection, "Error, recurso no encontrado\n");
 			return MG_TRUE;
 		}
 	}
-	mg_printf_data(connection, "Error, URI incorrecta\n");
+	mg_send_status(connection, NOTFOUND);
+	mg_printf_data(connection, "Error, recurso no encontrado\n");
 	return MG_TRUE;
 }
