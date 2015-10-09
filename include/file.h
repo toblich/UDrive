@@ -20,6 +20,7 @@ private:
 	void enviarArchivo(const string& completePath, mg_connection* connection);
 	MetadatoArchivo extractMetadataFrom(const vector<string>& nombreYExtension,
 			const string& user, const vector<string>& uris);
+	void subirArchivo (const vector<string>& uris, const DatosArchivo& datosArch, const string& user, mg_connection* connection);
 };
 
 #endif /* FILE_H_ */

@@ -1,15 +1,14 @@
 #include "file.h"
 
-File::File(ManejadorDeUsuarios* manejadorUs, ManejadorArchivosYMetadatos* manejadorArchYMet) {
+File::File (ManejadorDeUsuarios* manejadorUs, ManejadorArchivosYMetadatos* manejadorArchYMet) {
 	this->manejadorUs = manejadorUs;
 	this->manejadorArchYMet = manejadorArchYMet;
 }
 
+File::~File () {
+}
 
-File::~File() {}
-
-
-void File::enviarArchivo(const string& completePath, mg_connection* connection) {
+void File::enviarArchivo (const string& completePath, mg_connection* connection) {
 	if (completePath != "") {
 		if (sendFile(connection, completePath)) {
 			this->logInfo("Se descargó el archivo: " + completePath + " correctamente.");
@@ -30,8 +29,7 @@ void File::enviarArchivo(const string& completePath, mg_connection* connection) 
 	}
 }
 
-
-mg_result File::GETHandler(mg_connection* connection) {
+mg_result File::GETHandler (mg_connection* connection) {
 	string uri = string(connection->uri);
 	vector<string> uris = ParserURI::parsear(uri, '/');
 	this->logInfo("Se parseó la uri correctamente.");
@@ -51,8 +49,7 @@ mg_result File::GETHandler(mg_connection* connection) {
 	return MG_TRUE;
 }
 
-
-MetadatoArchivo File::extractMetadataFrom(const vector<string>& nombreYExtension, const string& user, const vector<string>& uris) {
+MetadatoArchivo File::extractMetadataFrom (const vector<string>& nombreYExtension, const string& user, const vector<string>& uris) {
 	MetadatoArchivo metArch;
 	metArch.nombre = "";
 	if (nombreYExtension.size() >= 2) {
@@ -74,7 +71,8 @@ MetadatoArchivo File::extractMetadataFrom(const vector<string>& nombreYExtension
 	int anio = tiempo->tm_year + 1900;
 	int mes = tiempo->tm_mon + 1;
 	int dia = tiempo->tm_mday;
-	metArch.fechaUltimaModificacion = to_string(dia) + "/" + to_string(mes) + "/" + to_string(anio);;
+	metArch.fechaUltimaModificacion = to_string(dia) + "/" + to_string(mes) + "/" + to_string(anio);
+	;
 	metArch.usuarioUltimaModificacion = user;
 	metArch.propietario = uris[1];
 	metArch.etiquetas = list<string>();		// TODO
@@ -82,10 +80,29 @@ MetadatoArchivo File::extractMetadataFrom(const vector<string>& nombreYExtension
 	return metArch;
 }
 
-
-mg_result File::PUTHandler(mg_connection* connection) {
+void File::subirArchivo (const vector<string>& uris, const DatosArchivo& datosArch, const string& user, mg_connection* connection) {
+	string filepath = getFilepathFrom(uris);
+	vector<string> nombreYExtension = ParserURI::parsear(datosArch.fileName, '.');
+	this->logInfo("Se parseó el nombre del archivo correctamente.");
+	MetadatoArchivo metArch = extractMetadataFrom(nombreYExtension, user, uris);
 	ParserJson parserJson;
+	string jsonMetadata = parserJson.serializarMetadatoArchivo(metArch);
+	this->logInfo("Se serializaron los metadatos del archivo correctamente.");
 
+	if (manejadorArchYMet->subirArchivo(user, filepath, datosArch.fileData, datosArch.dataLength, jsonMetadata)) {
+		this->logInfo("Se subió el archivo: " + filepath + " correctamente.");
+		mg_send_status(connection, CODESTATUS_RESOURCE_CREATED);
+		mg_send_header(connection, contentType.c_str(), jsonType.c_str());
+		printfData(connection, "{\"success\": \"Se subio el archivo exitosamente\"}");
+	} else {
+		this->logError("ERROR, no se pudo subir el archivo: " + filepath);
+		mg_send_status(connection, CODESTATUS_INTERNAL_SERVER_ERROR);
+		mg_send_header(connection, contentType.c_str(), jsonType.c_str());
+		printfData(connection, "{\"error\": \"Hubo un problema al subir el archivo, intentelo nuevamente\"}");
+	}
+}
+
+mg_result File::PUTHandler (mg_connection* connection) {
 	string uri = string(connection->uri);
 	vector<string> uris = ParserURI::parsear(uri, '/');
 	this->logInfo("Se parseó la uri correctamente.");
@@ -100,26 +117,7 @@ mg_result File::PUTHandler(mg_connection* connection) {
 
 	if (manejadorUs->autenticarToken(token, user)) {
 		this->logInfo("Se autenticó la sesión correctamente.");
-		string filepath = getFilepathFrom(uris);
-
-		vector<string> nombreYExtension = ParserURI::parsear(datosArch.fileName, '.');
-		this->logInfo("Se parseó el nombre del archivo correctamente.");
-		MetadatoArchivo metArch = extractMetadataFrom(nombreYExtension, user, uris);
-		string jsonMetadata = parserJson.serializarMetadatoArchivo(metArch);
-
-		this->logInfo("Se serializaron los metadatos del archivo correctamente.");
-
-		if (manejadorArchYMet->subirArchivo(user, filepath, datosArch.fileData, datosArch.dataLength, jsonMetadata)) {
-			this->logInfo("Se subió el archivo: " + filepath + " correctamente.");
-			mg_send_status(connection, CODESTATUS_RESOURCE_CREATED);
-			mg_send_header(connection, contentType.c_str(), jsonType.c_str());
-			printfData(connection, "{\"success\": \"Se subio el archivo exitosamente\"}");
-		} else {
-			this->logError("ERROR, no se pudo subir el archivo: " + filepath);
-			mg_send_status(connection, CODESTATUS_INTERNAL_SERVER_ERROR);
-			mg_send_header(connection, contentType.c_str(), jsonType.c_str());
-			printfData(connection, "{\"error\": \"Hubo un problema al subir el archivo, intentelo nuevamente\"}");
-		}
+		subirArchivo(uris, datosArch, user, connection);
 	} else {
 		this->responderAutenticacionFallida(connection);
 	}
@@ -127,8 +125,7 @@ mg_result File::PUTHandler(mg_connection* connection) {
 	return MG_TRUE;
 }
 
-
-mg_result File::DELETEHandler(mg_connection* connection) {
+mg_result File::DELETEHandler (mg_connection* connection) {
 	string uri = string(connection->uri);
 	vector<string> uris = ParserURI::parsear(uri, '/');
 	this->logInfo("Se parseó la uri correctamente.");
