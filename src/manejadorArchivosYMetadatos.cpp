@@ -159,6 +159,7 @@ bool ManejadorArchivosYMetadatos::eliminarCarpeta (string username, string path)
 			string dirName(ent->d_name);
 			if (dirName == "." or dirName == "..")
 				continue;
+
 			string pathInterno = path + "/" + dirName;
 			string pathInternoConFS = this->pathFileSystem + "/" + pathInterno;
 			if (this->existeCarpeta(pathInternoConFS))
@@ -194,6 +195,32 @@ bool ManejadorArchivosYMetadatos::subirArchivo (string username, string filepath
 		return false;
 }
 
+bool ManejadorArchivosYMetadatos::guardarArchivo (const string& filepath, const string& username, const char* data, int dataLen) {
+	vector<string> directorios = ParserURI::parsear(filepath, '/');
+	string pathSinArchivo = ParserURI::join(directorios, '/', 0, directorios.size()-1);
+
+	//Verifico que existan todas las carpetas y sino las creo
+	if (pathSinArchivo != "") {
+		if (not crearCarpetaSegura(username, pathSinArchivo)) {
+			Logger::logWarn("Al querer actualizar el archivo " + filepath + " no se pudieron crear las carpetas.");
+			return false;
+		}
+	}
+	string pathConFileSystem = this->pathFileSystem + "/" + filepath;
+	if (dbMetadatos->contains(filepath)) {
+		//Significa que no fui llamado desde el subirArchivo, por lo que la actualizacion se hará ahí
+		string metadatos = dbMetadatos->get(filepath);
+		string nuevosMetadatos = this->actualizarUsuarioFechaModificacion(metadatos, username);
+		dbMetadatos->modify(filepath, nuevosMetadatos);
+		//					Logger::logWarn("Se quiso consultar los metadatos del archivo " + filepath + " pero este no existe.");
+		//					return false;
+	}
+	ofstream outFile(pathConFileSystem, ofstream::binary);
+	outFile.write(data, dataLen);
+	outFile.close();
+	return true;
+}
+
 // El filename deberia venir con los path de carpetas tambien y dentro tambien el nombre de usuario
 bool ManejadorArchivosYMetadatos::actualizarArchivo (string username, string filepath, const char* data, int dataLen) {
 	//No le agrego el FileSystem porque se agrega despues en el metodo crearCarpeta
@@ -201,36 +228,7 @@ bool ManejadorArchivosYMetadatos::actualizarArchivo (string username, string fil
 		unsigned long int folderSize = 0;
 		if (tamanioCarpeta(username, folderSize)) {
 			if (folderSize + dataLen <= CUOTA) {
-				vector<string> directorios = ParserURI::parsear(filepath, '/');
-				int size = directorios.size();
-				string pathSinArchivo = "";
-				for (int i = 0; i < size - 1; i++) { //Saco el nombre del archivo
-					string directorio = directorios[i];
-					pathSinArchivo += directorio;
-					if (i < size - 2)
-						pathSinArchivo += "/";
-				}
-				//Verifico que existan todas las carpetas y sino las creo
-				if (pathSinArchivo != "") {
-					if (not crearCarpetaSegura(username, pathSinArchivo)) {
-						Logger::logWarn("Al querer actualizar el archivo " + filepath + " no se pudieron crear las carpetas.");
-						return false;
-					}
-				}
-				string pathConFileSystem = this->pathFileSystem + "/" + filepath;
-
-				if (dbMetadatos->contains(filepath)) { //Significa que no fui llamado desde el subirArchivo, por lo que la actualizacion se hará ahí
-					string metadatos = dbMetadatos->get(filepath);
-					string nuevosMetadatos = this->actualizarUsuarioFechaModificacion(metadatos, username);
-					dbMetadatos->modify(filepath, nuevosMetadatos);
-//					Logger::logWarn("Se quiso consultar los metadatos del archivo " + filepath + " pero este no existe.");
-//					return false;
-				}
-
-				ofstream outFile(pathConFileSystem, ofstream::binary);
-				outFile.write(data, dataLen);
-				outFile.close();
-				return true;
+				return guardarArchivo(filepath, username, data, dataLen);
 			}
 			unsigned long int cuotaMB = CUOTA / 1048576;
 			string texto = "No se ha podido subir el archivo " + filepath + " debido a que se ha superado la cuota de "; // + cuotaMB + " MB.";
@@ -253,6 +251,32 @@ string ManejadorArchivosYMetadatos::consultarMetadatosArchivo (string username, 
 	return "";
 }
 
+void ManejadorArchivosYMetadatos::actualizarMetadatosChequeados (const string& filepath, const string& jsonNuevosMetadatos,
+		const string& username) {
+	ParserJson parser;
+	string jsonMetadatosViejos = dbMetadatos->get(filepath);
+	MetadatoArchivo metadatosViejos = parser.deserializarMetadatoArchivo(jsonMetadatosViejos);
+	MetadatoArchivo metadatosNuevos = parser.deserializarMetadatoArchivo(jsonNuevosMetadatos);
+	list<string> usuariosViejos = metadatosViejos.usuariosHabilitados;
+	list<string> usuariosNuevos = metadatosNuevos.usuariosHabilitados;
+	string nuevoJson;
+	if (usuariosNuevos.empty()) {
+		metadatosNuevos.usuariosHabilitados = usuariosViejos;
+		nuevoJson = parser.serializarMetadatoArchivo(metadatosNuevos);
+	} else {
+		list<string>::iterator itUsuNuevos = usuariosNuevos.begin();
+		for (; itUsuNuevos != usuariosNuevos.end(); itUsuNuevos++) {
+			string nuevoUsuario = (*itUsuNuevos);
+			// Si todavia no tenia permisos
+			if (find(usuariosViejos.begin(), usuariosViejos.end(), nuevoUsuario) == usuariosViejos.end()) {
+				this->agregarPermiso(username, filepath, nuevoUsuario);
+			}
+		}
+		nuevoJson = jsonNuevosMetadatos;
+	}
+	dbMetadatos->modify(filepath, nuevoJson);
+}
+
 // Lo que se va hacer es lo siguiente: Los nuevos metadatos vendran integramente por lo que se va a cambiar salvo por los usuarios habilitados.
 // En ese caso, puedo recibir ese campo vacio o lleno:
 // - Vacio significa que no se modificaron los usuarios
@@ -265,30 +289,7 @@ bool ManejadorArchivosYMetadatos::actualizarMetadatos (string username, string f
 			Logger::logWarn("Se quiso actualizar los metadatos del archivo " + filepath + " pero este no existe.");
 			return false;
 		}
-		ParserJson parser;
-		string jsonMetadatosViejos = dbMetadatos->get(filepath);
-		MetadatoArchivo metadatosViejos = parser.deserializarMetadatoArchivo(jsonMetadatosViejos);
-		MetadatoArchivo metadatosNuevos = parser.deserializarMetadatoArchivo(jsonNuevosMetadatos);
-		list<string> usuariosViejos = metadatosViejos.usuariosHabilitados;
-		list<string> usuariosNuevos = metadatosNuevos.usuariosHabilitados;
-		string nuevoJson;
-
-		if (usuariosNuevos.empty()) {
-			metadatosNuevos.usuariosHabilitados = usuariosViejos;
-			nuevoJson = parser.serializarMetadatoArchivo(metadatosNuevos);
-		} else {
-			list<string>::iterator itUsuNuevos = usuariosNuevos.begin();
-			for (; itUsuNuevos != usuariosNuevos.end(); itUsuNuevos++) {
-				string nuevoUsuario = (*itUsuNuevos);
-				// Si todavia no tenia permisos
-				if (find(usuariosViejos.begin(), usuariosViejos.end(), nuevoUsuario) == usuariosViejos.end()) {
-					this->agregarPermiso(username, filepath, nuevoUsuario);
-				}
-			}
-			nuevoJson = jsonNuevosMetadatos;
-		}
-
-		dbMetadatos->modify(filepath, nuevoJson);
+		actualizarMetadatosChequeados(filepath, jsonNuevosMetadatos, username);
 		return true;
 	} else
 		return false;
