@@ -38,8 +38,8 @@ mg_result Profile::GETHandler (mg_connection* connection) {
 }
 
 mg_result Profile::PUTHandler (mg_connection* connection) {
-	ParserJson parserJson;
-	MetadatoUsuario nuevoPerfil;
+	//ParserJson parserJson;
+	//MetadatoUsuario nuevoPerfil;
 
 	string uri = string(connection->uri);
 	vector<string> uris = ParserURI::parsear(uri, '/');
@@ -47,25 +47,33 @@ mg_result Profile::PUTHandler (mg_connection* connection) {
 
 	string token = getVar(connection, "token");
 	this->logInfo("Se obtuvo la variable token con valor: " + token);
-	nuevoPerfil.nombre = getVar(connection, "nombre");
-	this->logInfo("Se obtuvo la variable nombre con valor: " + nuevoPerfil.nombre);
-	nuevoPerfil.email = getVar(connection, "email");
-	this->logInfo("Se obtuvo la variable email con valor: " + nuevoPerfil.email);
-	nuevoPerfil.pathFotoPerfil = getVar(connection, "pathFoto");
-	this->logInfo("Se obtuvo la variable pathFoto con valor: " + nuevoPerfil.pathFotoPerfil);
-	nuevoPerfil.ultimaUbicacion.latitud = getVarFloat(connection, "latitud");
-	nuevoPerfil.ultimaUbicacion.longitud = getVarFloat(connection, "longitud");
+	string nuevoPerfil = getVar(connection, "profile");
+	this->logInfo("Se obtuvo la variable con el nuevo perfil.");
 
-	string perfilActualizado = parserJson.serializarMetadatoUsuario(nuevoPerfil);
+//	nuevoPerfil.nombre = getVar(connection, "nombre");
+//	this->logInfo("Se obtuvo la variable nombre con valor: " + nuevoPerfil.nombre);
+//	nuevoPerfil.email = getVar(connection, "email");
+//	this->logInfo("Se obtuvo la variable email con valor: " + nuevoPerfil.email);
+//	nuevoPerfil.pathFotoPerfil = getVar(connection, "pathFoto");
+//	this->logInfo("Se obtuvo la variable pathFoto con valor: " + nuevoPerfil.pathFotoPerfil);
+//	nuevoPerfil.ultimaUbicacion.latitud = getVarFloat(connection, "latitud");
+//	nuevoPerfil.ultimaUbicacion.longitud = getVarFloat(connection, "longitud");
+//	string perfilActualizado = parserJson.serializarMetadatoUsuario(nuevoPerfil);
 
 	if (manejadorUs->autenticarToken(token, uris[1])) {
 		this->logInfo("Se autenticó la sesión correctamente.");
 
-		manejadorUs->modifyPerfil(uris[1], perfilActualizado);
-		this->logInfo("Se modificó el perfil del usuario correctamente.");
-		mg_send_status(connection, CODESTATUS_SUCCES);
-		mg_send_header(connection, contentType.c_str(), jsonType.c_str());
-		printfData(connection, "{\"success\": \"Se modifico el perfil exitosamente\"}");
+		if (manejadorUs->modifyPerfil(uris[1], nuevoPerfil)) {
+			this->logInfo("Se modificó el perfil del usuario correctamente.");
+			mg_send_status(connection, CODESTATUS_SUCCES);
+			mg_send_header(connection, contentType.c_str(), jsonType.c_str());
+			printfData(connection, "{\"success\": \"Se modifico el perfil exitosamente.\"}");
+		} else {
+			this->logInfo("No se pudo modificar el perfil debido a que es inválido.");
+			mg_send_status(connection, CODESTATUS_BAD_REQUEST);
+			mg_send_header(connection, contentType.c_str(), jsonType.c_str());
+			printfData(connection, "{\"error\": \"No se pudo modificar el perfil debido a que es inválido.\"}");
+		}
 	} else {
 		this->responderAutenticacionFallida(connection);
 	}
