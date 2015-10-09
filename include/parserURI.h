@@ -25,6 +25,20 @@ public:
 			uris.push_back(buffer);
 		return uris;
 	}
+
+	static string join(const vector<string>& partes, char delim){
+		return ParserURI::join(partes, delim, 0, partes.size());
+	}
+
+	static string join(const vector<string>& partes, char delim, int desde, int hasta){
+		string salida = "";
+		int size = partes.size();
+		for (int i = desde; i < hasta and i < size; i++){
+			salida += partes[i] + delim;
+		}
+		salida.pop_back();
+		return salida;
+	}
 };
 
 #endif /* PARSERURI_H_ */

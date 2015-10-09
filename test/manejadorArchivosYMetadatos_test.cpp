@@ -32,7 +32,7 @@ const std::string jsonArchOK = "{\n"
 		"\t\"extension\" : \"jpg\",\n"
 		"\t\"fecha ultima modificacion\" : \"09/09/2015\",\n"
 		"\t\"nombre\" : \"sol\",\n"
-		"\t\"propietario\" : \"Pancheitor\",\n"
+		"\t\"propietario\" : \"pablo\",\n"
 		"\t\"usuario ultima modificacion\" : \"Pepe\",\n"
 		"\t\"usuarios\" : [ \"Pancheitor\", \"Juan\", \"Pepe\", \"Santi\" ]\n"
 		"}";
@@ -126,10 +126,10 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaEliminarBienArchivoDeTexto) {
 	string filepath = "pablo/archivos/saludo.txt";
 	manejador->crearUsuario("pablo");
 	manejador->crearCarpetaSegura("pablo", path);
-	manejador->subirArchivo("pablo", filepath, "hola pablo", 10, "");
+	manejador->subirArchivo("pablo", filepath, "hola pablo", 10, jsonArchOK);
 	string filepathCompleto = pathFS + "/" + filepath;
 	manejador->eliminarArchivo("pablo", filepath);
-	string filepathCompletoTrash = pathFS + "/pablo/#trash/saludo.txt";
+	string filepathCompletoTrash = pathFS + "/pablo/#trash/archivos#saludo.txt";
 	struct stat buffer;
 	EXPECT_FALSE(stat (filepathCompleto.c_str(), &buffer) == 0); //No existe en el filesystem
 	EXPECT_TRUE(stat (filepathCompletoTrash.c_str(), &buffer) == 0); //Si existe en el trash
@@ -156,7 +156,7 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaPoderActualizarMetadatosDeArchivo
 			"\t\"extension\" : \"png\",\n"
 			"\t\"fecha ultima modificacion\" : \"10/09/2015\",\n"
 			"\t\"nombre\" : \"luna\",\n"
-			"\t\"propietario\" : \"Pancheitor\",\n"
+			"\t\"propietario\" : \"pablo\",\n"
 			"\t\"usuario ultima modificacion\" : \"Juan\",\n"
 			"\t\"usuarios\" : [ \"Pancheitor\", \"Juan\", \"Pepe\", \"Santi\", \"Pablo\" ]\n"
 			"}";
@@ -168,7 +168,7 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaPoderActualizarMetadatosDeArchivo
 	EXPECT_EQ("png", nuevoMetadato.extension);
 	EXPECT_EQ("10/09/2015", nuevoMetadato.fechaUltimaModificacion);
 	EXPECT_EQ("luna", nuevoMetadato.nombre);
-	EXPECT_EQ("Pancheitor", nuevoMetadato.propietario);
+	EXPECT_EQ("pablo", nuevoMetadato.propietario);
 	EXPECT_EQ("Juan", nuevoMetadato.usuarioUltimaModificacion);
 	EXPECT_EQ("pepe", nuevoMetadato.etiquetas.front());
 	EXPECT_EQ("Pablo", nuevoMetadato.usuariosHabilitados.back());
@@ -231,8 +231,8 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaBorrarBienCarpetaConArchivosPeroS
 	string filepath2 = "pablo/como estas/bien/juan";
 	manejador->crearUsuario("pablo");
 	manejador->crearCarpetaSegura("pablo","pablo/como estas/bien");
-	manejador->subirArchivo("pablo", filepath, "hola pablo", 10, "un metadato");
-	manejador->subirArchivo("pablo", filepath2, "hola pablo", 10, "un metadato");
+	manejador->subirArchivo("pablo", filepath, "hola pablo", 10, jsonArchOK);
+	manejador->subirArchivo("pablo", filepath2, "hola pablo", 10, jsonArchOK);
 	EXPECT_TRUE( manejador->eliminarCarpeta("pablo","pablo/como estas/bien") );
 }
 
@@ -248,9 +248,9 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaBorrarBienCarpetaConArchivosYCarp
 	string filepath3 = "pablo/como estas/bien/vos?/juan";
 	manejador->crearUsuario("pablo");
 	manejador->crearCarpetaSegura("pablo","pablo/como estas/bien/vos?");
-	manejador->subirArchivo("pablo", filepath, "hola pablo", 10, "un metadato");
-	manejador->subirArchivo("pablo", filepath2, "hola pablo", 10, "un metadato");
-	manejador->subirArchivo("pablo", filepath3, "hola pablo", 10, "un metadato");
+	manejador->subirArchivo("pablo", filepath, "hola pablo", 10, jsonArchOK);
+	manejador->subirArchivo("pablo", filepath2, "hola pablo", 10, jsonArchOK);
+	manejador->subirArchivo("pablo", filepath3, "hola pablo", 10, jsonArchOK);
 	EXPECT_TRUE( manejador->eliminarCarpeta("pablo","pablo/como estas") );
 }
 
@@ -313,7 +313,7 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaEliminarArchivoConMetodoEliminar)
 	string filepath = "pablo/archivos/saludo.txt";
 	manejador->crearUsuario("pablo");
 	manejador->crearCarpetaSegura("pablo", path);
-	manejador->subirArchivo("pablo", filepath, "hola pablo", 10, "");
+	manejador->subirArchivo("pablo", filepath, "hola pablo", 10, jsonArchOK);
 	string filepathCompleto = pathFS + "/" + filepath;
 	manejador->eliminar("pablo", filepath);
 	struct stat buffer;
@@ -326,9 +326,9 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaEliminarCarpetaConMetodoEliminar)
 	string filepath3 = "pablo/como estas/bien/vos?/juan";
 	manejador->crearUsuario("pablo");
 	manejador->crearCarpetaSegura("pablo","pablo/como estas/bien/vos?");
-	manejador->subirArchivo("pablo", filepath, "hola pablo", 10, "un metadato");
-	manejador->subirArchivo("pablo", filepath2, "hola pablo", 10, "un metadato");
-	manejador->subirArchivo("pablo", filepath3, "hola pablo", 10, "un metadato");
+	manejador->subirArchivo("pablo", filepath, "hola pablo", 10, jsonArchOK);
+	manejador->subirArchivo("pablo", filepath2, "hola pablo", 10, jsonArchOK);
+	manejador->subirArchivo("pablo", filepath3, "hola pablo", 10, jsonArchOK);
 	manejador->eliminar("pablo", "pablo/como estas");
 
 	string pathCarpetaEliminada = pathFS + "/pablo/como estas";

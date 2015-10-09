@@ -203,7 +203,6 @@ bool ManejadorArchivosYMetadatos::eliminarCarpeta(std::string username, std::str
 	return false;
 }
 
-// OJO porque el put tira excepciones
 // En la base de datos se guarda el path sin la carpeta del FS
 bool ManejadorArchivosYMetadatos::subirArchivo(std::string username,
 		std::string filepath, const char* data, int dataLen, std::string jsonMetadatos) {
@@ -273,7 +272,6 @@ bool ManejadorArchivosYMetadatos::actualizarArchivo(std::string username,
 	return false;
 }
 
-// OJO porque el get tira excepciones
 std::string ManejadorArchivosYMetadatos::consultarMetadatosArchivo(std::string username, std::string filepath) {
 	if ( verificarPermisos(username, filepath) ) {
 		if ( not dbMetadatos->contains(filepath) ){
@@ -285,7 +283,6 @@ std::string ManejadorArchivosYMetadatos::consultarMetadatosArchivo(std::string u
 	return "";
 }
 
-// OJO porque el modify tira excepciones
 // Lo que se va hacer es lo siguiente: Los nuevos metadatos vendran integramente por lo que se va a cambiar salvo por los usuarios habilitados.
 // En ese caso, puedo recibir ese campo vacio o lleno:
 // - Vacio significa que no se modificaron los usuarios
@@ -328,7 +325,6 @@ bool ManejadorArchivosYMetadatos::actualizarMetadatos(std::string username,
 		return false;
 }
 
-// OJO porque el get y modify tiran excepciones
 bool ManejadorArchivosYMetadatos::agregarPermiso(std::string usernameOrigen,
 		std::string filepath, std::string usernameDestino) {
 	if ( verificarPermisos(usernameOrigen, filepath) ) {
@@ -362,9 +358,8 @@ bool ManejadorArchivosYMetadatos::agregarPermiso(std::string usernameOrigen,
 		return false;
 }
 
-// OJO porque el get tira excepciones
 // Lo que se hace es moverlo a la papelera y cambiar el key de los metadatos por ese
-// TODO: Mandar el archivo a la papelera del propietario y borrar todos los permisos de todos, salvo del propietario
+// Manda el archivo a la papelera del propietario y borra todos los permisos de todos, salvo el del propietario
 bool ManejadorArchivosYMetadatos::eliminarArchivo(std::string username, std::string filepath) {
 	if ( verificarPermisos(username, filepath) ) {
 		std::string filepathCompleto = this->pathFileSystem + "/" + filepath;
@@ -376,19 +371,44 @@ bool ManejadorArchivosYMetadatos::eliminarArchivo(std::string username, std::str
 			vector<string> directorios = ParserURI::parsear(filepath, '/');
 			int size = directorios.size();
 			std::string filename = directorios[size-1];
-			std::string pathCompletoPapelera = username + "/" + trash + "/" + filename;
-			std::string pathArchivoPapelera = this->pathFileSystem + "/" + pathCompletoPapelera;
 
-			int result = rename( filepathCompleto.c_str(), pathArchivoPapelera.c_str() );
+			ParserJson parser;
+			string jsonMetadatos = dbMetadatos->get(filepath);
+			MetadatoArchivo metadato = parser.deserializarMetadatoArchivo(jsonMetadatos);
+
+			if ( metadato.propietario != directorios[0] ) {
+				std::cout << "El propietario del metadato no coincide con la carpeta del FileSystem. EXIT." << endl;
+				this->logError("El propietario del metadato no coincide con la carpeta del FileSystem. EXIT.");
+				exit(1);
+			}
+
+			std::string pathSinUsernameConHash = ParserURI::join(directorios, '#', 1, directorios.size());
+			std::string pathCompletoPapelera = metadato.propietario + "/" + trash + "/" + pathSinUsernameConHash;
+			std::string pathCompletoPapeleraConFS = this->pathFileSystem + "/" + pathCompletoPapelera;
+
+			int result = rename( filepathCompleto.c_str(), pathCompletoPapeleraConFS.c_str() );
 			if ( result == 0 ) {
 				this->logInfo("La eliminacion del archivo " + filepath + " fue correcta.");
 				Batch batch;
-				string metadatos = dbMetadatos->get(filepath);
-				string nuevosMetadatos = this->actualizarUsuarioFechaModificacion(metadatos, username);
-				batch.modify(filepath, nuevosMetadatos);
+				std::string jsonMetadatosConFechaModif = this->actualizarUsuarioFechaModificacion(jsonMetadatos, username);
+				MetadatoArchivo metadatoConFechaModif = parser.deserializarMetadatoArchivo(jsonMetadatosConFechaModif);
+				std::list<std::string> usuariosHabilitados = metadatoConFechaModif.usuariosHabilitados;
+				std::list<string>::iterator itUsu = usuariosHabilitados.begin();
+				for ( ; itUsu != usuariosHabilitados.end() ; itUsu++){
+					std::string usuario = (*itUsu);
+					if ( usuario == metadatoConFechaModif.propietario ) continue;
+					std::string permisosUsuario = permisos + "/" + usuario;
+					if ( dbMetadatos->contains(permisosUsuario) ){
+						std::string archivosStr = dbMetadatos->get(permisosUsuario);
+						std::vector<std::string> archivos = ParserURI::parsear(archivosStr, '#');
+						archivos.erase(std::remove(archivos.begin(), archivos.end(), filepath), archivos.end());
+						std::string joined = ParserURI::join(archivos, '#');
+						batch.modify(permisosUsuario, joined);
+					}
+				}
+				batch.modify(filepath, jsonMetadatosConFechaModif);
 				batch.erase(filepath);
-				batch.put(pathCompletoPapelera, nuevosMetadatos);
-				// TODO: Tener en cuenta que hay que cambiar en #permisos
+				batch.put(pathCompletoPapelera, jsonMetadatosConFechaModif);
 				if ( this->dbMetadatos->writeBatch(batch) )
 					return true;
 				this->logWarn("No se ha podido escribir el batch de eliminacion del archivo " + filepath + ".");
