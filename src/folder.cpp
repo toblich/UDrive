@@ -19,13 +19,7 @@ mg_result Folder::GETHandler(mg_connection* connection) {
 
 	if (manejadorUs->autenticarToken(token, user)){
 		this->logInfo("Se autenticó la sesión correctamente.");
-		string filepath = "";
-		for (int i = 1; i <= uris.size() - 1; i++){
-			filepath += uris[i];
-			if (i != uris.size() - 1){
-				filepath += "/";
-			}
-		}
+		string filepath = getFilepathFrom(uris);
 		string estructura = manejadorArchYMet->obtenerEstructuraCarpeta(filepath);
 		if(estructura != ""){
 			this->logInfo("Se envió la estructura de la carpeta: " + filepath + " correctamente.");
@@ -56,13 +50,7 @@ mg_result Folder::PUTHandler(mg_connection* connection) {
 
 	if (manejadorUs->autenticarToken(token, user)){
 		this->logInfo("Se autenticó la sesión correctamente.");
-		string filepath = "";
-		for (int i = 1; i <= uris.size() - 1; i++){
-			filepath += uris[i];
-			if (i != uris.size() - 1){
-				filepath += "/";
-			}
-		}
+		string filepath = getFilepathFrom(uris);
 		if(manejadorArchYMet->crearCarpetaSegura(user, filepath)){
 			this->logInfo("Se creo la carpeta: " + filepath + " correctamente.");
 			mg_send_status(connection, CODESTATUS_RESOURCE_CREATED);
@@ -92,13 +80,7 @@ mg_result Folder::DELETEHandler(mg_connection* connection) {
 
 	if (manejadorUs->autenticarToken(token, user)){
 		this->logInfo("Se autenticó la sesión correctamente.");
-		string filepath = "";
-		for (int i = 1; i <= uris.size() - 1; i++){
-			filepath += uris[i];
-			if (i != uris.size() - 1){
-				filepath += "/";
-			}
-		}
+		string filepath = getFilepathFrom(uris);
 		if (manejadorArchYMet->eliminar(user, filepath)){
 			this->logInfo("Se eliminó la carpeta: " + filepath + " correctamente.");
 			mg_send_status(connection, CODESTATUS_SUCCES);

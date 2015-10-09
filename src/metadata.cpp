@@ -21,13 +21,7 @@ mg_result Metadata::GETHandler(mg_connection* connection) {
 
 	if (manejadorUs->autenticarToken(token, user)){
 		this->logInfo("Se autenticó la sesión correctamente.");
-		string filepath = "";
-		for (int i = 1; i <= uris.size() - 1; i++){
-			filepath += uris[i];
-			if (i != uris.size() - 1){
-				filepath += "/";
-			}
-		}
+		string filepath = getFilepathFrom(uris);
 		string metadatosArch = manejadorArchYMet->consultarMetadatosArchivo(user, filepath);
 		if (metadatosArch != ""){
 			this->logInfo("Se enviaron los metadatos del archivo: " + filepath + " correctamente.");

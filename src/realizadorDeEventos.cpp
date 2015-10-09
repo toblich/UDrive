@@ -127,3 +127,14 @@ void RealizadorDeEventos::responderAutenticacionFallida(mg_connection* connectio
 	mg_send_header(connection, contentType.c_str(), jsonType.c_str());
 	printfData(connection, "{\"error\": \"El token no corresponde con la sesion del usuario\"}");
 }
+
+string RealizadorDeEventos::getFilepathFrom(const vector<string>& uris) {
+	string filepath = "";
+	for (int i = 1; i <= uris.size() - 1; i++) {
+		filepath += uris[i];
+		if (i != uris.size() - 1) {
+			filepath += "/";
+		}
+	}
+	return filepath;
+}
