@@ -74,32 +74,28 @@ bool ManejadorArchivosYMetadatos::verificarPathValido(std::string path) {
 bool ManejadorArchivosYMetadatos::tienePermisos(std::string username, std::string path){
 	std::string key = permisos + "/" + username;
 	if ( this->dbMetadatos->contains(key) ) {
-		ParserURI parser;
 		std::string archivosPermitidos = this->dbMetadatos->get(key);
-		std::vector<std::string> archivos = parser.parsear(archivosPermitidos, '#');
+		std::vector<std::string> archivos = ParserURI::parsear(archivosPermitidos, '#');
 		if ( std::find( archivos.begin(), archivos.end(), path ) != archivos.end() )
 			return true;
 		else
 			return false;
 	}
-	return false; //Significa que no se creo el usuario porque no existe esa key basicamente.
+	return false; //Significa que no se creo el usuario porque no existe esa key basicamente. No deberia pasar.
 }
 
 bool ManejadorArchivosYMetadatos::verificarPermisos(std::string username, std::string path) {
-	ParserURI parserUri;
-	vector<string> directorios = parserUri.parsear(path, '/');
+	vector<string> directorios = ParserURI::parsear(path, '/');
 	if ( directorios.size() > 0){
 		std::string fileOwner = directorios[0];
 		if ( username == fileOwner )
 			return true;
 		else {
-			//TODO: Verificar que el username tenga permisos en la parte de #permisos
-			//TODO: Sino, loguear que no tiene permisos
-			if ( this->tienePermisos(username, path) ) {
+s			if ( this->tienePermisos(username, path) ) {
 				return true;
 			}
 			this->logWarn("El usuario " + username + " no posee los permisos para el archivo " + path + ".");
-			return false; //Este return deberia depender de si tiene permisos o no
+			return false;
 		}
 	}
 	return false; //Esto no deberia pasar jamás, pero bueno
@@ -142,8 +138,7 @@ bool ManejadorArchivosYMetadatos::crearCarpeta(std::string username, std::string
 	if ( verificarPermisos(username, path) ) {
 		// Agrego el FileSystem para que sea la "raiz"
 		string pathCompletoConFS = this->pathFileSystem + "/" + path;
-		ParserURI parserUri;
-		vector<string> directorios = parserUri.parsear(pathCompletoConFS, '/');
+		vector<string> directorios = ParserURI::parsear(pathCompletoConFS, '/');
 		std::string directorioAcumulado = "";
 		int size = directorios.size();
 		for (int i = 0; i < size; i++){
@@ -238,8 +233,7 @@ bool ManejadorArchivosYMetadatos::actualizarArchivo(std::string username,
 		unsigned long int folderSize = 0;
 		if ( tamanioCarpeta(username, folderSize) ) {
 			if ( folderSize + dataLen <= CUOTA ) {
-				ParserURI parserUri;
-				vector<string> directorios = parserUri.parsear(filepath, '/');
+				vector<string> directorios = ParserURI::parsear(filepath, '/');
 				int size = directorios.size();
 				std::string pathSinArchivo = "";
 				for (int i = 0; i < size-1; i++){ //Saco el nombre del archivo
@@ -280,7 +274,6 @@ bool ManejadorArchivosYMetadatos::actualizarArchivo(std::string username,
 }
 
 // OJO porque el get tira excepciones
-// TODO: Ver si lanzar una excepcion mas especifica del tipo Metadato no encontrado
 std::string ManejadorArchivosYMetadatos::consultarMetadatosArchivo(std::string username, std::string filepath) {
 	if ( verificarPermisos(username, filepath) ) {
 		if ( not dbMetadatos->contains(filepath) ){
@@ -293,15 +286,43 @@ std::string ManejadorArchivosYMetadatos::consultarMetadatosArchivo(std::string u
 }
 
 // OJO porque el modify tira excepciones
-// TODO: Tiene sentido? Me parece mejor el hecho de agarrar y tener una "modificacion" por cada tipo como "darPermiso", "agregarEtiqueta", etc
+// Lo que se va hacer es lo siguiente: Los nuevos metadatos vendran integramente por lo que se va a cambiar salvo por los usuarios habilitados.
+// En ese caso, puedo recibir ese campo vacio o lleno:
+// - Vacio significa que no se modificaron los usuarios
+// - Lleno significa que esos son los nuevos usuarios habilitados -> En este caso me tengo que fijar los que ya habia comparados con los nuevos
+//																	 a ver cual es el/los nuevo/s usuarios a dar permisos.
+// Por ahora no se pueden borrar permisos.
 bool ManejadorArchivosYMetadatos::actualizarMetadatos(std::string username,
-		std::string filepath, std::string nuevosMetadatos) {
+		std::string filepath, std::string jsonNuevosMetadatos) {
 	if ( verificarPermisos(username, filepath) ) {
 		if ( not dbMetadatos->contains(filepath) ){
 			this->logWarn("Se quiso actualizar los metadatos del archivo " + filepath + " pero este no existe.");
 			return false;
 		}
-		dbMetadatos->modify(filepath, nuevosMetadatos);
+		ParserJson parser;
+		std::string jsonMetadatosViejos = dbMetadatos->get(filepath);
+		MetadatoArchivo metadatosViejos = parser.deserializarMetadatoArchivo(jsonMetadatosViejos);
+		MetadatoArchivo metadatosNuevos = parser.deserializarMetadatoArchivo(jsonNuevosMetadatos);
+		std::list<std::string> usuariosViejos =  metadatosViejos.usuariosHabilitados;
+		std::list<std::string> usuariosNuevos =  metadatosNuevos.usuariosHabilitados;
+		std::string nuevoJson;
+
+		if ( usuariosNuevos.empty() ){
+			metadatosNuevos.usuariosHabilitados = usuariosViejos;
+			nuevoJson = parser.serializarMetadatoArchivo(metadatosNuevos);
+		} else {
+			std::list<string>::iterator itUsuNuevos = usuariosNuevos.begin();
+			for ( ; itUsuNuevos != usuariosNuevos.end() ; itUsuNuevos++){
+				std::string nuevoUsuario = (*itUsuNuevos);
+				// Si todavia no tenia permisos
+				if ( std::find( usuariosViejos.begin(), usuariosViejos.end(), nuevoUsuario ) == usuariosViejos.end() ) {
+					this->agregarPermiso(username, filepath, nuevoUsuario);
+				}
+			}
+			nuevoJson = jsonNuevosMetadatos;
+		}
+
+		dbMetadatos->modify(filepath, nuevoJson);
 		return true;
 	} else
 		return false;
@@ -311,9 +332,13 @@ bool ManejadorArchivosYMetadatos::actualizarMetadatos(std::string username,
 bool ManejadorArchivosYMetadatos::agregarPermiso(std::string usernameOrigen,
 		std::string filepath, std::string usernameDestino) {
 	if ( verificarPermisos(usernameOrigen, filepath) ) {
-		//TODO Falta agregar el hecho de agregar al archivo de permisos que esta descripto en el issue
 		if ( not dbMetadatos->contains(filepath) ){
 			this->logWarn("Se quiso agregar un permiso al archivo " + filepath + " pero este no existe.");
+			return false;
+		}
+		std::string pathPermisos = permisos + "/" + usernameDestino;
+		if ( not dbMetadatos->contains(pathPermisos) ) {
+			this->logWarn("Se quiso agregar un permiso al usuario " + usernameDestino + " pero este no existe.");
 			return false;
 		}
 		std::string jsonArchivo = dbMetadatos->get(filepath);
@@ -321,8 +346,17 @@ bool ManejadorArchivosYMetadatos::agregarPermiso(std::string usernameOrigen,
 		MetadatoArchivo metadato = parser.deserializarMetadatoArchivo(jsonArchivo);
 		metadato.usuariosHabilitados.push_back(usernameDestino);
 		std::string jsonModificado = parser.serializarMetadatoArchivo(metadato);
-		std::string nuevosMetadatos = this->actualizarUsuarioFechaModificacion(jsonModificado, usernameOrigen);
-		dbMetadatos->modify(filepath, nuevosMetadatos);
+		dbMetadatos->modify(filepath, jsonModificado);
+//		Como este metodo se llama directamente desde actualizarMetadatos, ya la fecha viene modificada
+//		std::string nuevosMetadatos = this->actualizarUsuarioFechaModificacion(jsonModificado, usernameOrigen);
+//		dbMetadatos->modify(filepath, nuevosMetadatos);
+
+		std::string archivosPermitidos = dbMetadatos->get(pathPermisos);
+		if ( archivosPermitidos != "" )
+			archivosPermitidos += "#";
+		archivosPermitidos += filepath;
+		dbMetadatos->modify(pathPermisos, archivosPermitidos);
+
 		return true;
 	} else
 		return false;
@@ -330,6 +364,7 @@ bool ManejadorArchivosYMetadatos::agregarPermiso(std::string usernameOrigen,
 
 // OJO porque el get tira excepciones
 // Lo que se hace es moverlo a la papelera y cambiar el key de los metadatos por ese
+// TODO: Mandar el archivo a la papelera del propietario y borrar todos los permisos de todos, salvo del propietario
 bool ManejadorArchivosYMetadatos::eliminarArchivo(std::string username, std::string filepath) {
 	if ( verificarPermisos(username, filepath) ) {
 		std::string filepathCompleto = this->pathFileSystem + "/" + filepath;
@@ -338,8 +373,7 @@ bool ManejadorArchivosYMetadatos::eliminarArchivo(std::string username, std::str
 				this->logWarn("Se quiso eliminar el archivo " + filepath + " pero este no existe en la base de datos.");
 				return false;
 			}
-			ParserURI parserUri;
-			vector<string> directorios = parserUri.parsear(filepath, '/');
+			vector<string> directorios = ParserURI::parsear(filepath, '/');
 			int size = directorios.size();
 			std::string filename = directorios[size-1];
 			std::string pathCompletoPapelera = username + "/" + trash + "/" + filename;
@@ -382,8 +416,7 @@ std::string ManejadorArchivosYMetadatos::obtenerEstructuraCarpeta(std::string pa
 			std::string pathInterno = path + "/" + ent->d_name;
 			std::string pathInternoConFS = this->pathFileSystem + "/" + pathInterno;
 			if ( this->existeCarpeta(pathInternoConFS) ){
-				ParserURI parserUri;
-				vector<string> directorios = parserUri.parsear(pathInterno, '/');
+				vector<string> directorios = ParserURI::parsear(pathInterno, '/');
 				int size = directorios.size();
 				std::string foldername = directorios[size-1];
 				mapa.insert(pair<string, string>(foldername, "#folder"));

@@ -27,10 +27,19 @@ class ManejadorArchivosYMetadatosTest : public ::testing::Test {
 		ManejadorArchivosYMetadatos* manejador;
 };
 
+const std::string jsonArchOK = "{\n"
+		"\t\"etiquetas\" : [ \"23\", true, \"juan\" ],\n"
+		"\t\"extension\" : \"jpg\",\n"
+		"\t\"fecha ultima modificacion\" : \"09/09/2015\",\n"
+		"\t\"nombre\" : \"sol\",\n"
+		"\t\"propietario\" : \"Pancheitor\",\n"
+		"\t\"usuario ultima modificacion\" : \"Pepe\",\n"
+		"\t\"usuarios\" : [ \"Pancheitor\", \"Juan\", \"Pepe\", \"Santi\" ]\n"
+		"}";
+
 TEST_F(ManejadorArchivosYMetadatosTest, deberiaParsearBienPathComun) {
 	std::string path = "pablo/hola/como/estas";
-	ParserURI parserUri;
-	vector<string> directorios = parserUri.parsear(path, '/');
+	vector<string> directorios = ParserURI::parsear(path, '/');
 	vector<string>::iterator itDir = directorios.begin();
 	ASSERT_TRUE(directorios.size() == 4);
 	int i = 0;
@@ -48,8 +57,7 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaParsearBienPathComun) {
 
 TEST_F(ManejadorArchivosYMetadatosTest, deberiaParsearBienPathConEspacios) {
 	std::string path = "pablo/hola/como estas";
-	ParserURI parserUri;
-	vector<string> directorios = parserUri.parsear(path, '/');
+	vector<string> directorios = ParserURI::parsear(path, '/');
 	vector<string>::iterator itDir = directorios.begin();
 	ASSERT_TRUE(directorios.size() == 3);
 	int i = 0;
@@ -65,10 +73,10 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaParsearBienPathConEspacios) {
 TEST_F(ManejadorArchivosYMetadatosTest, deberiaCrearBienCarpetasSeguras) {
 	struct stat sb;
 	string path = "pablo/como estas/bien";
+	manejador->crearUsuario("pablo");
 	manejador->crearCarpetaSegura("pablo", path);
 	string pathCompleto = pathFS + "/" + path;
-	ParserURI parserUri;
-	vector<string> directorios = parserUri.parsear(pathCompleto, '/');
+	vector<string> directorios = ParserURI::parsear(pathCompleto, '/');
 	std::string directorioAcumulado = "";
 	int size = directorios.size();
 	for (int i = 0; i < size; i++){
@@ -100,6 +108,7 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaCrearCarpetaTrashAlCrearUsuario) 
 TEST_F(ManejadorArchivosYMetadatosTest, deberiaSubirBienArchivoDeTexto) {
 	string path = "pablo/archivos";
 	string filepath = "pablo/archivos/saludo.txt";
+	manejador->crearUsuario("pablo");
 	manejador->crearCarpetaSegura("pablo", path);
 	manejador->subirArchivo("pablo", filepath, "hola pablo", 10, "");
 	string pathCompleto = pathFS + "/" + filepath;
@@ -129,6 +138,7 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaEliminarBienArchivoDeTexto) {
 TEST_F(ManejadorArchivosYMetadatosTest, deberiaPoderConsultarMetadatosDeArchivo) {
 	string path = "pablo/archivos";
 	string filepath = "pablo/archivos/saludo.txt";
+	manejador->crearUsuario("pablo");
 	manejador->crearCarpetaSegura("pablo", path);
 	manejador->subirArchivo("pablo", filepath, "hola pablo", 10, "un metadato");
 	string metadato = manejador->consultarMetadatosArchivo("pablo", filepath);
@@ -138,28 +148,40 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaPoderConsultarMetadatosDeArchivo)
 TEST_F(ManejadorArchivosYMetadatosTest, deberiaPoderActualizarMetadatosDeArchivo) {
 	string path = "pablo/archivos";
 	string filepath = "pablo/archivos/saludo.txt";
+	manejador->crearUsuario("pablo");
 	manejador->crearCarpetaSegura("pablo", path);
-	manejador->subirArchivo("pablo", filepath, "hola pablo", 10, "un metadato");
-	manejador->actualizarMetadatos("pablo",filepath,"otro metadato");
-	string metadato = manejador->consultarMetadatosArchivo("pablo", filepath);
-	EXPECT_EQ("otro metadato", metadato);
+	manejador->subirArchivo("pablo", filepath, "hola pablo", 10, jsonArchOK);
+	std::string nuevoJson = "{\n"
+			"\t\"etiquetas\" : [ \"pepe\" ],\n"
+			"\t\"extension\" : \"png\",\n"
+			"\t\"fecha ultima modificacion\" : \"10/09/2015\",\n"
+			"\t\"nombre\" : \"luna\",\n"
+			"\t\"propietario\" : \"Pancheitor\",\n"
+			"\t\"usuario ultima modificacion\" : \"Juan\",\n"
+			"\t\"usuarios\" : [ \"Pancheitor\", \"Juan\", \"Pepe\", \"Santi\", \"Pablo\" ]\n"
+			"}";
+	manejador->actualizarMetadatos("pablo",filepath, nuevoJson);
+	string jsonNuevoMetadato = manejador->consultarMetadatosArchivo("pablo", filepath);
+	ParserJson parser;
+	MetadatoArchivo nuevoMetadato = parser.deserializarMetadatoArchivo(jsonNuevoMetadato);
+
+	EXPECT_EQ("png", nuevoMetadato.extension);
+	EXPECT_EQ("10/09/2015", nuevoMetadato.fechaUltimaModificacion);
+	EXPECT_EQ("luna", nuevoMetadato.nombre);
+	EXPECT_EQ("Pancheitor", nuevoMetadato.propietario);
+	EXPECT_EQ("Juan", nuevoMetadato.usuarioUltimaModificacion);
+	EXPECT_EQ("pepe", nuevoMetadato.etiquetas.front());
+	EXPECT_EQ("Pablo", nuevoMetadato.usuariosHabilitados.back());
 }
 
 TEST_F(ManejadorArchivosYMetadatosTest, deberiaPoderAgregarPermisoYAgregarloAlMetadato) {
 	//Como todavia no se agregan los permisos propiamente dichos, me fijo que se agreguen al metadato nomas
-	string metadatoArch = "{\n"
-			"\t\"etiquetas\" : [ \"23\", true, \"juan\" ],\n"
-			"\t\"extension\" : \"jpg\",\n"
-			"\t\"fecha ultima modificacion\" : \"09/09/2015\",\n"
-			"\t\"nombre\" : \"sol\",\n"
-			"\t\"propietario\" : \"Pancheitor\",\n"
-			"\t\"usuario ultima modificacion\" : \"Pepe\",\n"
-			"\t\"usuarios\" : [ \"pablo\" ]\n"
-			"}";
 	string path = "pablo/archivos";
 	string filepath = "pablo/archivos/saludo.txt";
+	manejador->crearUsuario("pablo");
+	manejador->crearUsuario("juan");
 	manejador->crearCarpetaSegura("pablo", path);
-	manejador->subirArchivo("pablo", filepath, "hola pablo", 10, metadatoArch);
+	manejador->subirArchivo("pablo", filepath, "hola pablo", 10, jsonArchOK);
 	manejador->agregarPermiso("pablo",filepath,"juan");
 	string metadatoActualizado = manejador->consultarMetadatosArchivo("pablo",filepath);
 	ParserJson parser;
@@ -176,6 +198,7 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaDevolverStringVacioPorArchivoInex
 TEST_F(ManejadorArchivosYMetadatosTest, deberiaDevolverPathCompletoPorArchivoExistenteAlDescargar) {
 	string path = "pablo/archivos";
 	string filepath = "pablo/archivos/saludo.txt";
+	manejador->crearUsuario("pablo");
 	manejador->crearCarpetaSegura("pablo", path);
 	manejador->subirArchivo("pablo", filepath, "hola pablo", 10, "un metadato");
 	string pathCompleto = manejador->descargarArchivo("pablo", filepath);
@@ -232,15 +255,6 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaBorrarBienCarpetaConArchivosYCarp
 }
 
 TEST_F(ManejadorArchivosYMetadatosTest, deberiaCambiarBienFechaYUsuarioUltimaModificacion) {
-	std::string jsonArchOK = "{\n"
-			"\t\"etiquetas\" : [ \"23\", true, \"juan\" ],\n"
-			"\t\"extension\" : \"jpg\",\n"
-			"\t\"fecha ultima modificacion\" : \"09/09/2015\",\n"
-			"\t\"nombre\" : \"sol\",\n"
-			"\t\"propietario\" : \"Pancheitor\",\n"
-			"\t\"usuario ultima modificacion\" : \"Pepe\",\n"
-			"\t\"usuarios\" : [ \"Pancheitor\", \"Juan\", \"Pepe\", \"Santi\" ]\n"
-			"}";
 	struct tm *tiempo;
 	time_t fecha_sistema;
 	time(&fecha_sistema);

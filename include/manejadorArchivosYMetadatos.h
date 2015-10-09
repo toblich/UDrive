@@ -42,6 +42,7 @@ private:
 	std::string actualizarUsuarioFechaModificacion(std::string jsonMetadatos, std::string usernameModificacion);
 	bool agregarPermisosABD(std::string username);
 	bool eliminarArchivo(std::string username, std::string filepath);
+	bool agregarPermiso(std::string usernameOrigen, std::string filepath, std::string usernameDestino);
 
 public:
 	ManejadorArchivosYMetadatos(BD* dbMetadatos);
@@ -59,8 +60,7 @@ public:
 	bool actualizarArchivo(std::string username, std::string filepath, const char* data, int dataLen);
 
 	std::string consultarMetadatosArchivo(std::string username, std::string filename);
-	bool actualizarMetadatos(std::string username, std::string filepath, std::string nuevosMetadatos); //TODO fecha modificacion
-	bool agregarPermiso(std::string usernameOrigen, std::string filepath, std::string usernameDestino);
+	bool actualizarMetadatos(std::string username, std::string filepath, std::string jsonNuevosMetadatos);
 
 	bool deleteFileSystem();
 };
