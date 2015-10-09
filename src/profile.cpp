@@ -31,10 +31,7 @@ mg_result Profile::GETHandler(mg_connection* connection) {
 			printfData(connection, "{\"error\": \"El usuario no existe, no se pudo obtener el perfil\"}");
 		}
 	}else{
-		this->logInfo("No se pudo autenticar la sesión.");
-		mg_send_status(connection, CODESTATUS_UNAUTHORIZED_CLIENT);
-		mg_send_header(connection, contentType.c_str(), jsonType.c_str());
-		printfData(connection, "{\"error\": \"El token no corresponde con la sesion del usuario\"}");
+		this->responderAutenticacionFallida(connection);
 	}
 
 	return MG_TRUE;
@@ -71,10 +68,7 @@ mg_result Profile::PUTHandler(mg_connection* connection) {
 		mg_send_header(connection, contentType.c_str(), jsonType.c_str());
 		printfData(connection, "{\"success\": \"Se modifico el perfil exitosamente\"}");
 	}else{
-		this->logInfo("No se pudo autenticar la sesión.");
-		mg_send_status(connection, CODESTATUS_UNAUTHORIZED_CLIENT);
-		mg_send_header(connection, contentType.c_str(), jsonType.c_str());
-		printfData(connection, "{\"error\": \"El token no corresponde con la sesion del usuario\"}");
+		this->responderAutenticacionFallida(connection);
 	}
 	return MG_TRUE;
 }

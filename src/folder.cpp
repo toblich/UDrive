@@ -39,10 +39,7 @@ mg_result Folder::GETHandler(mg_connection* connection) {
 			printfData(connection, "{\"error\": \"El path de la carpeta es invalido.\"}");
 		}
 	}else{
-		this->logInfo("No se pudo autenticar la sesión.");
-		mg_send_status(connection, CODESTATUS_UNAUTHORIZED_CLIENT);
-		mg_send_header(connection, contentType.c_str(), jsonType.c_str());
-		printfData(connection, "{\"error\": \"El token no corresponde con la sesion del usuario.\"}");
+		this->responderAutenticacionFallida(connection);
 	}
 	return MG_TRUE;
 }
@@ -78,10 +75,7 @@ mg_result Folder::PUTHandler(mg_connection* connection) {
 			printfData(connection, "{\"error\": \"El path de la carpeta es invalido.\"}");
 		}
 	}else{
-		this->logInfo("No se pudo autenticar la sesión.");
-		mg_send_status(connection, CODESTATUS_UNAUTHORIZED_CLIENT);
-		mg_send_header(connection, contentType.c_str(), jsonType.c_str());
-		printfData(connection, "{\"error\": \"El token no corresponde con la sesion del usuario.\"}");
+		this->responderAutenticacionFallida(connection);
 	}
 	return MG_TRUE;
 }
@@ -117,10 +111,7 @@ mg_result Folder::DELETEHandler(mg_connection* connection) {
 			printfData(connection, "{\"error\": \"Path invalido, no se encontro la carpeta.\"}");
 		}
 	}else{
-		this->logInfo("No se pudo autenticar la sesión.");
-		mg_send_status(connection, CODESTATUS_UNAUTHORIZED_CLIENT);
-		mg_send_header(connection, contentType.c_str(), jsonType.c_str());
-		printfData(connection, "{\"error\": \"El token no corresponde con la sesion del usuario.\"}");
+		this->responderAutenticacionFallida(connection);
 	}
 	return MG_TRUE;
 }

@@ -41,10 +41,7 @@ mg_result Metadata::GETHandler(mg_connection* connection) {
 			printfData(connection, "{\"error\": \"El usuario no tiene permisos o los metadatos del archivo no existen\"}");
 		}
 	}else{
-		this->logInfo("No se pudo autenticar la sesión.");
-		mg_send_status(connection, CODESTATUS_UNAUTHORIZED_CLIENT);
-		mg_send_header(connection, contentType.c_str(), jsonType.c_str());
-		printfData(connection, "{\"error\": \"El token no corresponde con la sesion del usuario\"}");
+		this->responderAutenticacionFallida(connection);
 	}
 	return MG_TRUE;
 }

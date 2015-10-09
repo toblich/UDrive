@@ -64,6 +64,8 @@ protected:
 	virtual mg_result DELETEHandler(mg_connection* connection);
 	void unsupportedMethod(mg_connection* connection);
 
+	void responderAutenticacionFallida(mg_connection* connection);
+
 };
 
 #endif /* REALIZADORDEEVENTOS_H_ */
