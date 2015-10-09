@@ -139,8 +139,8 @@ class ServerTest(unittest.TestCase):
 		self.assertEquals(perfilObtenido.get("nombre"), perfilOriginal.get("nombre"))
 		self.assertEquals(perfilObtenido.get("email"), perfilOriginal.get("email"))
 
-		s = requests.put(PROFILE + username, data={"nombre": "otroNombre", "email": 'otro@e.mail',
-			"token": token, "latitud" : "0.0", "longitud" : 10.0}) # actualizar perfil
+		s = requests.put(PROFILE + username, data={"profile": '{"nombre": "otroNombre", "email": "otro@e.mail"}',
+			"token": token}) # actualizar perfil
 		self.assertEquals(s.status_code, SUCCESS)
 		
 		t = requests.get(PROFILE + username, data={"token": token})	# obtener nuevo perfil
@@ -148,8 +148,6 @@ class ServerTest(unittest.TestCase):
 		nuevoPerfilObtenido = t.json().get("perfil")
 		self.assertEquals(nuevoPerfilObtenido.get("nombre"), "otroNombre")
 		self.assertEquals(nuevoPerfilObtenido.get("email"), "otro@e.mail")
-		self.assertEquals(nuevoPerfilObtenido.get("ultima ubicacion").get("latitud"), 0.0)
-		self.assertEquals(nuevoPerfilObtenido.get("ultima ubicacion").get("longitud"), 10.0)
 
 
 	def test_subirBajarYBorrarArchivoTexto(self):
