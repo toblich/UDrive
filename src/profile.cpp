@@ -38,9 +38,6 @@ mg_result Profile::GETHandler (mg_connection* connection) {
 }
 
 mg_result Profile::PUTHandler (mg_connection* connection) {
-	//ParserJson parserJson;
-	//MetadatoUsuario nuevoPerfil;
-
 	string uri = string(connection->uri);
 	vector<string> uris = ParserURI::parsear(uri, '/');
 	this->logInfo("Se parseó la uri correctamente.");
@@ -49,16 +46,6 @@ mg_result Profile::PUTHandler (mg_connection* connection) {
 	this->logInfo("Se obtuvo la variable token con valor: " + token);
 	string nuevoPerfil = getVar(connection, "profile");
 	this->logInfo("Se obtuvo la variable con el nuevo perfil.");
-
-//	nuevoPerfil.nombre = getVar(connection, "nombre");
-//	this->logInfo("Se obtuvo la variable nombre con valor: " + nuevoPerfil.nombre);
-//	nuevoPerfil.email = getVar(connection, "email");
-//	this->logInfo("Se obtuvo la variable email con valor: " + nuevoPerfil.email);
-//	nuevoPerfil.pathFotoPerfil = getVar(connection, "pathFoto");
-//	this->logInfo("Se obtuvo la variable pathFoto con valor: " + nuevoPerfil.pathFotoPerfil);
-//	nuevoPerfil.ultimaUbicacion.latitud = getVarFloat(connection, "latitud");
-//	nuevoPerfil.ultimaUbicacion.longitud = getVarFloat(connection, "longitud");
-//	string perfilActualizado = parserJson.serializarMetadatoUsuario(nuevoPerfil);
 
 	if (manejadorUs->autenticarToken(token, uris[1])) {
 		this->logInfo("Se autenticó la sesión correctamente.");
