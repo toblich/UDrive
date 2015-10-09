@@ -401,16 +401,15 @@ bool ManejadorArchivosYMetadatos::eliminarArchivo (string username, string filep
 
 string ManejadorArchivosYMetadatos::obtenerEstructuraCarpeta (string path) {
 	string pathCompleto = this->pathFileSystem + "/" + path;
-	map<string, string> mapa;
 	DIR* dir;
-	struct dirent* ent;
 	if ((dir = opendir(pathCompleto.c_str())) != NULL) {
-		ParserJson parser;
+		map<string, string> mapa;
+		struct dirent* ent;
 		while ((ent = readdir(dir)) != NULL) {
-			if (strcmp(ent->d_name, ".") == 0)
+			string dirName(ent->d_name);
+			if (dirName == "." or dirName == "..")
 				continue;
-			if (strcmp(ent->d_name, "..") == 0)
-				continue;
+
 			string pathInterno = path + "/" + ent->d_name;
 			string pathInternoConFS = this->pathFileSystem + "/" + pathInterno;
 			if (this->existeCarpeta(pathInternoConFS)) {
@@ -424,7 +423,7 @@ string ManejadorArchivosYMetadatos::obtenerEstructuraCarpeta (string path) {
 					return "";
 				}
 				string jsonMetadatos = this->dbMetadatos->get(pathInterno);
-				MetadatoArchivo metadato = parser.deserializarMetadatoArchivo(jsonMetadatos);
+				MetadatoArchivo metadato = ParserJson().deserializarMetadatoArchivo(jsonMetadatos);
 				string nombre = metadato.nombre;
 				if (metadato.extension != "none")
 					nombre += "." + metadato.extension;
@@ -432,7 +431,7 @@ string ManejadorArchivosYMetadatos::obtenerEstructuraCarpeta (string path) {
 			}
 		}
 		closedir(dir);
-		string json = parser.serializarMapa(mapa);
+		string json = ParserJson().serializarMapa(mapa);
 		return json;
 	} else
 		Logger::logWarn("No existe el directorio " + path);
