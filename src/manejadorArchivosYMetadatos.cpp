@@ -6,7 +6,7 @@
 //		 username: pablo		path: tobi/hola/asd.txt
 //		 Me deberia fijar si username es igual al primero del path. De ser asi, tiene los permisos seguro.
 //		 Sino, como en este caso, deberia fijarme si pablo tiene permisos para acceder a ese path mediante lo que habra en la DB
-//		 bajo la key '~permisos/pablo' y cuyo value sera algo del estilo 'pancho/datos/pepe.jpg#tobi/hola/asd.txt#santi/chau.txt'
+//		 bajo la key '#permisos/pablo' y cuyo value sera algo del estilo 'pancho/datos/pepe.jpg#tobi/hola/asd.txt#santi/chau.txt'
 //		 lo cual habra que parsear y ver si esta o no.
 //
 //		 REVISAR Y TESTEAR!!!
@@ -71,6 +71,20 @@ bool ManejadorArchivosYMetadatos::verificarPathValido(std::string path) {
 	return false;
 }
 
+bool ManejadorArchivosYMetadatos::tienePermisos(std::string username, std::string path){
+	std::string key = permisos + "/" + username;
+	if ( this->dbMetadatos->contains(key) ) {
+		ParserURI parser;
+		std::string archivosPermitidos = this->dbMetadatos->get(key);
+		std::vector<std::string> archivos = parser.parsear(archivosPermitidos, '#');
+		if ( std::find( archivos.begin(), archivos.end(), path ) != archivos.end() )
+			return true;
+		else
+			return false;
+	}
+	return false; //Significa que no se creo el usuario porque no existe esa key basicamente.
+}
+
 bool ManejadorArchivosYMetadatos::verificarPermisos(std::string username, std::string path) {
 	ParserURI parserUri;
 	vector<string> directorios = parserUri.parsear(path, '/');
@@ -79,8 +93,11 @@ bool ManejadorArchivosYMetadatos::verificarPermisos(std::string username, std::s
 		if ( username == fileOwner )
 			return true;
 		else {
-			//TODO: Verificar que el username tenga permisos en la parte de ~permisos
+			//TODO: Verificar que el username tenga permisos en la parte de #permisos
 			//TODO: Sino, loguear que no tiene permisos
+			if ( this->tienePermisos(username, path) ) {
+				return true;
+			}
 			this->logWarn("El usuario " + username + " no posee los permisos para el archivo " + path + ".");
 			return false; //Este return deberia depender de si tiene permisos o no
 		}
@@ -151,10 +168,20 @@ bool ManejadorArchivosYMetadatos::crearCarpetaSegura(std::string username, std::
 		return false;
 }
 
+bool ManejadorArchivosYMetadatos::agregarPermisosABD(std::string username) {
+	std::string key = permisos + "/" + username;
+	if ( not this->dbMetadatos->contains(key) ) {
+		this->dbMetadatos->put(key,"");
+		return true;
+	}
+	return false; // No deberia pasar nunca, ya que implicaria que ya existe ese usuario
+}
+
 bool ManejadorArchivosYMetadatos::crearUsuario(std::string username) {
 	//Creo tanto la carpeta del username como su papelera
 	string pathTrash = username + "/" + trash;
-	return this->crearCarpeta(username, pathTrash);
+	bool agregoPermisos = this->agregarPermisosABD(username);
+	return ( agregoPermisos and this->crearCarpeta(username, pathTrash) );
 }
 
 //Borrara todos los archivos de la carpeta y, en caso de que quede vacia, la carpeta fisica del fileSystem tambien
@@ -327,7 +354,7 @@ bool ManejadorArchivosYMetadatos::eliminarArchivo(std::string username, std::str
 				batch.modify(filepath, nuevosMetadatos);
 				batch.erase(filepath);
 				batch.put(pathCompletoPapelera, nuevosMetadatos);
-				// TODO: Tener en cuenta que hay que cambiar en ~permisos
+				// TODO: Tener en cuenta que hay que cambiar en #permisos
 				if ( this->dbMetadatos->writeBatch(batch) )
 					return true;
 				this->logWarn("No se ha podido escribir el batch de eliminacion del archivo " + filepath + ".");

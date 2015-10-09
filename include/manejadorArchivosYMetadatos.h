@@ -9,9 +9,11 @@
 #include "bd.h"
 #include "logger.h"
 #include <dirent.h>
+#include <algorithm>
 
 const std::string defaultFileSystem = "FileSystem";
 const std::string trash = "#trash";
+const std::string permisos = "#permisos";
 const unsigned long int CUOTA = 2147483648; // 2GB
 
 class ManejadorArchivosYMetadatos {
@@ -28,6 +30,7 @@ private:
 	bool existeCarpeta(std::string path);
 
 	bool verificarPathValido(std::string path);
+	bool tienePermisos(std::string username, std::string path);
 	bool verificarPermisos(std::string username, std::string path);
 
 	bool tamanioCarpeta(std::string path, unsigned long int & size);
@@ -37,6 +40,7 @@ private:
 	bool deleteCarpeta(std::string path);
 
 	std::string actualizarUsuarioFechaModificacion(std::string jsonMetadatos, std::string usernameModificacion);
+	bool agregarPermisosABD(std::string username);
 	bool eliminarArchivo(std::string username, std::string filepath);
 
 public:
@@ -51,10 +55,11 @@ public:
 	bool eliminar(std::string username, std::string path); //Sirve para carpetas y archivos
 
 	bool subirArchivo(std::string username, std::string filepath, const char* data, int dataLen, std::string jsonMetadatos);
+	std::string descargarArchivo(std::string username, std::string filepath);
+	bool actualizarArchivo(std::string username, std::string filepath, const char* data, int dataLen);
+
 	std::string consultarMetadatosArchivo(std::string username, std::string filename);
 	bool actualizarMetadatos(std::string username, std::string filepath, std::string nuevosMetadatos); //TODO fecha modificacion
-	bool actualizarArchivo(std::string username, std::string filepath, const char* data, int dataLen);
-	std::string descargarArchivo(std::string username, std::string filepath);
 	bool agregarPermiso(std::string usernameOrigen, std::string filepath, std::string usernameDestino);
 
 	bool deleteFileSystem();
