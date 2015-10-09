@@ -91,7 +91,7 @@ bool ManejadorArchivosYMetadatos::verificarPermisos(std::string username, std::s
 		if ( username == fileOwner )
 			return true;
 		else {
-s			if ( this->tienePermisos(username, path) ) {
+			if ( this->tienePermisos(username, path) ) {
 				return true;
 			}
 			this->logWarn("El usuario " + username + " no posee los permisos para el archivo " + path + ".");
