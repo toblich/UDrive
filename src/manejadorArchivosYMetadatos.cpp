@@ -327,6 +327,34 @@ bool ManejadorArchivosYMetadatos::agregarPermiso (string usernameOrigen, string 
 		return false;
 }
 
+Batch ManejadorArchivosYMetadatos::armarBatchEliminarArchivo (const string& jsonMetadatos, const string& username,
+		const string& filepath, const string& pathCompletoPapelera) {
+	Batch batch;
+	string jsonMetadatosConFechaModif = this->actualizarUsuarioFechaModificacion(jsonMetadatos, username);
+	MetadatoArchivo metadatoConFechaModif = ParserJson().deserializarMetadatoArchivo(jsonMetadatosConFechaModif);
+	list<string> usuariosHabilitados = metadatoConFechaModif.usuariosHabilitados;
+	list<string>::iterator itUsu = usuariosHabilitados.begin();
+
+	for (; itUsu != usuariosHabilitados.end(); itUsu++) {
+		string usuario = (*itUsu);
+		if (usuario == metadatoConFechaModif.propietario)
+			continue;
+
+		string permisosUsuario = permisos + "/" + usuario;
+		if (dbMetadatos->contains(permisosUsuario)) {
+			string archivosStr = dbMetadatos->get(permisosUsuario);
+			vector<string> archivos = ParserURI::parsear(archivosStr, '#');
+			archivos.erase(remove(archivos.begin(), archivos.end(), filepath), archivos.end());
+			string joined = ParserURI::join(archivos, '#');
+			batch.modify(permisosUsuario, joined);
+		}
+	}
+	batch.modify(filepath, jsonMetadatosConFechaModif);
+	batch.erase(filepath);
+	batch.put(pathCompletoPapelera, jsonMetadatosConFechaModif);
+	return batch;
+}
+
 // Lo que se hace es moverlo a la papelera y cambiar el key de los metadatos por ese
 // Manda el archivo a la papelera del propietario y borra todos los permisos de todos, salvo el del propietario
 bool ManejadorArchivosYMetadatos::eliminarArchivo (string username, string filepath) {
@@ -337,15 +365,12 @@ bool ManejadorArchivosYMetadatos::eliminarArchivo (string username, string filep
 				Logger::logWarn("Se quiso eliminar el archivo " + filepath + " pero este no existe en la base de datos.");
 				return false;
 			}
+
 			vector<string> directorios = ParserURI::parsear(filepath, '/');
-			int size = directorios.size();
-			string filename = directorios[size - 1];
-
-			ParserJson parser;
 			string jsonMetadatos = dbMetadatos->get(filepath);
-			MetadatoArchivo metadato = parser.deserializarMetadatoArchivo(jsonMetadatos);
+			MetadatoArchivo metadato = ParserJson().deserializarMetadatoArchivo(jsonMetadatos);
 
-			if (metadato.propietario != directorios[0]) {
+			if (metadato.propietario != directorios.front()) {	// DEBUG: no deberia suceder nunca
 				cout << "El propietario del metadato no coincide con la carpeta del FileSystem. EXIT." << endl;
 				Logger::logError("El propietario del metadato no coincide con la carpeta del FileSystem. EXIT.");
 				exit(1);
@@ -355,30 +380,11 @@ bool ManejadorArchivosYMetadatos::eliminarArchivo (string username, string filep
 			string pathCompletoPapelera = metadato.propietario + "/" + trash + "/" + pathSinUsernameConHash;
 			string pathCompletoPapeleraConFS = this->pathFileSystem + "/" + pathCompletoPapelera;
 
-			int result = rename(filepathCompleto.c_str(), pathCompletoPapeleraConFS.c_str());
-			if (result == 0) {
+			if (not rename(filepathCompleto.c_str(), pathCompletoPapeleraConFS.c_str())) {
 				Logger::logInfo("La eliminacion del archivo " + filepath + " fue correcta.");
-				Batch batch;
-				string jsonMetadatosConFechaModif = this->actualizarUsuarioFechaModificacion(jsonMetadatos, username);
-				MetadatoArchivo metadatoConFechaModif = parser.deserializarMetadatoArchivo(jsonMetadatosConFechaModif);
-				list<string> usuariosHabilitados = metadatoConFechaModif.usuariosHabilitados;
-				list<string>::iterator itUsu = usuariosHabilitados.begin();
-				for (; itUsu != usuariosHabilitados.end(); itUsu++) {
-					string usuario = (*itUsu);
-					if (usuario == metadatoConFechaModif.propietario)
-						continue;
-					string permisosUsuario = permisos + "/" + usuario;
-					if (dbMetadatos->contains(permisosUsuario)) {
-						string archivosStr = dbMetadatos->get(permisosUsuario);
-						vector<string> archivos = ParserURI::parsear(archivosStr, '#');
-						archivos.erase(remove(archivos.begin(), archivos.end(), filepath), archivos.end());
-						string joined = ParserURI::join(archivos, '#');
-						batch.modify(permisosUsuario, joined);
-					}
-				}
-				batch.modify(filepath, jsonMetadatosConFechaModif);
-				batch.erase(filepath);
-				batch.put(pathCompletoPapelera, jsonMetadatosConFechaModif);
+
+				Batch batch = armarBatchEliminarArchivo(jsonMetadatos, username, filepath, pathCompletoPapelera);
+
 				if (this->dbMetadatos->writeBatch(batch))
 					return true;
 				Logger::logWarn("No se ha podido escribir el batch de eliminacion del archivo " + filepath + ".");
