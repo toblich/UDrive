@@ -14,17 +14,20 @@ class ManejadorArchivosYMetadatosTest : public ::testing::Test {
 		virtual void SetUp() {
 			db = new MapDB();
 			manejador = new ManejadorArchivosYMetadatos(db, pathFS);
+			validador = new Validador(db);
 		}
 
 		virtual void TearDown() {
 			manejador->deleteFileSystem();
 			delete manejador;
+			delete validador;
 			db->deleteBD();
 			delete db;
 		}
 
 		BD* db;
 		ManejadorArchivosYMetadatos* manejador;
+		Validador* validador;
 };
 
 const std::string jsonArchOK = "{\n"
@@ -89,12 +92,12 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaCrearBienCarpetasSeguras) {
 
 TEST_F(ManejadorArchivosYMetadatosTest, deberiaHaberErrorEnPath) {
 	string path = "pablo/como#estas/bien";
-	EXPECT_FALSE( manejador->verificarPathValido(path) );
+	EXPECT_FALSE( validador->esPathValido(path) );
 }
 
 TEST_F(ManejadorArchivosYMetadatosTest, deberiaHaberErrorEnPermisos) {
 	string path = "pablo/como estas/bien";
-	EXPECT_FALSE( manejador->verificarPermisos("juan",path) );
+	EXPECT_FALSE( validador->verificarPermisos("juan",path) );
 }
 
 TEST_F(ManejadorArchivosYMetadatosTest, deberiaCrearCarpetaTrashAlCrearUsuario) {
@@ -213,12 +216,12 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaDevolverPathCompletoPorArchivoExi
 
 TEST_F(ManejadorArchivosYMetadatosTest, deberiaVerificarBienQueCarpetaEstaVacia) {
 	manejador->crearCarpetaSegura("pablo","pablo/como estas/bien");
-	EXPECT_TRUE( manejador->carpetaVacia(pathFS + "/pablo/como estas/bien") );
+	EXPECT_TRUE( validador->carpetaVacia(pathFS + "/pablo/como estas/bien") );
 }
 
 TEST_F(ManejadorArchivosYMetadatosTest, deberiaVerificarBienQueCarpetaNoEstaVacia) {
 	manejador->crearCarpetaSegura("pablo","pablo/como estas/bien");
-	EXPECT_FALSE( manejador->carpetaVacia(pathFS + "/pablo/como estas") );
+	EXPECT_FALSE( validador->carpetaVacia(pathFS + "/pablo/como estas") );
 }
 
 TEST_F(ManejadorArchivosYMetadatosTest, deberiaBorrarBienCarpetaSinArchivosNiCarpetas) {
