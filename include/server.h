@@ -17,6 +17,8 @@
 #include "bd.h"
 #include "parserURI.h"
 
+#define NOTFOUND 404
+
 using namespace std;
 
 class Server {

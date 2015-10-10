@@ -90,10 +90,15 @@ string ManejadorDeUsuarios::getPerfil(string username) {
 	}
 }
 
-void ManejadorDeUsuarios::modifyPerfil(string username, string perfil){
-	if (perfiles->contains(username)){
-		perfiles->modify(username, perfil);
-	}else {
-		perfiles->put(username, perfil);
+bool ManejadorDeUsuarios::modifyPerfil(string username, string perfil){
+	if (esPerfilValido(perfil)){
+		if (perfiles->contains(username)){
+			perfiles->modify(username, perfil);
+			return true;
+		}else {
+			perfiles->put(username, perfil);
+			return true;
+		}
 	}
+	return false;
 }

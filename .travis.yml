@@ -1,6 +1,8 @@
 sudo: false
-language: cpp
+language: python
 compiler: gcc
+python: 
+  - "2.7"
 
 addons:
   apt:
@@ -11,9 +13,14 @@ addons:
     - g++-4.9
     - libgtest-dev
 
+
+before_install:
+  - pip install --upgrade pip
+
 install:
   - export CXX="g++-4.9"
   - g++ --version
+  - pip install requests
 
 before_script:
   - chmod +x travis/*
@@ -40,4 +47,4 @@ before_script:
   - cd build 
 
 script:
-  - cmake -Dtest=ON -Drocksdb=OFF ../ && make unitTest && ./unitTest
+  - cmake -Dtest=ON -Drocksdb=OFF ../ && make unitTest && ./unitTest && make udrive && python ../test/server_test.py

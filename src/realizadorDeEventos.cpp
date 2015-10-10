@@ -120,3 +120,21 @@ void RealizadorDeEventos::unsupportedMethod(mg_connection* connection) {
 	mg_send_header(connection, contentType.c_str(), jsonType.c_str());
 	printfData(connection, "{\"error\": \"metodo no soportado por esta clase\"}");
 }
+
+void RealizadorDeEventos::responderAutenticacionFallida(mg_connection* connection) {
+	this->logInfo("No se pudo autenticar la sesión.");
+	mg_send_status(connection, CODESTATUS_UNAUTHORIZED_CLIENT);
+	mg_send_header(connection, contentType.c_str(), jsonType.c_str());
+	printfData(connection, "{\"error\": \"El token no corresponde con la sesion del usuario\"}");
+}
+
+string RealizadorDeEventos::getFilepathFrom(const vector<string>& uris) {
+	string filepath = "";
+	for (int i = 1; i <= uris.size() - 1; i++) {
+		filepath += uris[i];
+		if (i != uris.size() - 1) {
+			filepath += "/";
+		}
+	}
+	return filepath;
+}

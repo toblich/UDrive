@@ -43,11 +43,17 @@ def definirConstantesGlobales():
 	global NOT_FOUND
 	NOT_FOUND = 404
 
+	global UNAUTHORIZED
+	UNAUTHORIZED = 401
+
 	global RESOURCE_CREATED
 	RESOURCE_CREATED = 201
 
 	global SUCCESS
 	SUCCESS = 200
+
+	global UNSUPPORTED_METHOD
+	UNSUPPORTED_METHOD = 405
 
 
 def registrarYLoguear(username, password, profile):
@@ -67,7 +73,7 @@ class ServerTest(unittest.TestCase):
 		if exists("FileSystem"):
 			rmtree("FileSystem")
 		self.serverProcess = Popen(["./udrive", "&"])
-		sleep(1)
+		sleep(0.1)
 
 
 	def tearDown(self):
@@ -133,8 +139,8 @@ class ServerTest(unittest.TestCase):
 		self.assertEquals(perfilObtenido.get("nombre"), perfilOriginal.get("nombre"))
 		self.assertEquals(perfilObtenido.get("email"), perfilOriginal.get("email"))
 
-		s = requests.put(PROFILE + username, data={"nombre": "otroNombre", "email": 'otro@e.mail',
-			"token": token, "latitud" : "0.0", "longitud" : 10.0}) # actualizar perfil
+		s = requests.put(PROFILE + username, data={"profile": '{"nombre": "otroNombre", "email": "otro@e.mail"}',
+			"token": token}) # actualizar perfil
 		self.assertEquals(s.status_code, SUCCESS)
 		
 		t = requests.get(PROFILE + username, data={"token": token})	# obtener nuevo perfil
@@ -142,8 +148,6 @@ class ServerTest(unittest.TestCase):
 		nuevoPerfilObtenido = t.json().get("perfil")
 		self.assertEquals(nuevoPerfilObtenido.get("nombre"), "otroNombre")
 		self.assertEquals(nuevoPerfilObtenido.get("email"), "otro@e.mail")
-		self.assertEquals(nuevoPerfilObtenido.get("ultima ubicacion").get("latitud"), 0.0)
-		self.assertEquals(nuevoPerfilObtenido.get("ultima ubicacion").get("longitud"), 10.0)
 
 
 	def test_subirBajarYBorrarArchivoTexto(self):
@@ -172,9 +176,9 @@ class ServerTest(unittest.TestCase):
 
 	def test_obtenerYActualizarMetadatos(self):
 		token = registrarYLoguearUser(USER_SIMPLE)
-		FILENAME = "CMakeFiles/2.8.12.2/CMakeSystem.cmake"
+		FILENAME = "../src/db/batch.cpp"
 
-		internalUri = USER_SIMPLE["user"] + "/" + FILENAME
+		internalUri = USER_SIMPLE["user"] + FILENAME[2:] # saca los '..'
 		requests.put(FILE + internalUri, files={'file': open(FILENAME, 'rb'), "token": token, "user": USER_SIMPLE["user"]})	# sube archivo
 
 		r = requests.get(METADATA + internalUri, data={"user": USER_SIMPLE["user"], "token": token})	# consulta metadatos
@@ -182,9 +186,9 @@ class ServerTest(unittest.TestCase):
 
 		metadata = r.json().get("metadatos")
 		self.assertEquals(metadata.get("propietario"), USER_SIMPLE["user"])
-		self.assertEquals(metadata.get("nombre"), "CMakeSystem")
+		self.assertEquals(metadata.get("nombre"), "batch")
 		self.assertEquals(metadata.get("usuario ultima modificacion"), USER_SIMPLE["user"])
-		self.assertEquals(metadata.get("extension"), "cmake")
+		self.assertEquals(metadata.get("extension"), "cpp")
 		self.assertEquals(metadata.get("etiquetas"), [])
 		self.assertEquals(metadata.get("usuarios"), [USER_SIMPLE["user"]])
 
@@ -192,12 +196,12 @@ class ServerTest(unittest.TestCase):
 		self.assertEquals(t.status_code, SUCCESS)
 
 
-	def test_obtenerEstructuraDeCarpeta(self):
+	def test_obtenerEstructuraDeCarpetaYBorrarCarperta(self):
 		token = registrarYLoguearUser(USER_SIMPLE)
-		FILENAME = "CMakeFiles/2.8.12.2/CMakeSystem.cmake"
-		BASE_FOLDER = FOLDER + USER_SIMPLE["user"] + "/CMakeFiles/"
+		FILENAME = "../src/db/batch.cpp"
+		BASE_FOLDER = FOLDER + USER_SIMPLE["user"] + "/src/"
 
-		internalUri = USER_SIMPLE["user"] + "/" + FILENAME + "sarasa"
+		internalUri = USER_SIMPLE["user"] + FILENAME[2:] # saca los '..'
 		requests.put(FILE + internalUri, files={'file': open(FILENAME, 'rb'), "token": token, "user": USER_SIMPLE["user"]})	# sube archivo
 
 		r = requests.put(BASE_FOLDER + "subcarpeta", data={"token": token, "user": USER_SIMPLE["user"]})
@@ -207,10 +211,38 @@ class ServerTest(unittest.TestCase):
 		self.assertEquals(s.status_code, SUCCESS)
 
 		estructura = literal_eval(s.content)
-		expected = {"estructura" : {"2.8.12.2" : "#folder", "subcarpeta": "#folder"} }
+		expected = {"estructura" : {"db" : "#folder", "subcarpeta": "#folder"} }
 		self.assertDictEqual(expected, estructura) 
 
+		t = requests.delete(BASE_FOLDER, data={"token": token, "user": USER_SIMPLE["user"]})
+		self.assertEquals(t.status_code, SUCCESS)
 
+		u = requests.delete(BASE_FOLDER, data={"token": token, "user": USER_SIMPLE["user"]})
+		self.assertEquals(u.status_code, NOT_FOUND)
+
+		v = requests.delete(BASE_FOLDER, data={"token": 1234567890, "user": USER_SIMPLE["user"]})
+		self.assertEquals(v.status_code, UNAUTHORIZED)
+
+	def test_DeberiaDarErrorAlQuererIngresarAUnRecursoInexistente(self):
+		r = requests.get(BASE)
+		self.assertEquals(r.status_code, NOT_FOUND)
+
+		INEXISTENTE = BASE + "/sarasa"
+		s = requests.get(INEXISTENTE)
+		self.assertEquals(s.status_code, NOT_FOUND)
+
+	def test_DeberiaDarErrorAlQuererUsarUnMetodoNoSoportado(self):
+		r = requests.get(SESSION)
+		self.assertEquals(r.status_code, UNSUPPORTED_METHOD)
+
+		s = requests.put(SESSION)
+		self.assertEquals(s.status_code, UNSUPPORTED_METHOD)
+
+		t = requests.post(FOLDER)
+		self.assertEquals(t.status_code, UNSUPPORTED_METHOD)
+
+		u = requests.delete(METADATA)
+		self.assertEquals(u.status_code, UNSUPPORTED_METHOD)
 
 if __name__ == '__main__':
 	definirConstantesGlobales()

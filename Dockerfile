@@ -11,4 +11,5 @@ RUN ls && wget https://github.com/toblich/UDrive/archive/develop.zip && ls && un
 RUN cd UDrive-develop && chmod +x docker/rocksdb.sh && sync && ./docker/rocksdb.sh 
 RUN cd UDrive-develop && chmod +x docker/gtest.sh && sync && ./docker/gtest.sh 
 
-CMD echo ------------------------------------------------------------------------------------------------------------------------------------------------------- && cd UDrive-develop && find . -type d  && chmod +x build.sh && sync && ./build.sh -t -x
+CMD echo ------------------------------------------------------------------------------ && \
+	cd UDrive-develop && find . -type d  && chmod +x build.sh && sync && ./build.sh -t -x

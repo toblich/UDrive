@@ -15,6 +15,8 @@ protected:
 	ManejadorDeUsuarios* manejadorUs;
 	ManejadorArchivosYMetadatos* manejadorArchYMet;
 
+	void GETMetadatos(mg_connection* connection, vector<string> uris, string user);
+	void GETBusquedas(mg_connection* connection, vector<string> uris, string query);
 	mg_result GETHandler(mg_connection* connection);
 	mg_result PUTHandler(mg_connection* connection);
 };
