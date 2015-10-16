@@ -239,9 +239,19 @@ void ManejadorArchivosYMetadatos::actualizarMetadatosChequeados (const string& f
 			string nuevoUsuario = (*itUsuNuevos);
 			// Si todavia no tenia permisos
 			if (find(usuariosViejos.begin(), usuariosViejos.end(), nuevoUsuario) == usuariosViejos.end()) {
-				this->agregarPermiso(username, filepath, nuevoUsuario);
+				cout << "Voy a agregar permiso a " << nuevoUsuario << " para el archivo " << filepath << endl;
+				bool ok = this->agregarPermiso(username, filepath, nuevoUsuario);
+				cout << "Agregar permisos: " << boolalpha << ok << endl;
 			}
-			// TODO: Si tenia permisos y ahora no los tiene, eliminarPermiso
+		}
+		// TODO: Si tenia permisos y ahora no los tiene, eliminarPermiso
+		list<string>::iterator itUsuViejos = usuariosViejos.begin();
+		for (; itUsuViejos != usuariosViejos.end(); itUsuViejos++) {
+			string viejoUsuario = (*itUsuViejos);
+			// Si tenia permisos y ahora ya no
+			if (find(usuariosNuevos.begin(), usuariosNuevos.end(), viejoUsuario) == usuariosNuevos.end()) {
+				this->eliminarPermiso(username, filepath, viejoUsuario);
+			}
 		}
 		nuevoJson = jsonNuevosMetadatos;
 	}
@@ -282,16 +292,54 @@ bool ManejadorArchivosYMetadatos::agregarPermiso (string usernameOrigen, string 
 		MetadatoArchivo metadato = parser.deserializarMetadatoArchivo(jsonArchivo);
 		metadato.usuariosHabilitados.push_back(usernameDestino);
 		string jsonModificado = parser.serializarMetadatoArchivo(metadato);
-		dbMetadatos->modify(filepath, jsonModificado);
+
+		Batch batch;
+		batch.modify(filepath, jsonModificado);
 //		Como este metodo se llama directamente desde actualizarMetadatos, ya la fecha viene modificada
-//		string nuevosMetadatos = this->actualizarUsuarioFechaModificacion(jsonModificado, usernameOrigen);
-//		dbMetadatos->modify(filepath, nuevosMetadatos);
 
 		string archivosPermitidos = dbMetadatos->get(pathPermisos);
 		if (archivosPermitidos != "")
 			archivosPermitidos += "#";
 		archivosPermitidos += filepath;
-		dbMetadatos->modify(pathPermisos, archivosPermitidos);
+		batch.modify(pathPermisos, archivosPermitidos);
+		dbMetadatos->writeBatch(batch);
+
+		return true;
+	} else
+		return false;
+}
+
+bool ManejadorArchivosYMetadatos::eliminarPermiso(string usernameOrigen, string filepath, string usernameDestino) {
+	if (validador.verificarPermisos(usernameOrigen, filepath)) {
+		if (not dbMetadatos->contains(filepath)) {
+			Logger::logWarn("Se quiso eliminar un permiso del archivo " + filepath + " pero este no existe.");
+			return false;
+		}
+		string pathPermisos = permisos + "/" + usernameDestino;
+		if (not dbMetadatos->contains(pathPermisos)) {
+			Logger::logWarn("Se quiso eliminar un permiso del usuario " + usernameDestino + " pero este no existe.");
+			return false;
+		}
+		string jsonArchivo = dbMetadatos->get(filepath);
+
+		ParserJson parser;
+		MetadatoArchivo metadato = parser.deserializarMetadatoArchivo(jsonArchivo);
+		list<string> usuariosHabilitados = metadato.usuariosHabilitados;
+		if ( find(usuariosHabilitados.begin(), usuariosHabilitados.end(), usernameDestino) != usuariosHabilitados.end() )
+			usuariosHabilitados.remove(usernameDestino);
+		string jsonModificado = parser.serializarMetadatoArchivo(metadato);
+
+		Batch batch;
+		batch.modify(filepath, jsonModificado);
+//		Como este metodo se llama directamente desde actualizarMetadatos, ya la fecha viene modificada
+
+		string archivosPermitidos = dbMetadatos->get(pathPermisos);
+		vector<string> vecArchivosPermitidos = ParserURI::parsear(archivosPermitidos, '#');
+		vecArchivosPermitidos.erase(remove(vecArchivosPermitidos.begin(), vecArchivosPermitidos.end(), filepath), vecArchivosPermitidos.end());
+		archivosPermitidos = ParserURI::join(vecArchivosPermitidos, '#');
+
+		batch.modify(pathPermisos, archivosPermitidos);
+		dbMetadatos->writeBatch(batch);
 
 		return true;
 	} else
