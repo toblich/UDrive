@@ -21,6 +21,7 @@ using namespace std;
 const string defaultFileSystem = "FileSystem";
 const string trash = "#trash";
 const string permisos = "#permisos";
+const string folder = "#folder";
 const unsigned long int CUOTA = 2147483648; // 2GB
 
 class Validador {

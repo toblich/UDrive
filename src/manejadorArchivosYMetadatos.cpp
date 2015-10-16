@@ -49,7 +49,7 @@ bool ManejadorArchivosYMetadatos::restaurar(string username, string pathEnPapele
 		return false;
 
 	string pathRealConHashYSecuencia = ParserURI::parsear(pathEnPapeleraSinFS, '/').back();
-	vector<string> partes = ParserURI::parsear(pathRealConHashYSecuencia, '#');
+	vector<string> partes = ParserURI::parsear(pathRealConHashYSecuencia, RESERVED_CHAR);
 	string pathRealSinFS = username + "/" + ParserURI::join(partes, '/', 0, partes.size()-1);	// descarta el numero de secuencia
 
 	if (not validador.puedoRestaurarA(pathEnPapeleraSinFS, pathRealSinFS, pathFileSystem))
@@ -299,7 +299,7 @@ bool ManejadorArchivosYMetadatos::agregarPermiso (string usernameOrigen, string 
 
 		string archivosPermitidos = dbMetadatos->get(pathPermisos);
 		if (archivosPermitidos != "")
-			archivosPermitidos += "#";
+			archivosPermitidos += RESERVED_CHAR;
 		archivosPermitidos += filepath;
 		batch.modify(pathPermisos, archivosPermitidos);
 		dbMetadatos->writeBatch(batch);
@@ -334,9 +334,9 @@ bool ManejadorArchivosYMetadatos::eliminarPermiso(string usernameOrigen, string 
 //		Como este metodo se llama directamente desde actualizarMetadatos, ya la fecha viene modificada
 
 		string archivosPermitidos = dbMetadatos->get(pathPermisos);
-		vector<string> vecArchivosPermitidos = ParserURI::parsear(archivosPermitidos, '#');
+		vector<string> vecArchivosPermitidos = ParserURI::parsear(archivosPermitidos, RESERVED_CHAR);
 		vecArchivosPermitidos.erase(remove(vecArchivosPermitidos.begin(), vecArchivosPermitidos.end(), filepath), vecArchivosPermitidos.end());
-		archivosPermitidos = ParserURI::join(vecArchivosPermitidos, '#');
+		archivosPermitidos = ParserURI::join(vecArchivosPermitidos, RESERVED_CHAR);
 
 		batch.modify(pathPermisos, archivosPermitidos);
 		dbMetadatos->writeBatch(batch);
@@ -362,9 +362,9 @@ Batch ManejadorArchivosYMetadatos::armarBatchEliminarArchivo (const string& json
 		string permisosUsuario = permisos + "/" + usuario;
 		if (dbMetadatos->contains(permisosUsuario)) {
 			string archivosStr = dbMetadatos->get(permisosUsuario);
-			vector<string> archivos = ParserURI::parsear(archivosStr, '#');
+			vector<string> archivos = ParserURI::parsear(archivosStr, RESERVED_CHAR);
 			archivos.erase(remove(archivos.begin(), archivos.end(), filepath), archivos.end());
-			string joined = ParserURI::join(archivos, '#');
+			string joined = ParserURI::join(archivos, RESERVED_CHAR);
 			batch.modify(permisosUsuario, joined);
 		}
 	}
@@ -404,7 +404,7 @@ bool ManejadorArchivosYMetadatos::mandarArchivoATrash(string username, string fi
 	vector<string> directorios = ParserURI::parsear(filepath, '/');
 	string jsonMetadatos = dbMetadatos->get(filepath);
 	MetadatoArchivo metadato = ParserJson().deserializarMetadatoArchivo(jsonMetadatos);
-	string pathSinUsernameConHash = ParserURI::join(directorios, '#', 1, directorios.size());
+	string pathSinUsernameConHash = ParserURI::join(directorios, RESERVED_CHAR, 1, directorios.size());
 
 	if (metadato.propietario != directorios.front()) {	// DEBUG: no deberia suceder nunca
 		cout << "El propietario del metadato no coincide con la carpeta del FileSystem. EXIT." << endl;
@@ -414,7 +414,7 @@ bool ManejadorArchivosYMetadatos::mandarArchivoATrash(string username, string fi
 
 	string pathCompletoPapelera = metadato.propietario + "/" + trash + "/" + pathSinUsernameConHash;
 	string nroSecuencia = this->validador.obtenerNumeroSecuencia(this->pathFileSystem, metadato.propietario, pathSinUsernameConHash);
-	pathCompletoPapelera += "#" + nroSecuencia;
+	pathCompletoPapelera += RESERVED_CHAR + nroSecuencia;
 	string pathCompletoPapeleraConFS = this->pathFileSystem + "/" + pathCompletoPapelera;
 
 
@@ -452,7 +452,7 @@ string ManejadorArchivosYMetadatos::obtenerEstructuraCarpeta (string path) {
 				vector<string> directorios = ParserURI::parsear(pathInterno, '/');
 				int size = directorios.size();
 				string foldername = directorios[size - 1];
-				mapa.insert(pair<string, string>(foldername, "#folder"));
+				mapa.insert(pair<string, string>(foldername, folder));
 			} else { //Es un archivo
 				if (not dbMetadatos->contains(pathInterno)) {
 					Logger::logWarn("Se quiso obtener los metadatos del archivo " + path + " pero este no existe.");
