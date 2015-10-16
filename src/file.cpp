@@ -85,8 +85,7 @@ void File::subirArchivo (const vector<string>& uris, const DatosArchivo& datosAr
 	vector<string> nombreYExtension = ParserURI::parsear(datosArch.fileName, '.');
 	this->logInfo("Se parseó el nombre del archivo correctamente.");
 	MetadatoArchivo metArch = extractMetadataFrom(nombreYExtension, user, uris);
-	ParserJson parserJson;
-	string jsonMetadata = parserJson.serializarMetadatoArchivo(metArch);
+	string jsonMetadata = ParserJson::serializarMetadatoArchivo(metArch);
 	this->logInfo("Se serializaron los metadatos del archivo correctamente.");
 
 	if (manejadorArchYMet->subirArchivo(user, filepath, datosArch.fileData, datosArch.dataLength, jsonMetadata)) {

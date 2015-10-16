@@ -167,8 +167,7 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaPoderActualizarMetadatosDeArchivo
 			"}";
 	manejador->actualizarMetadatos("pablo",filepath, nuevoJson);
 	string jsonNuevoMetadato = manejador->consultarMetadatosArchivo("pablo", filepath);
-	ParserJson parser;
-	MetadatoArchivo nuevoMetadato = parser.deserializarMetadatoArchivo(jsonNuevoMetadato);
+	MetadatoArchivo nuevoMetadato = ParserJson::deserializarMetadatoArchivo(jsonNuevoMetadato);
 
 	EXPECT_EQ("png", nuevoMetadato.extension);
 	EXPECT_EQ("10/09/2015", nuevoMetadato.fechaUltimaModificacion);
@@ -196,8 +195,7 @@ TEST_F(ManejadorArchivosYMetadatosTest, alActualizarMetadatoDeArchivoConUsuarios
 			"}";
 	manejador->actualizarMetadatos("pablo",filepath, nuevoJson);
 	string jsonNuevoMetadato = manejador->consultarMetadatosArchivo("pablo", filepath);
-	ParserJson parser;
-	MetadatoArchivo nuevoMetadato = parser.deserializarMetadatoArchivo(jsonNuevoMetadato);
+	MetadatoArchivo nuevoMetadato = ParserJson::deserializarMetadatoArchivo(jsonNuevoMetadato);
 
 	EXPECT_EQ("pablo", nuevoMetadato.usuariosHabilitados.back());
 }
@@ -212,8 +210,7 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaPoderAgregarPermisoYAgregarloAlMe
 	manejador->subirArchivo("pablo", filepath, "hola pablo", 10, jsonArchOK);
 	manejador->agregarPermiso("pablo",filepath,"juan");
 	string metadatoActualizado = manejador->consultarMetadatosArchivo("pablo",filepath);
-	ParserJson parser;
-	MetadatoArchivo asd = parser.deserializarMetadatoArchivo(metadatoActualizado);
+	MetadatoArchivo asd = ParserJson::deserializarMetadatoArchivo(metadatoActualizado);
 	EXPECT_EQ("juan", asd.usuariosHabilitados.back());
 }
 
@@ -292,8 +289,7 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaCambiarBienFechaYUsuarioUltimaMod
 	int dia = tiempo->tm_mday;
 
 	std::string jsonNuevoMetadato = manejador->actualizarUsuarioFechaModificacion(jsonArchOK, "juancito");
-	ParserJson parser;
-	MetadatoArchivo nuevoMetadato = parser.deserializarMetadatoArchivo(jsonNuevoMetadato);
+	MetadatoArchivo nuevoMetadato = ParserJson::deserializarMetadatoArchivo(jsonNuevoMetadato);
 	std::string fecha = std::to_string(dia) + "/" + std::to_string(mes) + "/" + std::to_string(anio);
 	EXPECT_EQ(fecha, nuevoMetadato.fechaUltimaModificacion);
 	EXPECT_EQ("juancito", nuevoMetadato.usuarioUltimaModificacion);
@@ -365,24 +361,23 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaEliminarCarpetaConMetodoEliminar)
 }
 
 TEST_F(ManejadorArchivosYMetadatosTest, deberiaObtenerBienLaEstructuraDeLasCarpetas) {
-	ParserJson parser;
 	string filepath1 = "pablo/como estas/bien/saludo.txt";
 	MetadatoArchivo metadato1;
 	metadato1.nombre = "saludo";
 	metadato1.extension = "txt";
-	string metadatos1 = parser.serializarMetadatoArchivo(metadato1);
+	string metadatos1 = ParserJson::serializarMetadatoArchivo(metadato1);
 
 	string filepath2 = "pablo/como estas/bien/juan";
 	MetadatoArchivo metadato2;
 	metadato2.nombre = "juan";
 	metadato2.extension = "none";
-	string metadatos2 = parser.serializarMetadatoArchivo(metadato2);
+	string metadatos2 = ParserJson::serializarMetadatoArchivo(metadato2);
 
 	string filepath3 = "pablo/como estas/bien/pepe.hola";
 	MetadatoArchivo metadato3;
 	metadato3.nombre = "pepe";
 	metadato3.extension = "hola";
-	string metadatos3 = parser.serializarMetadatoArchivo(metadato3);
+	string metadatos3 = ParserJson::serializarMetadatoArchivo(metadato3);
 
 	manejador->crearUsuario("pablo");
 	manejador->crearCarpetaSegura("pablo","pablo/como estas/bien/vos?");
@@ -392,7 +387,7 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaObtenerBienLaEstructuraDeLasCarpe
 	manejador->subirArchivo("pablo", filepath3, "hola pablo", 10, metadatos3);
 	string estructura = manejador->obtenerEstructuraCarpeta("pablo/como estas/bien");
 
-	map<string, string> mapa = parser.deserializarMapa(estructura);
+	map<string, string> mapa = ParserJson::deserializarMapa(estructura);
 
 	EXPECT_EQ(mapa.at("saludo.txt"), "txt");
 	EXPECT_EQ(mapa.at("juan"), "none");
@@ -474,8 +469,7 @@ TEST_F(ManejadorArchivosYMetadatosTest, usuarioConPermisosDeberiaPoderConsultarM
 	string filepath = "pablo/archivos/saludo.txt";
 	inic(manejador, filepath);
 	string jsonMetadato = manejador->consultarMetadatosArchivo("juan", filepath);
-	ParserJson parser;
-	MetadatoArchivo metadato = parser.deserializarMetadatoArchivo(jsonMetadato);
+	MetadatoArchivo metadato = ParserJson::deserializarMetadatoArchivo(jsonMetadato);
 	EXPECT_EQ("txt", metadato.extension);
 	EXPECT_EQ("saludo", metadato.nombre);
 	EXPECT_EQ("pablo", metadato.propietario);
@@ -497,8 +491,7 @@ TEST_F(ManejadorArchivosYMetadatosTest, usuarioConPermisosDeberiaPoderActualizar
 			"}";
 	manejador->actualizarMetadatos("juan",filepath, nuevoJson);
 	string jsonNuevoMetadato = manejador->consultarMetadatosArchivo("juan", filepath);
-	ParserJson parser;
-	MetadatoArchivo nuevoMetadato = parser.deserializarMetadatoArchivo(jsonNuevoMetadato);
+	MetadatoArchivo nuevoMetadato = ParserJson::deserializarMetadatoArchivo(jsonNuevoMetadato);
 
 	EXPECT_EQ("txt", nuevoMetadato.extension);
 	EXPECT_EQ("10/09/2015", nuevoMetadato.fechaUltimaModificacion);
@@ -515,8 +508,7 @@ TEST_F(ManejadorArchivosYMetadatosTest, usuarioConPermisosDeberiaPoderAgregarPer
 	manejador->crearUsuario("pepe");
 	manejador->agregarPermiso("juan",filepath,"pepe");
 	string metadatoActualizado = manejador->consultarMetadatosArchivo("pepe",filepath);
-	ParserJson parser;
-	MetadatoArchivo asd = parser.deserializarMetadatoArchivo(metadatoActualizado);
+	MetadatoArchivo asd = ParserJson::deserializarMetadatoArchivo(metadatoActualizado);
 	EXPECT_EQ("pepe", asd.usuariosHabilitados.back());
 }
 
@@ -621,15 +613,14 @@ TEST_F(ManejadorArchivosYMetadatosTest, usuarioDeberiaPoderAgregarPermisosAlActu
 	inic(manejador, filepath);
 	manejador->crearUsuario("pepe");
 	string jsonMetadato = manejador->consultarMetadatosArchivo("juan", filepath);
-	ParserJson parser;
-	MetadatoArchivo metadato = parser.deserializarMetadatoArchivo(jsonMetadato);
+	MetadatoArchivo metadato = ParserJson::deserializarMetadatoArchivo(jsonMetadato);
 	metadato.usuariosHabilitados.push_back("pepe");
-	string jsonMetadatoModificado = parser.serializarMetadatoArchivo(metadato);
+	string jsonMetadatoModificado = ParserJson::serializarMetadatoArchivo(metadato);
 	ASSERT_TRUE(manejador->actualizarMetadatos("juan", filepath, jsonMetadatoModificado));
 
 	string jsonPepe = manejador->consultarMetadatosArchivo("pepe", filepath);
 	EXPECT_NE("", jsonPepe);
-	MetadatoArchivo metadatoPepe = parser.deserializarMetadatoArchivo(jsonPepe);
+	MetadatoArchivo metadatoPepe = ParserJson::deserializarMetadatoArchivo(jsonPepe);
 	EXPECT_EQ("txt", metadatoPepe.extension);
 	EXPECT_EQ("saludo", metadatoPepe.nombre);
 	EXPECT_EQ("pablo", metadatoPepe.propietario);
@@ -642,17 +633,16 @@ TEST_F(ManejadorArchivosYMetadatosTest, usuarioDeberiaPoderEliminarPermisosAlAct
 	inic(manejador, filepath);
 	manejador->crearUsuario("pepe");
 	string jsonMetadato = manejador->consultarMetadatosArchivo("juan", filepath);
-	ParserJson parser;
-	MetadatoArchivo metadato = parser.deserializarMetadatoArchivo(jsonMetadato);
+	MetadatoArchivo metadato = ParserJson::deserializarMetadatoArchivo(jsonMetadato);
 	metadato.usuariosHabilitados.push_back("pepe");
-	string jsonMetadatoModificado = parser.serializarMetadatoArchivo(metadato);
+	string jsonMetadatoModificado = ParserJson::serializarMetadatoArchivo(metadato);
 	ASSERT_TRUE(manejador->actualizarMetadatos("juan", filepath, jsonMetadatoModificado));
 
 	string jsonPepe = manejador->consultarMetadatosArchivo("pepe", filepath);
 	EXPECT_NE("", jsonPepe);
-	MetadatoArchivo metadatoPepe = parser.deserializarMetadatoArchivo(jsonPepe);
+	MetadatoArchivo metadatoPepe = ParserJson::deserializarMetadatoArchivo(jsonPepe);
 	metadatoPepe.usuariosHabilitados.remove("juan");
-	string jsonPepeModif = parser.serializarMetadatoArchivo(metadatoPepe);
+	string jsonPepeModif = ParserJson::serializarMetadatoArchivo(metadatoPepe);
 	manejador->actualizarMetadatos("pepe", filepath, jsonPepeModif);
 
 	string jsonVacio = manejador->consultarMetadatosArchivo("juan", filepath);

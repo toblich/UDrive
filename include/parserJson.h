@@ -9,22 +9,22 @@
 class ParserJson {
 
 private:
-	std::string verificarString(std::string key, Json::Value raiz);
-	double verificarDouble(std::string key, Json::Value raiz);
+	static std::string verificarString(std::string key, Json::Value raiz);
+	static double verificarDouble(std::string key, Json::Value raiz);
+	ParserJson() {}
 
 public:
-	ParserJson();
-	virtual ~ParserJson();
+	virtual ~ParserJson() {}
 
-	std::string serializarMetadatoArchivo(MetadatoArchivo metadato);
-	std::string serializarMetadatoUsuario(MetadatoUsuario metadato);
-	std::string serializarMetadatoSesion(MetadatosSesion metadato);
-	std::string serializarMapa(std::map<std::string, std::string>& mapa);
+	static std::string serializarMetadatoArchivo(MetadatoArchivo metadato);
+	static std::string serializarMetadatoUsuario(MetadatoUsuario metadato);
+	static std::string serializarMetadatoSesion(MetadatosSesion metadato);
+	static std::string serializarMapa(std::map<std::string, std::string>& mapa);
 
-	MetadatoArchivo deserializarMetadatoArchivo(std::string json);
-	MetadatoUsuario deserializarMetadatoUsuario(std::string json);
-	MetadatosSesion deserializarMetadatoSesion(std::string json);
-	std::map<std::string, std::string> deserializarMapa(std::string json);
+	static MetadatoArchivo deserializarMetadatoArchivo(std::string json);
+	static MetadatoUsuario deserializarMetadatoUsuario(std::string json);
+	static MetadatosSesion deserializarMetadatoSesion(std::string json);
+	static std::map<std::string, std::string> deserializarMapa(std::string json);
 };
 
 #endif /* INCLUDE_PARSERJSON_H_ */

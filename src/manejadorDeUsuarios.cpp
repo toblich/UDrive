@@ -60,7 +60,7 @@ string ManejadorDeUsuarios::generarToken(string username, time_t timestamp) {
 }
 
 bool ManejadorDeUsuarios::esPerfilValido(const string& perfilJson) {
-	MetadatoUsuario perfil = ParserJson().deserializarMetadatoUsuario(perfilJson);
+	MetadatoUsuario perfil = ParserJson::deserializarMetadatoUsuario(perfilJson);
 	return regex_match(perfil.nombre, REGEX_NOMBRE) and regex_match(perfil.email, REGEX_EMAIL);
 }
 

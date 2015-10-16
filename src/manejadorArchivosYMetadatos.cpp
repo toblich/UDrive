@@ -230,14 +230,14 @@ string ManejadorArchivosYMetadatos::consultarMetadatosArchivo (string username, 
 void ManejadorArchivosYMetadatos::actualizarMetadatosChequeados (const string& filepath,
 		const string& jsonNuevosMetadatos, const string& username) {
 	string jsonMetadatosViejos = dbMetadatos->get(filepath);
-	MetadatoArchivo metadatosViejos = ParserJson().deserializarMetadatoArchivo(jsonMetadatosViejos);
-	MetadatoArchivo metadatosNuevos = ParserJson().deserializarMetadatoArchivo(jsonNuevosMetadatos);
+	MetadatoArchivo metadatosViejos = ParserJson::deserializarMetadatoArchivo(jsonMetadatosViejos);
+	MetadatoArchivo metadatosNuevos = ParserJson::deserializarMetadatoArchivo(jsonNuevosMetadatos);
 	list<string> usuariosViejos = metadatosViejos.usuariosHabilitados;
 	list<string> usuariosNuevos = metadatosNuevos.usuariosHabilitados;
 	string nuevoJson;
 	if (usuariosNuevos.empty()) {
 		metadatosNuevos.usuariosHabilitados = usuariosViejos;
-		nuevoJson = ParserJson().serializarMetadatoArchivo(metadatosNuevos);
+		nuevoJson = ParserJson::serializarMetadatoArchivo(metadatosNuevos);
 	} else {
 		list<string>::iterator itUsuNuevos = usuariosNuevos.begin();
 		for (; itUsuNuevos != usuariosNuevos.end(); itUsuNuevos++) {
@@ -295,9 +295,9 @@ bool ManejadorArchivosYMetadatos::agregarPermiso (string usernameOrigen, string 
 	}
 	string jsonArchivo = dbMetadatos->get(filepath);
 
-	MetadatoArchivo metadato = ParserJson().deserializarMetadatoArchivo(jsonArchivo);
+	MetadatoArchivo metadato = ParserJson::deserializarMetadatoArchivo(jsonArchivo);
 	metadato.usuariosHabilitados.push_back(usernameDestino);
-	string jsonModificado = ParserJson().serializarMetadatoArchivo(metadato);
+	string jsonModificado = ParserJson::serializarMetadatoArchivo(metadato);
 
 	Batch batch;
 	batch.modify(filepath, jsonModificado);
@@ -315,12 +315,12 @@ bool ManejadorArchivosYMetadatos::agregarPermiso (string usernameOrigen, string 
 
 string ManejadorArchivosYMetadatos::metadatosConPermisosDepurados (const string& filepath, const string& usernameDestino) {
 	string jsonArchivo = dbMetadatos->get(filepath);
-	MetadatoArchivo metadato = ParserJson().deserializarMetadatoArchivo(jsonArchivo);
+	MetadatoArchivo metadato = ParserJson::deserializarMetadatoArchivo(jsonArchivo);
 	list<string> usuariosHabilitados = metadato.usuariosHabilitados;
 	if (find(usuariosHabilitados.begin(), usuariosHabilitados.end(), usernameDestino) != usuariosHabilitados.end())
 		usuariosHabilitados.remove(usernameDestino);
 
-	return ParserJson().serializarMetadatoArchivo(metadato);
+	return ParserJson::serializarMetadatoArchivo(metadato);
 }
 
 // Como este metodo se llama directamente desde actualizarMetadatos, ya la fecha viene modificada
@@ -359,7 +359,7 @@ Batch ManejadorArchivosYMetadatos::armarBatchEliminarArchivo (const string& json
 		const string& filepath, const string& pathCompletoPapelera) {
 	Batch batch;
 	string jsonMetadatosConFechaModif = this->actualizarUsuarioFechaModificacion(jsonMetadatos, username);
-	MetadatoArchivo metadatoConFechaModif = ParserJson().deserializarMetadatoArchivo(jsonMetadatosConFechaModif);
+	MetadatoArchivo metadatoConFechaModif = ParserJson::deserializarMetadatoArchivo(jsonMetadatosConFechaModif);
 	list<string> usuariosHabilitados = metadatoConFechaModif.usuariosHabilitados;
 	list<string>::iterator itUsu = usuariosHabilitados.begin();
 
@@ -412,7 +412,7 @@ bool ManejadorArchivosYMetadatos::mandarArchivoATrash(string username, string fi
 	string filepathCompleto = this->pathFileSystem + "/" + filepath;
 	vector<string> directorios = ParserURI::parsear(filepath, '/');
 	string jsonMetadatos = dbMetadatos->get(filepath);
-	MetadatoArchivo metadato = ParserJson().deserializarMetadatoArchivo(jsonMetadatos);
+	MetadatoArchivo metadato = ParserJson::deserializarMetadatoArchivo(jsonMetadatos);
 	string pathSinUsernameConHash = ParserURI::join(directorios, RESERVED_CHAR, 1, directorios.size());
 
 	if (metadato.propietario != directorios.front()) {	// DEBUG: no deberia suceder nunca
@@ -467,7 +467,7 @@ string ManejadorArchivosYMetadatos::obtenerEstructuraCarpeta (string path) {
 					return "";
 				}
 				string jsonMetadatos = this->dbMetadatos->get(pathInterno);
-				MetadatoArchivo metadato = ParserJson().deserializarMetadatoArchivo(jsonMetadatos);
+				MetadatoArchivo metadato = ParserJson::deserializarMetadatoArchivo(jsonMetadatos);
 				string nombre = metadato.nombre;
 				if (metadato.extension != "none")
 					nombre += "." + metadato.extension;
@@ -475,7 +475,7 @@ string ManejadorArchivosYMetadatos::obtenerEstructuraCarpeta (string path) {
 			}
 		}
 		closedir(dir);
-		string json = ParserJson().serializarMapa(mapa);
+		string json = ParserJson::serializarMapa(mapa);
 		return json;
 	} else
 		Logger::logWarn("No existe el directorio " + path);
@@ -541,7 +541,7 @@ bool ManejadorArchivosYMetadatos::tamanioCarpeta (string path, unsigned long int
 string ManejadorArchivosYMetadatos::actualizarUsuarioFechaModificacion (string jsonMetadatos,
 		string usernameModificacion) {
 
-	MetadatoArchivo metadato = ParserJson().deserializarMetadatoArchivo(jsonMetadatos);
+	MetadatoArchivo metadato = ParserJson::deserializarMetadatoArchivo(jsonMetadatos);
 	metadato.usuarioUltimaModificacion = usernameModificacion;
 
 	struct tm *tiempo;
@@ -553,7 +553,7 @@ string ManejadorArchivosYMetadatos::actualizarUsuarioFechaModificacion (string j
 	int dia = tiempo->tm_mday;
 	string fecha = to_string(dia) + "/" + to_string(mes) + "/" + to_string(anio);
 	metadato.fechaUltimaModificacion = fecha;
-	string nuevosMetadatos = ParserJson().serializarMetadatoArchivo(metadato);
+	string nuevosMetadatos = ParserJson::serializarMetadatoArchivo(metadato);
 	return nuevosMetadatos;
 }
 

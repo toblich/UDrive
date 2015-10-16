@@ -4,13 +4,13 @@
 using std::string;
 using namespace Json;
 
-ParserJson::ParserJson() {
-
-}
-
-ParserJson::~ParserJson() {
-
-}
+//ParserJson::ParserJson() {
+//
+//}
+//
+//ParserJson::~ParserJson() {
+//
+//}
 
 string ParserJson::verificarString(string key, Value raiz) {
 	Value parametro = raiz.get(key, "NO");
@@ -125,11 +125,11 @@ MetadatoArchivo ParserJson::deserializarMetadatoArchivo(string json) {
 	MetadatoArchivo metadatos;
 	bool parseadoExitoso = reader.parse(json, raiz);
 	if (parseadoExitoso){
-		metadatos.nombre = this->verificarString("nombre", raiz);
-		metadatos.extension = this->verificarString("extension", raiz);
-		metadatos.fechaUltimaModificacion = this->verificarString("fecha ultima modificacion", raiz);
-		metadatos.usuarioUltimaModificacion = this->verificarString("usuario ultima modificacion", raiz);
-		metadatos.propietario = this->verificarString("propietario", raiz);
+		metadatos.nombre = ParserJson::verificarString("nombre", raiz);
+		metadatos.extension = ParserJson::verificarString("extension", raiz);
+		metadatos.fechaUltimaModificacion = ParserJson::verificarString("fecha ultima modificacion", raiz);
+		metadatos.usuarioUltimaModificacion = ParserJson::verificarString("usuario ultima modificacion", raiz);
+		metadatos.propietario = ParserJson::verificarString("propietario", raiz);
 
 		std::list<string> etiquetas;
 		Value etiq = raiz.get("etiquetas", "NO");
@@ -177,14 +177,14 @@ MetadatoUsuario ParserJson::deserializarMetadatoUsuario(string json) {
 	MetadatoUsuario metadatos;
 	bool parseadoExitoso = reader.parse(json, raiz);
 	if (parseadoExitoso){
-		metadatos.nombre = this->verificarString("nombre", raiz);
-		metadatos.email = this->verificarString("email", raiz);
-		metadatos.pathFotoPerfil = this->verificarString("path foto de perfil", raiz);
+		metadatos.nombre = ParserJson::verificarString("nombre", raiz);
+		metadatos.email = ParserJson::verificarString("email", raiz);
+		metadatos.pathFotoPerfil = ParserJson::verificarString("path foto de perfil", raiz);
 
 		Value ubicacion = raiz.get("ultima ubicacion", "NO");
 		if (not ubicacion.isNull() and ubicacion.isObject()){
-			metadatos.ultimaUbicacion.latitud = this->verificarDouble("latitud", ubicacion);
-			metadatos.ultimaUbicacion.longitud = this->verificarDouble("longitud", ubicacion);
+			metadatos.ultimaUbicacion.latitud = ParserJson::verificarDouble("latitud", ubicacion);
+			metadatos.ultimaUbicacion.longitud = ParserJson::verificarDouble("longitud", ubicacion);
 		} else {
 			Logger logger;
 			string error = "Parametro \"ultima ubicacion\" de un metadato de usuario invalido o inexistente en un Json. Se le asigna la ubicacion (0,0) al mismo.";
@@ -207,9 +207,9 @@ MetadatosSesion ParserJson::deserializarMetadatoSesion(std::string json){
 	MetadatosSesion metadatos;
 	bool parseadoExitoso = reader.parse(json, raiz);
 	if (parseadoExitoso){
-		metadatos.username = this->verificarString("username", raiz);
-		metadatos.password = this->verificarString("password", raiz);
-		metadatos.token = this->verificarString("token", raiz);
+		metadatos.username = ParserJson::verificarString("username", raiz);
+		metadatos.password = ParserJson::verificarString("password", raiz);
+		metadatos.token = ParserJson::verificarString("token", raiz);
 	} else {
 		Logger logger;
 		string error = "Fallo el parseo de un Json metadato de sesion.";
