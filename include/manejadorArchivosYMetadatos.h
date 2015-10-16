@@ -23,6 +23,8 @@ private:
 
 	bool agregarPermisosABD(string username);
 	bool eliminarArchivo(string username, string filepath);
+	bool mandarArchivoATrash(string username, string filepath);
+	void eliminarArchivoDefinitivamente(string filepath);
 	bool agregarPermiso(string usernameOrigen, string filepath, string usernameDestino);
 	bool eliminarPermiso(string usernameOrigen, string filepath, string usernameDestino);
 	bool guardarArchivo (const string& filepath, const string& username, const char* data, int dataLen);

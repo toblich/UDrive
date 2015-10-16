@@ -682,8 +682,8 @@ TEST_F(ManejadorArchivosYMetadatosTest, noDeberiaRestaurarArchivoPropioNuncaBorr
 	string path = propietario + "/subcarpeta/archivo.txt";
 	string pathEnPapelera = propietario + "/#trash/subcarpeta#archivo.txt#0";
 
-	ASSERT_TRUE(manejador->crearUsuario(propietario));
-	ASSERT_TRUE(manejador->subirArchivo(propietario, path, contenido.c_str(), contenido.size(), jsonArchOK));
+	manejador->crearUsuario(propietario);
+	manejador->subirArchivo(propietario, path, contenido.c_str(), contenido.size(), jsonArchOK);
 
 	EXPECT_FALSE(manejador->restaurar(propietario, pathEnPapelera));
 }
@@ -693,10 +693,10 @@ TEST_F(ManejadorArchivosYMetadatosTest, noDeberiaRestaurarArchivoPropioBorradoPe
 	string path = propietario + "/subcarpeta/archivo.txt";
 	string pathEnPapelera = propietario + "/#trash/subcarpeta#archivo.txt#0";
 
-	ASSERT_TRUE(manejador->crearUsuario(propietario));
-	ASSERT_TRUE(manejador->subirArchivo(propietario, path, contenido.c_str(), contenido.size(), jsonArchOK));
-	ASSERT_TRUE(manejador->eliminar(propietario, path));
-	ASSERT_TRUE(manejador->subirArchivo(propietario, path, contenido.c_str(), contenido.size(), jsonArchOK));
+	manejador->crearUsuario(propietario);
+	manejador->subirArchivo(propietario, path, contenido.c_str(), contenido.size(), jsonArchOK);
+	manejador->eliminar(propietario, path);
+	manejador->subirArchivo(propietario, path, contenido.c_str(), contenido.size(), jsonArchOK);
 
 	EXPECT_FALSE(manejador->restaurar(propietario, pathEnPapelera));
 }
@@ -706,11 +706,25 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaRestaurarUnaVezArchivoBorradoDosV
 	string path = propietario + "/subcarpeta/archivo.txt";
 	string pathEnPapelera = propietario + "/#trash/subcarpeta#archivo.txt#0";
 
-	ASSERT_TRUE(manejador->crearUsuario(propietario));
+	manejador->crearUsuario(propietario);
 	for (int i = 0; i < 2; i++) {
 		ASSERT_TRUE(manejador->subirArchivo(propietario, path, contenido.c_str(), contenido.size(), jsonArchOK));
 		ASSERT_TRUE(manejador->eliminar(propietario, path));
 	}
 
 	EXPECT_TRUE(manejador->restaurar(propietario, pathEnPapelera));
+}
+
+TEST_F(ManejadorArchivosYMetadatosTest, deberiaEliminarDefinitivamenteArchivoAlBorrarloDeLaPapelera) {
+	string contenido = "contenido";
+	string path = propietario + "/subcarpeta/archivo.txt";
+	string pathEnPapelera = propietario + "/#trash/subcarpeta#archivo.txt#0";
+
+	manejador->crearUsuario(propietario);
+	manejador->subirArchivo(propietario, path, contenido.c_str(), contenido.size(), jsonArchOK);
+	manejador->eliminar(propietario, path);
+
+	ASSERT_TRUE(manejador->eliminar(propietario, pathEnPapelera)); // lo borra definitivamente
+	EXPECT_EQ("", manejador->descargarArchivo(propietario, pathEnPapelera));
+	EXPECT_EQ("", manejador->consultarMetadatosArchivo(propietario, pathEnPapelera));
 }
