@@ -401,6 +401,34 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaObtenerBienLaEstructuraDeLasCarpe
 	EXPECT_EQ(mapa.at("hola"), "#folder");
 }
 
+TEST_F(ManejadorArchivosYMetadatosTest, noDeberiaPoderEliminarArchivoInexistente) {
+	string filepath = "pablo/archivos/saludo.txt";
+	manejador->crearUsuario("pablo");
+	manejador->crearCarpetaSegura("pablo", "pablo/archivos");
+	EXPECT_FALSE(manejador->eliminar("pablo", filepath));
+}
+
+TEST_F(ManejadorArchivosYMetadatosTest, noDeberiaPoderActualizarMetadatoInexistente) {
+	string filepath = "pablo/archivos/saludo.txt";
+	manejador->crearUsuario("pablo");
+	manejador->crearCarpetaSegura("pablo", "pablo/archivos");
+	EXPECT_FALSE(manejador->actualizarMetadatos("pablo", filepath, jsonArchOK));
+}
+
+TEST_F(ManejadorArchivosYMetadatosTest, noDeberiaPoderConsultarMetadatoInexistente) {
+	string filepath = "pablo/archivos/saludo.txt";
+	manejador->crearUsuario("pablo");
+	manejador->crearCarpetaSegura("pablo", "pablo/archivos");
+	EXPECT_EQ(manejador->consultarMetadatosArchivo("pablo", filepath), "");
+}
+
+TEST_F(ManejadorArchivosYMetadatosTest, noDeberiaPoderSubirDosVecesUnArchivoConMetodoSubirArchivo) {
+	string filepath = "pablo/archivos/saludo.txt";
+	manejador->crearUsuario("pablo");
+	manejador->crearCarpetaSegura("pablo", "pablo/archivos");
+	EXPECT_TRUE(manejador->subirArchivo("pablo", filepath, "hola pablo", 10, jsonArchOK));
+	EXPECT_FALSE(manejador->subirArchivo("pablo", filepath, "hola pablo", 10, jsonArchOK));
+}
 
 TEST_F(ManejadorArchivosYMetadatosTest, deberiaBorrarElFileSystem) {
 	struct stat sb;
@@ -551,7 +579,7 @@ TEST_F(ManejadorArchivosYMetadatosTest, usuarioSinPermisosNoDeberiaPoderConsulta
 	string filepath = "pablo/archivos/saludo.txt";
 	manejador->crearUsuario("pablo");
 	manejador->crearUsuario("juan");
-	manejador->subirArchivo("pablo", filepath, "hola pablo", 10, jsonArchOK);;
+	manejador->subirArchivo("pablo", filepath, "hola pablo", 10, jsonArchOK);
 	EXPECT_EQ(manejador->consultarMetadatosArchivo("juan", filepath), "");
 }
 
@@ -559,7 +587,7 @@ TEST_F(ManejadorArchivosYMetadatosTest, usuarioSinPermisosNoDeberiaPoderActualiz
 	string filepath = "pablo/archivos/saludo.txt";
 	manejador->crearUsuario("pablo");
 	manejador->crearUsuario("juan");
-	manejador->subirArchivo("pablo", filepath, "hola pablo", 10, jsonArchOK);;
+	manejador->subirArchivo("pablo", filepath, "hola pablo", 10, jsonArchOK);
 	EXPECT_FALSE(manejador->actualizarMetadatos("juan", filepath, jsonArchOK));
 }
 
@@ -567,7 +595,7 @@ TEST_F(ManejadorArchivosYMetadatosTest, usuarioSinPermisosNoDeberiaPoderActualiz
 	string filepath = "pablo/archivos/saludo.txt";
 	manejador->crearUsuario("pablo");
 	manejador->crearUsuario("juan");
-	manejador->subirArchivo("pablo", filepath, "hola pablo", 10, jsonArchOK);;
+	manejador->subirArchivo("pablo", filepath, "hola pablo", 10, jsonArchOK);
 	EXPECT_FALSE(manejador->actualizarArchivo("juan", filepath, "hola juan", 9));
 }
 
@@ -575,7 +603,7 @@ TEST_F(ManejadorArchivosYMetadatosTest, usuarioSinPermisosNoDeberiaPoderDescarga
 	string filepath = "pablo/archivos/saludo.txt";
 	manejador->crearUsuario("pablo");
 	manejador->crearUsuario("juan");
-	manejador->subirArchivo("pablo", filepath, "hola pablo", 10, jsonArchOK);;
+	manejador->subirArchivo("pablo", filepath, "hola pablo", 10, jsonArchOK);
 	EXPECT_EQ(manejador->descargarArchivo("juan", filepath), "");
 }
 
@@ -583,7 +611,7 @@ TEST_F(ManejadorArchivosYMetadatosTest, usuarioSinPermisosNoDeberiaPoderEliminar
 	string filepath = "pablo/archivos/saludo.txt";
 	manejador->crearUsuario("pablo");
 	manejador->crearUsuario("juan");
-	manejador->subirArchivo("pablo", filepath, "hola pablo", 10, jsonArchOK);;
+	manejador->subirArchivo("pablo", filepath, "hola pablo", 10, jsonArchOK);
 	EXPECT_FALSE(manejador->eliminar("juan", filepath));
 }
 

@@ -241,6 +241,7 @@ void ManejadorArchivosYMetadatos::actualizarMetadatosChequeados (const string& f
 			if (find(usuariosViejos.begin(), usuariosViejos.end(), nuevoUsuario) == usuariosViejos.end()) {
 				this->agregarPermiso(username, filepath, nuevoUsuario);
 			}
+			// TODO: Si tenia permisos y ahora no los tiene, eliminarPermiso
 		}
 		nuevoJson = jsonNuevosMetadatos;
 	}
