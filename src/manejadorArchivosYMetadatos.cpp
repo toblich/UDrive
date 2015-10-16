@@ -12,7 +12,7 @@
 //		 REVISAR Y TESTEAR!!!
 
 ManejadorArchivosYMetadatos::ManejadorArchivosYMetadatos (BD* dbMetadatos) :
-		ManejadorArchivosYMetadatos(dbMetadatos, defaultFileSystem) {
+		ManejadorArchivosYMetadatos(dbMetadatos, DEFAULT_FS) {
 }
 
 ManejadorArchivosYMetadatos::ManejadorArchivosYMetadatos (BD* dbMetadatos, string path) : validador(dbMetadatos) {
@@ -107,13 +107,13 @@ bool ManejadorArchivosYMetadatos::crearCarpetaSegura (string username, string pa
 }
 
 bool ManejadorArchivosYMetadatos::agregarPermisosABD (string username) {
-	string key = permisos + "/" + username;
+	string key = PERMISOS + "/" + username;
 	return this->dbMetadatos->put(key, ""); // PUT devuelve false si ya existia la clave, true si la agrega
 }
 
 bool ManejadorArchivosYMetadatos::crearUsuario (string username) {
 	//Creo tanto la carpeta del username como su papelera
-	string pathTrash = username + "/" + trash;
+	string pathTrash = username + "/" + TRASH;
 	bool agregoPermisos = this->agregarPermisosABD(username);
 	return (agregoPermisos and this->crearCarpeta(username, pathTrash));
 }
@@ -282,7 +282,7 @@ bool ManejadorArchivosYMetadatos::agregarPermiso (string usernameOrigen, string 
 			Logger::logWarn("Se quiso agregar un permiso al archivo " + filepath + " pero este no existe.");
 			return false;
 		}
-		string pathPermisos = permisos + "/" + usernameDestino;
+		string pathPermisos = PERMISOS + "/" + usernameDestino;
 		if (not dbMetadatos->contains(pathPermisos)) {
 			Logger::logWarn("Se quiso agregar un permiso al usuario " + usernameDestino + " pero este no existe.");
 			return false;
@@ -315,7 +315,7 @@ bool ManejadorArchivosYMetadatos::eliminarPermiso(string usernameOrigen, string 
 			Logger::logWarn("Se quiso eliminar un permiso del archivo " + filepath + " pero este no existe.");
 			return false;
 		}
-		string pathPermisos = permisos + "/" + usernameDestino;
+		string pathPermisos = PERMISOS + "/" + usernameDestino;
 		if (not dbMetadatos->contains(pathPermisos)) {
 			Logger::logWarn("Se quiso eliminar un permiso del usuario " + usernameDestino + " pero este no existe.");
 			return false;
@@ -359,7 +359,7 @@ Batch ManejadorArchivosYMetadatos::armarBatchEliminarArchivo (const string& json
 		if (usuario == metadatoConFechaModif.propietario)
 			continue;
 
-		string permisosUsuario = permisos + "/" + usuario;
+		string permisosUsuario = PERMISOS + "/" + usuario;
 		if (dbMetadatos->contains(permisosUsuario)) {
 			string archivosStr = dbMetadatos->get(permisosUsuario);
 			vector<string> archivos = ParserURI::parsear(archivosStr, RESERVED_CHAR);
@@ -391,7 +391,7 @@ bool ManejadorArchivosYMetadatos::eliminarArchivo (string username, string filep
 		return false;
 	}
 
-	if (trash == ParserURI::parsear(filepath, '/')[1]) {
+	if (TRASH == ParserURI::parsear(filepath, '/')[1]) {
 		this->eliminarArchivoDefinitivamente(filepath);
 		return true;
 	} else {
@@ -412,7 +412,7 @@ bool ManejadorArchivosYMetadatos::mandarArchivoATrash(string username, string fi
 		exit(1);
 	}
 
-	string pathCompletoPapelera = metadato.propietario + "/" + trash + "/" + pathSinUsernameConHash;
+	string pathCompletoPapelera = metadato.propietario + "/" + TRASH + "/" + pathSinUsernameConHash;
 	string nroSecuencia = this->validador.obtenerNumeroSecuencia(this->pathFileSystem, metadato.propietario, pathSinUsernameConHash);
 	pathCompletoPapelera += RESERVED_CHAR + nroSecuencia;
 	string pathCompletoPapeleraConFS = this->pathFileSystem + "/" + pathCompletoPapelera;
@@ -452,7 +452,7 @@ string ManejadorArchivosYMetadatos::obtenerEstructuraCarpeta (string path) {
 				vector<string> directorios = ParserURI::parsear(pathInterno, '/');
 				int size = directorios.size();
 				string foldername = directorios[size - 1];
-				mapa.insert(pair<string, string>(foldername, folder));
+				mapa.insert(pair<string, string>(foldername, FOLDER));
 			} else { //Es un archivo
 				if (not dbMetadatos->contains(pathInterno)) {
 					Logger::logWarn("Se quiso obtener los metadatos del archivo " + path + " pero este no existe.");

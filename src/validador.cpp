@@ -43,7 +43,7 @@ bool Validador::esPathValido (string path) {
 }
 
 bool Validador::tienePermisos (string username, string path) {
-	string key = permisos + "/" + username;
+	string key = PERMISOS + "/" + username;
 	if (this->dbMetadatos->contains(key)) {
 		string archivosPermitidos = this->dbMetadatos->get(key);
 		vector<string> archivos = ParserURI::parsear(archivosPermitidos, RESERVED_CHAR);
@@ -64,7 +64,7 @@ bool Validador::verificarPermisos (string username, string path) {
 }
 
 string Validador::obtenerNumeroSecuencia(string pathFileSystem, string propietario, string pathSinUsernameConHash) {
-	string comando = "ls '" + pathFileSystem + "/" + propietario + "/" + trash + "' -1 | grep \"^" +
+	string comando = "ls '" + pathFileSystem + "/" + propietario + "/" + TRASH + "' -1 | grep \"^" +
 			pathSinUsernameConHash + RESERVED_REGEX + "[0-9]\\+$\" | rev | cut -d " + RESERVED_REGEX +
 			" -f 1 | rev | sort -nr | head -n1";
 	string nuevoNroSecuencia;

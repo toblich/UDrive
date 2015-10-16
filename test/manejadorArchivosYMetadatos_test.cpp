@@ -93,7 +93,7 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaCrearBienCarpetasSeguras) {
 }
 
 TEST_F(ManejadorArchivosYMetadatosTest, deberiaHaberErrorEnPath) {
-	string path = "pablo/como#estas/bien";
+	string path = "pablo/como" + RESERVED_STR + "estas/bien";
 	EXPECT_FALSE( validador->esPathValido(path) );
 }
 
@@ -106,7 +106,7 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaCrearCarpetaTrashAlCrearUsuario) 
 	struct stat sb;
 	string usuario = "pablo";
 	ASSERT_TRUE(manejador->crearUsuario(usuario));
-	string trash = pathFS + "/" + usuario + "/#trash";
+	string trash = pathFS + "/" + usuario + "/" + TRASH;
 	EXPECT_TRUE(stat(trash.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode));
 }
 
@@ -134,7 +134,7 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaEliminarBienArchivoDeTexto) {
 	manejador->subirArchivo("pablo", filepath, "hola pablo", 10, jsonArchOK);
 	string filepathCompleto = pathFS + "/" + filepath;
 	manejador->eliminarArchivo("pablo", filepath);
-	string filepathCompletoTrash = pathFS + "/pablo/#trash/archivos#saludo.txt#0";
+	string filepathCompletoTrash = pathFS + "/pablo/" + TRASH + "/archivos" + RESERVED_STR + "saludo.txt" + RESERVED_STR + "0";
 	struct stat buffer;
 	EXPECT_FALSE(stat (filepathCompleto.c_str(), &buffer) == 0); //No existe en el filesystem
 	EXPECT_TRUE(stat (filepathCompletoTrash.c_str(), &buffer) == 0); //Si existe en el trash
@@ -397,8 +397,8 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaObtenerBienLaEstructuraDeLasCarpe
 	EXPECT_EQ(mapa.at("saludo.txt"), "txt");
 	EXPECT_EQ(mapa.at("juan"), "none");
 	EXPECT_EQ(mapa.at("pepe.hola"), "hola");
-	EXPECT_EQ(mapa.at("vos?"), "#folder");
-	EXPECT_EQ(mapa.at("hola"), "#folder");
+	EXPECT_EQ(mapa.at("vos?"), FOLDER);
+	EXPECT_EQ(mapa.at("hola"), FOLDER);
 }
 
 TEST_F(ManejadorArchivosYMetadatosTest, noDeberiaPoderEliminarArchivoInexistente) {
@@ -461,8 +461,9 @@ TEST_F(ManejadorArchivosYMetadatosTest, usuarioConPermisosDeberiaEliminarBienArc
 	inic(manejador, filepath);
 	string filepathCompleto = pathFS + "/" + filepath;
 	ASSERT_TRUE( manejador->eliminarArchivo("juan", filepath) );
-	string filepathCompletoTrashProp = pathFS + "/pablo/#trash/archivos#saludo.txt#0";
-	string filepathCompletoTrashJuan = pathFS + "/juan/#trash/archivos#saludo.txt#0";
+	string filename = "/archivos" + RESERVED_STR + "saludo.txt" + RESERVED_STR + "0";
+	string filepathCompletoTrashProp = pathFS + "/pablo/"+ TRASH + "/" + filename;
+	string filepathCompletoTrashJuan = pathFS + "/juan/" + TRASH + "/" + filename;
 	struct stat buffer;
 	EXPECT_FALSE(stat (filepathCompleto.c_str(), &buffer) == 0); //No existe en el filesystem
 	EXPECT_TRUE(stat (filepathCompletoTrashProp.c_str(), &buffer) == 0); //Si existe en el trash del propietario
@@ -664,7 +665,7 @@ TEST_F(ManejadorArchivosYMetadatosTest, usuarioDeberiaPoderEliminarPermisosAlAct
 TEST_F(ManejadorArchivosYMetadatosTest, deberiaRestaurarArchivoPropioBorrado) {
 	string contenido = "contenido";
 	string path = propietario + "/subcarpeta/archivo.txt";
-	string pathEnPapelera = propietario + "/#trash/subcarpeta#archivo.txt#0";
+	string pathEnPapelera = propietario + "/" + TRASH + "/subcarpeta" + RESERVED_STR + "archivo.txt" + RESERVED_STR + "0";
 
 	ASSERT_TRUE(manejador->crearUsuario(propietario));
 	ASSERT_TRUE(manejador->subirArchivo(propietario, path, contenido.c_str(), contenido.size(), jsonArchOK));
@@ -680,7 +681,7 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaRestaurarArchivoPropioBorrado) {
 TEST_F(ManejadorArchivosYMetadatosTest, noDeberiaRestaurarArchivoPropioNuncaBorrado) {
 	string contenido = "contenido";
 	string path = propietario + "/subcarpeta/archivo.txt";
-	string pathEnPapelera = propietario + "/#trash/subcarpeta#archivo.txt#0";
+	string pathEnPapelera = propietario + "/" + TRASH + "/subcarpeta" + RESERVED_STR + "archivo.txt" + RESERVED_STR + "0";
 
 	manejador->crearUsuario(propietario);
 	manejador->subirArchivo(propietario, path, contenido.c_str(), contenido.size(), jsonArchOK);
@@ -691,7 +692,7 @@ TEST_F(ManejadorArchivosYMetadatosTest, noDeberiaRestaurarArchivoPropioNuncaBorr
 TEST_F(ManejadorArchivosYMetadatosTest, noDeberiaRestaurarArchivoPropioBorradoPeroVueltoACrear) {
 	string contenido = "contenido";
 	string path = propietario + "/subcarpeta/archivo.txt";
-	string pathEnPapelera = propietario + "/#trash/subcarpeta#archivo.txt#0";
+	string pathEnPapelera = propietario + "/" + TRASH + "/subcarpeta" + RESERVED_STR + "archivo.txt" + RESERVED_STR + "0";
 
 	manejador->crearUsuario(propietario);
 	manejador->subirArchivo(propietario, path, contenido.c_str(), contenido.size(), jsonArchOK);
@@ -704,7 +705,7 @@ TEST_F(ManejadorArchivosYMetadatosTest, noDeberiaRestaurarArchivoPropioBorradoPe
 TEST_F(ManejadorArchivosYMetadatosTest, deberiaRestaurarUnaVezArchivoBorradoDosVeces) {
 	string contenido = "contenido";
 	string path = propietario + "/subcarpeta/archivo.txt";
-	string pathEnPapelera = propietario + "/#trash/subcarpeta#archivo.txt#0";
+	string pathEnPapelera = propietario + "/" + TRASH + "/subcarpeta" + RESERVED_STR + "archivo.txt" + RESERVED_STR + "0";
 
 	manejador->crearUsuario(propietario);
 	for (int i = 0; i < 2; i++) {
@@ -718,7 +719,7 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaRestaurarUnaVezArchivoBorradoDosV
 TEST_F(ManejadorArchivosYMetadatosTest, deberiaEliminarDefinitivamenteArchivoAlBorrarloDeLaPapelera) {
 	string contenido = "contenido";
 	string path = propietario + "/subcarpeta/archivo.txt";
-	string pathEnPapelera = propietario + "/#trash/subcarpeta#archivo.txt#0";
+	string pathEnPapelera = propietario + "/" + TRASH + "/subcarpeta" + RESERVED_STR + "archivo.txt" + RESERVED_STR + "0";
 
 	manejador->crearUsuario(propietario);
 	manejador->subirArchivo(propietario, path, contenido.c_str(), contenido.size(), jsonArchOK);
