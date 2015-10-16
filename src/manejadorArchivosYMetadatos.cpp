@@ -329,48 +329,60 @@ Batch ManejadorArchivosYMetadatos::armarBatchEliminarArchivo (const string& json
 // Lo que se hace es moverlo a la papelera y cambiar el key de los metadatos por ese
 // Manda el archivo a la papelera del propietario y borra todos los permisos de todos, salvo el del propietario
 bool ManejadorArchivosYMetadatos::eliminarArchivo (string username, string filepath) {
-	if (validador.verificarPermisos(username, filepath)) {
-		string filepathCompleto = this->pathFileSystem + "/" + filepath;
-		if (validador.existeArchivo(filepathCompleto)) {
-			if (not dbMetadatos->contains(filepath)) {
-				Logger::logWarn("Se quiso eliminar el archivo " + filepath + " pero este no existe en la base de datos.");
-				return false;
-			}
-
-			vector<string> directorios = ParserURI::parsear(filepath, '/');
-			string jsonMetadatos = dbMetadatos->get(filepath);
-			MetadatoArchivo metadato = ParserJson().deserializarMetadatoArchivo(jsonMetadatos);
-
-			if (metadato.propietario != directorios.front()) {	// DEBUG: no deberia suceder nunca
-				cout << "El propietario del metadato no coincide con la carpeta del FileSystem. EXIT." << endl;
-				Logger::logError("El propietario del metadato no coincide con la carpeta del FileSystem. EXIT.");
-				exit(1);
-			}
-
-			string pathSinUsernameConHash = ParserURI::join(directorios, '#', 1, directorios.size());
-
-			string pathCompletoPapelera = metadato.propietario + "/" + trash + "/" + pathSinUsernameConHash;
-			string nroSecuencia = this->validador.obtenerNumeroSecuencia(this->pathFileSystem, metadato.propietario, pathSinUsernameConHash);
-			pathCompletoPapelera += "#" + nroSecuencia;
-			string pathCompletoPapeleraConFS = this->pathFileSystem + "/" + pathCompletoPapelera;
-
-			if (not rename(filepathCompleto.c_str(), pathCompletoPapeleraConFS.c_str())) {
-				Logger::logInfo("La eliminacion del archivo " + filepath + " fue correcta.");
-
-				Batch batch = armarBatchEliminarArchivo(jsonMetadatos, username, filepath, pathCompletoPapelera);
-
-				if (this->dbMetadatos->writeBatch(batch))
-					return true;
-				Logger::logWarn("No se ha podido escribir el batch de eliminacion del archivo " + filepath + ".");
-				return false;
-			} else {
-				Logger::logWarn("La eliminacion del archivo " + filepath + " no fue correcta.");
-				return false;
-			}
-		} else
-			return false;
-	} else
+	if (not validador.verificarPermisos(username, filepath))
 		return false;
+
+	string filepathCompleto = this->pathFileSystem + "/" + filepath;
+
+	if (not validador.existeArchivo(filepathCompleto)) {
+		Logger::logWarn("Se quiso eliminar el archivo " + filepath + " pero este no existe en el filesystem.");
+		return false;
+	}
+	if (not dbMetadatos->contains(filepath)) {
+		Logger::logWarn("Se quiso eliminar el archivo " + filepath + " pero este no existe en la base de datos.");
+		return false;
+	}
+
+	if (trash == ParserURI::parsear(filepath, '/')[1]) {
+		this->eliminarArchivoDefinitivamente(filepath);
+		return true;
+	} else {
+		return this->mandarArchivoATrash(username, filepath);
+	}
+}
+
+bool ManejadorArchivosYMetadatos::mandarArchivoATrash(string username, string filepath) {
+	string filepathCompleto = this->pathFileSystem + "/" + filepath;
+	vector<string> directorios = ParserURI::parsear(filepath, '/');
+	string jsonMetadatos = dbMetadatos->get(filepath);
+	MetadatoArchivo metadato = ParserJson().deserializarMetadatoArchivo(jsonMetadatos);
+	string pathSinUsernameConHash = ParserURI::join(directorios, '#', 1, directorios.size());
+
+	if (metadato.propietario != directorios.front()) {	// DEBUG: no deberia suceder nunca
+		cout << "El propietario del metadato no coincide con la carpeta del FileSystem. EXIT." << endl;
+		Logger::logError("El propietario del metadato no coincide con la carpeta del FileSystem. EXIT.");
+		exit(1);
+	}
+
+	string pathCompletoPapelera = metadato.propietario + "/" + trash + "/" + pathSinUsernameConHash;
+	string nroSecuencia = this->validador.obtenerNumeroSecuencia(this->pathFileSystem, metadato.propietario, pathSinUsernameConHash);
+	pathCompletoPapelera += "#" + nroSecuencia;
+	string pathCompletoPapeleraConFS = this->pathFileSystem + "/" + pathCompletoPapelera;
+
+
+	if (rename(filepathCompleto.c_str(), pathCompletoPapeleraConFS.c_str())) {
+		Logger::logWarn("La eliminacion del archivo " + filepath + " no fue correcta.");
+		return false;
+	}
+	Logger::logInfo("La eliminacion del archivo " + filepath + " fue correcta.");
+
+	Batch batch = armarBatchEliminarArchivo(jsonMetadatos, username, filepath, pathCompletoPapelera);
+
+	if (this->dbMetadatos->writeBatch(batch))
+		return true;
+
+	Logger::logWarn("No se ha podido escribir el batch de eliminacion del archivo " + filepath + ".");
+	return false;
 }
 
 //TODO: Fijarse del caso especial de "compartidos conmigo"
@@ -433,8 +445,7 @@ bool ManejadorArchivosYMetadatos::deleteCarpeta (string path) {
 	if (validador.existeCarpeta(path)) {
 		string command = "exec rm -r '" + path + "'";
 		system(command.c_str());
-		Logger logger;
-		logger.loggear("Se elimino permanentemente la carpeta " + path + ".", TRACE);
+		Logger::logTrace("Se elimino permanentemente la carpeta " + path + ".");
 		return true;
 	} else {
 		Logger::logWarn("No se ha podido eliminar la carpeta " + path + " porque no existe.");
@@ -488,6 +499,16 @@ string ManejadorArchivosYMetadatos::actualizarUsuarioFechaModificacion (string j
 	metadato.fechaUltimaModificacion = fecha;
 	string nuevosMetadatos = parser.serializarMetadatoArchivo(metadato);
 	return nuevosMetadatos;
+}
+
+void ManejadorArchivosYMetadatos::eliminarArchivoDefinitivamente (string filepath) {
+	// Las validaciones de existencia se hacen antes de llamarlo
+	dbMetadatos->erase(filepath);
+	Logger::logInfo("Se borraron definitivamente los metadatos del archivo " + filepath);
+	string filepathConFS = this->pathFileSystem + "/" + filepath;
+	string command = "exec rm '" + filepathConFS + "'";
+	system(command.c_str());
+	Logger::logInfo("Se borro definitivamente el archivo " + filepath);
 }
 
 bool ManejadorArchivosYMetadatos::deleteFileSystem () {
