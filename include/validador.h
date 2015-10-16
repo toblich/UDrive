@@ -11,6 +11,7 @@
 #include "logger.h"
 #include <dirent.h>
 #include <algorithm>
+#include <sstream>
 
 using namespace std;
 
@@ -32,6 +33,7 @@ public:
 	bool esPathValido(string path);
 	bool tienePermisos(string username, string path);
 	bool verificarPermisos(string username, string path);
+	string obtenerNumeroSecuencia(string pathFileSystem, string propietario, string pathSinUsernameConHash);
 };
 
 #endif /* INCLUDE_VALIDADOR_H_ */

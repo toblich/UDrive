@@ -37,26 +37,27 @@ bool ManejadorArchivosYMetadatos::eliminar (string username, string path) {
 // El path recibido no debe contener el nombre de un archivo.
 // En caso de que sea asi, se debera modificar este metodo.
 bool ManejadorArchivosYMetadatos::crearCarpeta (string username, string path) {
-	if (validador.verificarPermisos(username, path)) {
-		// Agrego el FileSystem para que sea la "raiz"
-		string pathCompletoConFS = this->pathFileSystem + "/" + path;
-		vector<string> directorios = ParserURI::parsear(pathCompletoConFS, '/');
-		string directorioAcumulado = "";
-		const int SIZE = directorios.size();
-		for (int i = 0; i < SIZE; i++) {
-			string directorio = directorios[i];
-			string directorioPadre = directorioAcumulado;
-			directorioAcumulado += (directorio + "/");
+	bool tienePermisos = validador.verificarPermisos(username, path);
+	// Agrego el FileSystem para que sea la "raiz"
+	string pathCompletoConFS = this->pathFileSystem + "/" + path;
+	vector<string> directorios = ParserURI::parsear(pathCompletoConFS, '/');
+	string directorioAcumulado = "";
+	const int SIZE = directorios.size();
+	for (int i = 0; i < SIZE; i++) {
+		string directorio = directorios[i];
+		string directorioPadre = directorioAcumulado;
+		directorioAcumulado += (directorio + "/");
 
-			if (not validador.existeCarpeta(directorioAcumulado)) { // Me fijo si existe la carpeta, sino la creo
+		if ( not validador.existeCarpeta(directorioAcumulado) ) { // Me fijo si existe la carpeta, sino la creo
+			if (tienePermisos) {
 				mkdir(directorioAcumulado.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 				Logger::logInfo("La carpeta " + directorio + " no existe dentro de " + directorioPadre
 								+ " por lo que ha sido creada.");
-			}
+			} else
+				return false; // Si no existia la carpeta y no tiene permisos para crear
 		}
-		return true;
 	}
-	return false;
+	return true;
 }
 
 bool ManejadorArchivosYMetadatos::crearCarpetaSegura (string username, string path) {
@@ -306,7 +307,10 @@ bool ManejadorArchivosYMetadatos::eliminarArchivo (string username, string filep
 			}
 
 			string pathSinUsernameConHash = ParserURI::join(directorios, '#', 1, directorios.size());
+
 			string pathCompletoPapelera = metadato.propietario + "/" + trash + "/" + pathSinUsernameConHash;
+			string nroSecuencia = this->validador.obtenerNumeroSecuencia(this->pathFileSystem, metadato.propietario, pathSinUsernameConHash);
+			pathCompletoPapelera += "#" + nroSecuencia;
 			string pathCompletoPapeleraConFS = this->pathFileSystem + "/" + pathCompletoPapelera;
 
 			if (not rename(filepathCompleto.c_str(), pathCompletoPapeleraConFS.c_str())) {
@@ -328,6 +332,8 @@ bool ManejadorArchivosYMetadatos::eliminarArchivo (string username, string filep
 		return false;
 }
 
+//TODO: Fijarse del caso especial de "compartidos conmigo"
+//TODO: Fijarse de mandar pathInterno en vez de metadato.nombre
 string ManejadorArchivosYMetadatos::obtenerEstructuraCarpeta (string path) {
 	string pathCompleto = this->pathFileSystem + "/" + path;
 	DIR* dir;

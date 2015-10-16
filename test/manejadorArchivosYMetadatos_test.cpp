@@ -31,13 +31,13 @@ class ManejadorArchivosYMetadatosTest : public ::testing::Test {
 };
 
 const std::string jsonArchOK = "{\n"
-		"\t\"etiquetas\" : [ \"23\", true, \"juan\" ],\n"
-		"\t\"extension\" : \"jpg\",\n"
+		"\t\"etiquetas\" : [ \"23\", true, \"hola\" ],\n"
+		"\t\"extension\" : \"txt\",\n"
 		"\t\"fecha ultima modificacion\" : \"09/09/2015\",\n"
-		"\t\"nombre\" : \"sol\",\n"
+		"\t\"nombre\" : \"saludo\",\n"
 		"\t\"propietario\" : \"pablo\",\n"
-		"\t\"usuario ultima modificacion\" : \"Pepe\",\n"
-		"\t\"usuarios\" : [ \"Pancheitor\", \"Juan\", \"Pepe\", \"Santi\" ]\n"
+		"\t\"usuario ultima modificacion\" : \"pablo\",\n"
+		"\t\"usuarios\" : [ \"pablo\" ]\n"
 		"}";
 
 TEST_F(ManejadorArchivosYMetadatosTest, deberiaParsearBienPathComun) {
@@ -132,7 +132,7 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaEliminarBienArchivoDeTexto) {
 	manejador->subirArchivo("pablo", filepath, "hola pablo", 10, jsonArchOK);
 	string filepathCompleto = pathFS + "/" + filepath;
 	manejador->eliminarArchivo("pablo", filepath);
-	string filepathCompletoTrash = pathFS + "/pablo/#trash/archivos#saludo.txt";
+	string filepathCompletoTrash = pathFS + "/pablo/#trash/archivos#saludo.txt#0";
 	struct stat buffer;
 	EXPECT_FALSE(stat (filepathCompleto.c_str(), &buffer) == 0); //No existe en el filesystem
 	EXPECT_TRUE(stat (filepathCompletoTrash.c_str(), &buffer) == 0); //Si existe en el trash
@@ -175,6 +175,29 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaPoderActualizarMetadatosDeArchivo
 	EXPECT_EQ("Juan", nuevoMetadato.usuarioUltimaModificacion);
 	EXPECT_EQ("pepe", nuevoMetadato.etiquetas.front());
 	EXPECT_EQ("Pablo", nuevoMetadato.usuariosHabilitados.back());
+}
+
+TEST_F(ManejadorArchivosYMetadatosTest, alActualizarMetadatoDeArchivoConUsuariosVaciosDeberiaConservarUsuarios) {
+	string path = "pablo/archivos";
+	string filepath = "pablo/archivos/saludo.txt";
+	manejador->crearUsuario("pablo");
+	manejador->crearCarpetaSegura("pablo", path);
+	manejador->subirArchivo("pablo", filepath, "hola pablo", 10, jsonArchOK);
+	std::string nuevoJson = "{\n"
+			"\t\"etiquetas\" : [ \"pepe\" ],\n"
+			"\t\"extension\" : \"png\",\n"
+			"\t\"fecha ultima modificacion\" : \"10/09/2015\",\n"
+			"\t\"nombre\" : \"luna\",\n"
+			"\t\"propietario\" : \"pablo\",\n"
+			"\t\"usuario ultima modificacion\" : \"Juan\",\n"
+			"\t\"usuarios\" : \n"
+			"}";
+	manejador->actualizarMetadatos("pablo",filepath, nuevoJson);
+	string jsonNuevoMetadato = manejador->consultarMetadatosArchivo("pablo", filepath);
+	ParserJson parser;
+	MetadatoArchivo nuevoMetadato = parser.deserializarMetadatoArchivo(jsonNuevoMetadato);
+
+	EXPECT_EQ("pablo", nuevoMetadato.usuariosHabilitados.back());
 }
 
 TEST_F(ManejadorArchivosYMetadatosTest, deberiaPoderAgregarPermisoYAgregarloAlMetadato) {
@@ -387,3 +410,178 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaBorrarElFileSystem) {
 	//Ahora no deberia existir
 	EXPECT_FALSE(stat(pathFS.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode));
 }
+
+// TESTEO DE PERMISOS
+
+void inic(ManejadorArchivosYMetadatos* manejador, string path){
+	manejador->crearUsuario("pablo");
+	manejador->crearUsuario("juan");
+	manejador->subirArchivo("pablo", path, "hola pablo", 10, jsonArchOK);
+	manejador->agregarPermiso("pablo", path, "juan");
+}
+
+TEST_F(ManejadorArchivosYMetadatosTest, deberiaNoHaberErrorEnPermisos) {
+	string path = "pablo/como estas/bien/saludo.txt";
+	inic(manejador, path);
+	EXPECT_TRUE( validador->verificarPermisos("juan",path) );
+}
+
+TEST_F(ManejadorArchivosYMetadatosTest, usuarioConPermisosDeberiaEliminarBienArchivoDeTexto) {
+	string filepath = "pablo/archivos/saludo.txt";
+	inic(manejador, filepath);
+	string filepathCompleto = pathFS + "/" + filepath;
+	ASSERT_TRUE( manejador->eliminarArchivo("juan", filepath) );
+	string filepathCompletoTrashProp = pathFS + "/pablo/#trash/archivos#saludo.txt#0";
+	string filepathCompletoTrashJuan = pathFS + "/juan/#trash/archivos#saludo.txt#0";
+	struct stat buffer;
+	EXPECT_FALSE(stat (filepathCompleto.c_str(), &buffer) == 0); //No existe en el filesystem
+	EXPECT_TRUE(stat (filepathCompletoTrashProp.c_str(), &buffer) == 0); //Si existe en el trash del propietario
+	EXPECT_FALSE(stat (filepathCompletoTrashJuan.c_str(), &buffer) == 0); //No existe en el trash del usuario con permisos
+}
+
+TEST_F(ManejadorArchivosYMetadatosTest, usuarioConPermisosDeberiaPoderConsultarMetadatosDeArchivo) {
+	string filepath = "pablo/archivos/saludo.txt";
+	inic(manejador, filepath);
+	string jsonMetadato = manejador->consultarMetadatosArchivo("juan", filepath);
+	ParserJson parser;
+	MetadatoArchivo metadato = parser.deserializarMetadatoArchivo(jsonMetadato);
+	EXPECT_EQ("txt", metadato.extension);
+	EXPECT_EQ("saludo", metadato.nombre);
+	EXPECT_EQ("pablo", metadato.propietario);
+	EXPECT_EQ("juan", metadato.usuariosHabilitados.back());
+	EXPECT_EQ("pablo", metadato.usuariosHabilitados.front());
+}
+
+TEST_F(ManejadorArchivosYMetadatosTest, usuarioConPermisosDeberiaPoderActualizarMetadatosDeArchivo) {
+	string filepath = "pablo/archivos/saludo.txt";
+	inic(manejador, filepath);
+	std::string nuevoJson = "{\n"
+			"\t\"etiquetas\" : [ \"pepe\" ],\n"
+			"\t\"extension\" : \"png\",\n"
+			"\t\"fecha ultima modificacion\" : \"10/09/2015\",\n"
+			"\t\"nombre\" : \"luna\",\n"
+			"\t\"propietario\" : \"pablo\",\n"
+			"\t\"usuario ultima modificacion\" : \"Juan\",\n"
+			"\t\"usuarios\" : [ \"Pancheitor\", \"Juan\", \"Pepe\", \"Santi\", \"Pablo\" ]\n"
+			"}";
+	manejador->actualizarMetadatos("juan",filepath, nuevoJson);
+	string jsonNuevoMetadato = manejador->consultarMetadatosArchivo("juan", filepath);
+	ParserJson parser;
+	MetadatoArchivo nuevoMetadato = parser.deserializarMetadatoArchivo(jsonNuevoMetadato);
+
+	EXPECT_EQ("png", nuevoMetadato.extension);
+	EXPECT_EQ("10/09/2015", nuevoMetadato.fechaUltimaModificacion);
+	EXPECT_EQ("luna", nuevoMetadato.nombre);
+	EXPECT_EQ("pablo", nuevoMetadato.propietario);
+	EXPECT_EQ("Juan", nuevoMetadato.usuarioUltimaModificacion);
+	EXPECT_EQ("pepe", nuevoMetadato.etiquetas.front());
+	EXPECT_EQ("Pablo", nuevoMetadato.usuariosHabilitados.back());
+}
+
+TEST_F(ManejadorArchivosYMetadatosTest, usuarioConPermisosDeberiaPoderAgregarPermisoYAgregarloAlMetadato) {
+	string filepath = "pablo/archivos/saludo.txt";
+	inic(manejador, filepath);
+	manejador->crearUsuario("pepe");
+	manejador->agregarPermiso("juan",filepath,"pepe");
+	string metadatoActualizado = manejador->consultarMetadatosArchivo("pepe",filepath);
+	ParserJson parser;
+	MetadatoArchivo asd = parser.deserializarMetadatoArchivo(metadatoActualizado);
+	EXPECT_EQ("pepe", asd.usuariosHabilitados.back());
+}
+
+TEST_F(ManejadorArchivosYMetadatosTest, usuarioConPermisosDeberiaPoderDescargarArchivo) {
+	string filepath = "pablo/archivos/saludo.txt";
+	inic(manejador, filepath);
+	string pathCompleto = manejador->descargarArchivo("juan", filepath);
+
+	char homeDirectory[1024];
+	getcwd(homeDirectory, sizeof(homeDirectory));
+	string pathAComparar(homeDirectory);
+	pathAComparar += "/" + pathFS + "/" + filepath;
+
+	EXPECT_EQ(pathAComparar,pathCompleto);
+}
+
+// No se cuanto sentido tiene este test
+TEST_F(ManejadorArchivosYMetadatosTest, usuarioConPermisosNoDeberiaPoderBorrarCarpetaConArchivosYCarpetas) {
+	string filepath = "pablo/como estas/bien/saludo.txt";
+	string filepath2 = "pablo/como estas/bien/juan";
+	string filepath3 = "pablo/como estas/bien/vos?/juan";
+	manejador->crearUsuario("pablo");
+	manejador->crearUsuario("juan");
+	manejador->crearCarpetaSegura("pablo","pablo/como estas/bien/vos?");
+	manejador->subirArchivo("pablo", filepath, "hola pablo", 10, jsonArchOK);
+	manejador->subirArchivo("pablo", filepath2, "hola pablo", 10, jsonArchOK);
+	manejador->subirArchivo("pablo", filepath3, "hola pablo", 10, jsonArchOK);
+	manejador->agregarPermiso("pablo", filepath, "juan");
+	manejador->agregarPermiso("pablo", filepath2, "juan");
+	manejador->agregarPermiso("pablo", filepath3, "juan");
+	EXPECT_FALSE( manejador->eliminar("juan","pablo/como estas") );
+}
+
+TEST_F(ManejadorArchivosYMetadatosTest, usuarioConPermisosDeberiaPoderActualizarArchivo) {
+	string filepath = "pablo/archivos/saludo.txt";
+	inic(manejador, filepath);
+	ASSERT_TRUE(manejador->actualizarArchivo("juan", filepath, "hola juan", 9));
+
+	string pathCompleto = pathFS + "/" + filepath;
+	ifstream archivo(pathCompleto.c_str());
+	string texto;
+	ASSERT_TRUE(archivo.is_open());
+	while ( getline(archivo,texto) ) {
+		EXPECT_EQ(texto, "hola juan");
+	}
+	archivo.close();
+}
+
+TEST_F(ManejadorArchivosYMetadatosTest, usuarioConPermisosDeberiaSerElUltimoQueModifico) {
+	string filepath = "pablo/archivos/saludo.txt";
+	inic(manejador, filepath);
+	ASSERT_TRUE(manejador->actualizarArchivo("juan", filepath, "hola juan", 9));
+
+	string jsonMetadatos = manejador->consultarMetadatosArchivo("juan", filepath);
+	MetadatoArchivo metadato = ParserJson().deserializarMetadatoArchivo(jsonMetadatos);
+
+	EXPECT_EQ("juan", metadato.usuarioUltimaModificacion);
+}
+
+TEST_F(ManejadorArchivosYMetadatosTest, usuarioSinPermisosNoDeberiaPoderConsultarMetadatos) {
+	string filepath = "pablo/archivos/saludo.txt";
+	manejador->crearUsuario("pablo");
+	manejador->crearUsuario("juan");
+	manejador->subirArchivo("pablo", filepath, "hola pablo", 10, jsonArchOK);;
+	EXPECT_EQ(manejador->consultarMetadatosArchivo("juan", filepath), "");
+}
+
+TEST_F(ManejadorArchivosYMetadatosTest, usuarioSinPermisosNoDeberiaPoderActualizarMetadatos) {
+	string filepath = "pablo/archivos/saludo.txt";
+	manejador->crearUsuario("pablo");
+	manejador->crearUsuario("juan");
+	manejador->subirArchivo("pablo", filepath, "hola pablo", 10, jsonArchOK);;
+	EXPECT_FALSE(manejador->actualizarMetadatos("juan", filepath, jsonArchOK));
+}
+
+TEST_F(ManejadorArchivosYMetadatosTest, usuarioSinPermisosNoDeberiaPoderActualizarArchivo) {
+	string filepath = "pablo/archivos/saludo.txt";
+	manejador->crearUsuario("pablo");
+	manejador->crearUsuario("juan");
+	manejador->subirArchivo("pablo", filepath, "hola pablo", 10, jsonArchOK);;
+	EXPECT_FALSE(manejador->actualizarArchivo("juan", filepath, "hola juan", 9));
+}
+
+TEST_F(ManejadorArchivosYMetadatosTest, usuarioSinPermisosNoDeberiaPoderDescargarArchivo) {
+	string filepath = "pablo/archivos/saludo.txt";
+	manejador->crearUsuario("pablo");
+	manejador->crearUsuario("juan");
+	manejador->subirArchivo("pablo", filepath, "hola pablo", 10, jsonArchOK);;
+	EXPECT_EQ(manejador->descargarArchivo("juan", filepath), "");
+}
+
+TEST_F(ManejadorArchivosYMetadatosTest, usuarioSinPermisosNoDeberiaPoderEliminarArchivo) {
+	string filepath = "pablo/archivos/saludo.txt";
+	manejador->crearUsuario("pablo");
+	manejador->crearUsuario("juan");
+	manejador->subirArchivo("pablo", filepath, "hola pablo", 10, jsonArchOK);;
+	EXPECT_FALSE(manejador->eliminar("juan", filepath));
+}
+

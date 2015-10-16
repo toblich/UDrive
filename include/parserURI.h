@@ -36,7 +36,8 @@ public:
 		for (int i = desde; i < hasta and i < size; i++){
 			salida += partes[i] + delim;
 		}
-		salida.pop_back();
+		if ( salida.size() > 0)
+			salida.pop_back();
 		return salida;
 	}
 };

@@ -60,5 +60,25 @@ bool Validador::verificarPermisos (string username, string path) {
 			return true;
 		Logger::logWarn("El usuario " + username + " no posee los permisos para el archivo " + path + ".");
 	}
-	return false; //Esto no deberia pasar jamás, pero bueno
+	return false;
+}
+
+string Validador::obtenerNumeroSecuencia(string pathFileSystem, string propietario, string pathSinUsernameConHash) {
+	string comando = "ls '" + pathFileSystem + "/" + propietario + "/" + trash + "' -1 | grep \"^" + pathSinUsernameConHash + "\\#[0-9]\\+$\" | rev | cut -d \\# -f 1 | rev | sort -nr | head -n1";
+	string nuevoNroSecuencia;
+	FILE *fp;
+	char ultimoNroSecuencia[4];
+	fp = popen(comando.c_str(), "r");
+	if ( fgets(ultimoNroSecuencia, sizeof(ultimoNroSecuencia), fp) != NULL ) {
+		string ultimoNroSecuenciaStr(ultimoNroSecuencia);
+		stringstream str(ultimoNroSecuenciaStr);
+		int numeroSecuencia;
+		str >> numeroSecuencia;
+		numeroSecuencia++;
+		nuevoNroSecuencia = to_string(numeroSecuencia);
+	} else {
+		nuevoNroSecuencia = "0";
+	}
+	pclose(fp);
+	return nuevoNroSecuencia;
 }
