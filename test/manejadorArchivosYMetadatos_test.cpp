@@ -599,6 +599,10 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaRestaurarArchivoPropioBorrado) {
 	ASSERT_TRUE(manejador->eliminar(propietario, path));
 
 	EXPECT_TRUE(manejador->restaurar(propietario, pathEnPapelera));
+	EXPECT_NE("", manejador->consultarMetadatosArchivo(propietario, path));	// Los metadatos existen (no son iguales por la fecha y los permisos)
+	EXPECT_NE("", manejador->descargarArchivo(propietario, path));	// El archivo existe (da el path)
+	EXPECT_EQ("", manejador->consultarMetadatosArchivo(propietario, pathEnPapelera));
+	EXPECT_EQ("", manejador->descargarArchivo(propietario, pathEnPapelera));
 }
 
 TEST_F(ManejadorArchivosYMetadatosTest, noDeberiaRestaurarArchivoPropioNuncaBorrado) {
