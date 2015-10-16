@@ -32,6 +32,8 @@ private:
 	Batch armarBatchEliminarArchivo (const string& jsonMetadatos, const string& username, const string& filepath,
 			const string& pathCompletoPapelera);
 	bool restaurarMetadatos (const string& pathEnPapeleraSinFS, const string& username, const string& pathRealSinFS);
+	string metadatosConPermisosDepurados (const string& filepath, const string& usernameDestino);
+	string jsonArchivosPermitidos (const string& pathPermisos, const string& filepath);
 
 public:
 	ManejadorArchivosYMetadatos(BD* dbMetadatos);

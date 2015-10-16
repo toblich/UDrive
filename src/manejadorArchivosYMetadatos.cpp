@@ -229,16 +229,15 @@ string ManejadorArchivosYMetadatos::consultarMetadatosArchivo (string username, 
 
 void ManejadorArchivosYMetadatos::actualizarMetadatosChequeados (const string& filepath,
 		const string& jsonNuevosMetadatos, const string& username) {
-	ParserJson parser;
 	string jsonMetadatosViejos = dbMetadatos->get(filepath);
-	MetadatoArchivo metadatosViejos = parser.deserializarMetadatoArchivo(jsonMetadatosViejos);
-	MetadatoArchivo metadatosNuevos = parser.deserializarMetadatoArchivo(jsonNuevosMetadatos);
+	MetadatoArchivo metadatosViejos = ParserJson().deserializarMetadatoArchivo(jsonMetadatosViejos);
+	MetadatoArchivo metadatosNuevos = ParserJson().deserializarMetadatoArchivo(jsonNuevosMetadatos);
 	list<string> usuariosViejos = metadatosViejos.usuariosHabilitados;
 	list<string> usuariosNuevos = metadatosNuevos.usuariosHabilitados;
 	string nuevoJson;
 	if (usuariosNuevos.empty()) {
 		metadatosNuevos.usuariosHabilitados = usuariosViejos;
-		nuevoJson = parser.serializarMetadatoArchivo(metadatosNuevos);
+		nuevoJson = ParserJson().serializarMetadatoArchivo(metadatosNuevos);
 	} else {
 		list<string>::iterator itUsuNuevos = usuariosNuevos.begin();
 		for (; itUsuNuevos != usuariosNuevos.end(); itUsuNuevos++) {
@@ -295,10 +294,10 @@ bool ManejadorArchivosYMetadatos::agregarPermiso (string usernameOrigen, string 
 		return false;
 	}
 	string jsonArchivo = dbMetadatos->get(filepath);
-	ParserJson parser;
-	MetadatoArchivo metadato = parser.deserializarMetadatoArchivo(jsonArchivo);
+
+	MetadatoArchivo metadato = ParserJson().deserializarMetadatoArchivo(jsonArchivo);
 	metadato.usuariosHabilitados.push_back(usernameDestino);
-	string jsonModificado = parser.serializarMetadatoArchivo(metadato);
+	string jsonModificado = ParserJson().serializarMetadatoArchivo(metadato);
 
 	Batch batch;
 	batch.modify(filepath, jsonModificado);
@@ -314,6 +313,24 @@ bool ManejadorArchivosYMetadatos::agregarPermiso (string usernameOrigen, string 
 	return true;
 }
 
+string ManejadorArchivosYMetadatos::metadatosConPermisosDepurados (const string& filepath, const string& usernameDestino) {
+	string jsonArchivo = dbMetadatos->get(filepath);
+	MetadatoArchivo metadato = ParserJson().deserializarMetadatoArchivo(jsonArchivo);
+	list<string> usuariosHabilitados = metadato.usuariosHabilitados;
+	if (find(usuariosHabilitados.begin(), usuariosHabilitados.end(), usernameDestino) != usuariosHabilitados.end())
+		usuariosHabilitados.remove(usernameDestino);
+
+	return ParserJson().serializarMetadatoArchivo(metadato);
+}
+
+// Como este metodo se llama directamente desde actualizarMetadatos, ya la fecha viene modificada
+string ManejadorArchivosYMetadatos::jsonArchivosPermitidos (const string& pathPermisos, const string& filepath) {
+	vector<string> vecArchivosPermitidos = ParserURI::parsear(dbMetadatos->get(pathPermisos), RESERVED_CHAR);
+	vecArchivosPermitidos.erase(remove(vecArchivosPermitidos.begin(), vecArchivosPermitidos.end(), filepath),
+			vecArchivosPermitidos.end());
+	return ParserURI::join(vecArchivosPermitidos, RESERVED_CHAR);
+}
+
 bool ManejadorArchivosYMetadatos::eliminarPermiso(string usernameOrigen, string filepath, string usernameDestino) {
 	if (not validador.verificarPermisos(usernameOrigen, filepath))
 		return false;
@@ -326,24 +343,12 @@ bool ManejadorArchivosYMetadatos::eliminarPermiso(string usernameOrigen, string 
 		Logger::logWarn("Se quiso eliminar un permiso del usuario " + usernameDestino + " pero este no existe.");
 		return false;
 	}
-	string jsonArchivo = dbMetadatos->get(filepath);
 
-	ParserJson parser;
-	MetadatoArchivo metadato = parser.deserializarMetadatoArchivo(jsonArchivo);
-	list<string> usuariosHabilitados = metadato.usuariosHabilitados;
-	if ( find(usuariosHabilitados.begin(), usuariosHabilitados.end(), usernameDestino) != usuariosHabilitados.end() )
-		usuariosHabilitados.remove(usernameDestino);
-	string jsonModificado = parser.serializarMetadatoArchivo(metadato);
+	string jsonModificado = metadatosConPermisosDepurados(filepath, usernameDestino);
+	string archivosPermitidos = jsonArchivosPermitidos(pathPermisos, filepath);
 
 	Batch batch;
 	batch.modify(filepath, jsonModificado);
-//		Como este metodo se llama directamente desde actualizarMetadatos, ya la fecha viene modificada
-
-	string archivosPermitidos = dbMetadatos->get(pathPermisos);
-	vector<string> vecArchivosPermitidos = ParserURI::parsear(archivosPermitidos, RESERVED_CHAR);
-	vecArchivosPermitidos.erase(remove(vecArchivosPermitidos.begin(), vecArchivosPermitidos.end(), filepath), vecArchivosPermitidos.end());
-	archivosPermitidos = ParserURI::join(vecArchivosPermitidos, RESERVED_CHAR);
-
 	batch.modify(pathPermisos, archivosPermitidos);
 	dbMetadatos->writeBatch(batch);
 
@@ -535,8 +540,8 @@ bool ManejadorArchivosYMetadatos::tamanioCarpeta (string path, unsigned long int
 
 string ManejadorArchivosYMetadatos::actualizarUsuarioFechaModificacion (string jsonMetadatos,
 		string usernameModificacion) {
-	ParserJson parser;
-	MetadatoArchivo metadato = parser.deserializarMetadatoArchivo(jsonMetadatos);
+
+	MetadatoArchivo metadato = ParserJson().deserializarMetadatoArchivo(jsonMetadatos);
 	metadato.usuarioUltimaModificacion = usernameModificacion;
 
 	struct tm *tiempo;
@@ -548,7 +553,7 @@ string ManejadorArchivosYMetadatos::actualizarUsuarioFechaModificacion (string j
 	int dia = tiempo->tm_mday;
 	string fecha = to_string(dia) + "/" + to_string(mes) + "/" + to_string(anio);
 	metadato.fechaUltimaModificacion = fecha;
-	string nuevosMetadatos = parser.serializarMetadatoArchivo(metadato);
+	string nuevosMetadatos = ParserJson().serializarMetadatoArchivo(metadato);
 	return nuevosMetadatos;
 }
 
