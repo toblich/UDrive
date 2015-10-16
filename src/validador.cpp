@@ -34,9 +34,9 @@ bool Validador::carpetaVacia (string pathConFS) {
 	return vacia;
 }
 
-// Una carpeta no puede contener un #
+// Una carpeta no puede contener un RESERVED_CHAR
 bool Validador::esPathValido (string path) {
-	if (path.find('#') == string::npos)
+	if (path.find(RESERVED_CHAR) == string::npos)
 		return true;
 	Logger::logWarn("El path " + path + " no es valido.");
 	return false;
@@ -46,7 +46,7 @@ bool Validador::tienePermisos (string username, string path) {
 	string key = permisos + "/" + username;
 	if (this->dbMetadatos->contains(key)) {
 		string archivosPermitidos = this->dbMetadatos->get(key);
-		vector<string> archivos = ParserURI::parsear(archivosPermitidos, '#');
+		vector<string> archivos = ParserURI::parsear(archivosPermitidos, RESERVED_CHAR);
 		return (find(archivos.begin(), archivos.end(), path) != archivos.end());
 	}
 	return false; //Significa que no se creo el usuario porque no existe esa key basicamente. No deberia pasar.
@@ -64,7 +64,9 @@ bool Validador::verificarPermisos (string username, string path) {
 }
 
 string Validador::obtenerNumeroSecuencia(string pathFileSystem, string propietario, string pathSinUsernameConHash) {
-	string comando = "ls '" + pathFileSystem + "/" + propietario + "/" + trash + "' -1 | grep \"^" + pathSinUsernameConHash + "\\#[0-9]\\+$\" | rev | cut -d \\# -f 1 | rev | sort -nr | head -n1";
+	string comando = "ls '" + pathFileSystem + "/" + propietario + "/" + trash + "' -1 | grep \"^" +
+			pathSinUsernameConHash + RESERVED_REGEX + "[0-9]\\+$\" | rev | cut -d " + RESERVED_REGEX +
+			" -f 1 | rev | sort -nr | head -n1";
 	string nuevoNroSecuencia;
 	FILE *fp;
 	char ultimoNroSecuencia[4];

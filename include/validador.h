@@ -15,6 +15,9 @@
 
 using namespace std;
 
+#define RESERVED_CHAR '#'
+#define RESERVED_REGEX "\\#"
+
 const string defaultFileSystem = "FileSystem";
 const string trash = "#trash";
 const string permisos = "#permisos";
