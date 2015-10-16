@@ -32,7 +32,6 @@
 CMakeFiles*
 CMakeCache*
 cmake_install*
-Makefile*
 CTestTestfile*
 build/*
 Testing/*
