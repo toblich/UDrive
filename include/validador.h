@@ -15,10 +15,10 @@
 
 using namespace std;
 
-#define RESERVED_CHAR '#'
+#define RESERVED_CHAR '^'	// Ojo, mover los tres juntos
+const string RESERVED_STR = "^";
+const string RESERVED_REGEX = "\\^";
 
-const string RESERVED_STR = "#";
-const string RESERVED_REGEX = "\\#";
 const string TRASH = RESERVED_STR + "trash";
 const string PERMISOS = RESERVED_STR + "permisos";
 const string FOLDER = RESERVED_STR + "folder";

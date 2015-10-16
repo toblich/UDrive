@@ -9,6 +9,9 @@ from ast import literal_eval
 
 
 def definirConstantesGlobales():
+	global FOLDER_TYPE
+	FOLDER_TYPE = "^folder"
+
 	global BASE 
 	BASE = "http://localhost:8080/"
 	
@@ -211,7 +214,7 @@ class ServerTest(unittest.TestCase):
 		self.assertEquals(s.status_code, SUCCESS)
 
 		estructura = literal_eval(s.content)
-		expected = {"estructura" : {"db" : "#folder", "subcarpeta": "#folder"} }
+		expected = {"estructura" : {"db" : FOLDER_TYPE, "subcarpeta": FOLDER_TYPE} }
 		self.assertDictEqual(expected, estructura) 
 
 		t = requests.delete(BASE_FOLDER, data={"token": token, "user": USER_SIMPLE["user"]})
