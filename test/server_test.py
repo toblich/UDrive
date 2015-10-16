@@ -223,6 +223,7 @@ class ServerTest(unittest.TestCase):
 		v = requests.delete(BASE_FOLDER, data={"token": 1234567890, "user": USER_SIMPLE["user"]})
 		self.assertEquals(v.status_code, UNAUTHORIZED)
 
+
 	def test_DeberiaDarErrorAlQuererIngresarAUnRecursoInexistente(self):
 		r = requests.get(BASE)
 		self.assertEquals(r.status_code, NOT_FOUND)
@@ -230,6 +231,7 @@ class ServerTest(unittest.TestCase):
 		INEXISTENTE = BASE + "/sarasa"
 		s = requests.get(INEXISTENTE)
 		self.assertEquals(s.status_code, NOT_FOUND)
+
 
 	def test_DeberiaDarErrorAlQuererUsarUnMetodoNoSoportado(self):
 		r = requests.get(SESSION)
@@ -243,6 +245,14 @@ class ServerTest(unittest.TestCase):
 
 		u = requests.delete(METADATA)
 		self.assertEquals(u.status_code, UNSUPPORTED_METHOD)
+
+
+	def test_DeberiaDarErrorAlAccederConTokenErroneo(self):
+		token = registrarYLoguearUser(USER_SIMPLE)
+		r = requests.get(PROFILE + USER_SIMPLE["user"], data={"user": USER_SIMPLE["user"], "token": "123456789"})
+		self.assertEquals(r.status_code, UNAUTHORIZED)
+
+
 
 if __name__ == '__main__':
 	definirConstantesGlobales()

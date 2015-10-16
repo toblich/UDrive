@@ -40,6 +40,8 @@ const std::string jsonArchOK = "{\n"
 		"\t\"usuarios\" : [ \"pablo\" ]\n"
 		"}";
 
+const std::string propietario = "pablo";
+
 TEST_F(ManejadorArchivosYMetadatosTest, deberiaParsearBienPathComun) {
 	std::string path = "pablo/hola/como/estas";
 	vector<string> directorios = ParserURI::parsear(path, '/');
@@ -585,3 +587,54 @@ TEST_F(ManejadorArchivosYMetadatosTest, usuarioSinPermisosNoDeberiaPoderEliminar
 	EXPECT_FALSE(manejador->eliminar("juan", filepath));
 }
 
+// TESTS RESTAURACION
+
+TEST_F(ManejadorArchivosYMetadatosTest, deberiaRestaurarArchivoPropioBorrado) {
+	string contenido = "contenido";
+	string path = propietario + "/subcarpeta/archivo.txt";
+	string pathEnPapelera = propietario + "/#trash/subcarpeta#archivo.txt#0";
+
+	ASSERT_TRUE(manejador->crearUsuario(propietario));
+	ASSERT_TRUE(manejador->subirArchivo(propietario, path, contenido.c_str(), contenido.size(), jsonArchOK));
+	ASSERT_TRUE(manejador->eliminar(propietario, path));
+
+	EXPECT_TRUE(manejador->restaurar(propietario, pathEnPapelera));
+}
+
+TEST_F(ManejadorArchivosYMetadatosTest, noDeberiaRestaurarArchivoPropioNuncaBorrado) {
+	string contenido = "contenido";
+	string path = propietario + "/subcarpeta/archivo.txt";
+	string pathEnPapelera = propietario + "/#trash/subcarpeta#archivo.txt#0";
+
+	ASSERT_TRUE(manejador->crearUsuario(propietario));
+	ASSERT_TRUE(manejador->subirArchivo(propietario, path, contenido.c_str(), contenido.size(), jsonArchOK));
+
+	EXPECT_FALSE(manejador->restaurar(propietario, pathEnPapelera));
+}
+
+TEST_F(ManejadorArchivosYMetadatosTest, noDeberiaRestaurarArchivoPropioBorradoPeroVueltoACrear) {
+	string contenido = "contenido";
+	string path = propietario + "/subcarpeta/archivo.txt";
+	string pathEnPapelera = propietario + "/#trash/subcarpeta#archivo.txt#0";
+
+	ASSERT_TRUE(manejador->crearUsuario(propietario));
+	ASSERT_TRUE(manejador->subirArchivo(propietario, path, contenido.c_str(), contenido.size(), jsonArchOK));
+	ASSERT_TRUE(manejador->eliminar(propietario, path));
+	ASSERT_TRUE(manejador->subirArchivo(propietario, path, contenido.c_str(), contenido.size(), jsonArchOK));
+
+	EXPECT_FALSE(manejador->restaurar(propietario, pathEnPapelera));
+}
+
+TEST_F(ManejadorArchivosYMetadatosTest, deberiaRestaurarUnaVezArchivoBorradoDosVeces) {
+	string contenido = "contenido";
+	string path = propietario + "/subcarpeta/archivo.txt";
+	string pathEnPapelera = propietario + "/#trash/subcarpeta#archivo.txt#0";
+
+	ASSERT_TRUE(manejador->crearUsuario(propietario));
+	for (int i = 0; i < 2; i++) {
+		ASSERT_TRUE(manejador->subirArchivo(propietario, path, contenido.c_str(), contenido.size(), jsonArchOK));
+		ASSERT_TRUE(manejador->eliminar(propietario, path));
+	}
+
+	EXPECT_TRUE(manejador->restaurar(propietario, pathEnPapelera));
+}

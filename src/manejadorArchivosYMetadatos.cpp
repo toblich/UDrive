@@ -34,6 +34,46 @@ bool ManejadorArchivosYMetadatos::eliminar (string username, string path) {
 	return false;
 }
 
+bool ManejadorArchivosYMetadatos::restaurarMetadatos (const string& pathEnPapeleraSinFS, const string& username,
+		const string& pathRealSinFS) {
+	string metadatosJson = dbMetadatos->get(pathEnPapeleraSinFS);
+	string nuevosMetadatosJson = this->actualizarUsuarioFechaModificacion(metadatosJson, username);
+	Batch batch;
+	batch.erase(pathEnPapeleraSinFS);
+	batch.put(pathRealSinFS, nuevosMetadatosJson);
+	return dbMetadatos->writeBatch(batch);
+}
+
+bool ManejadorArchivosYMetadatos::restaurar(string username, string pathEnPapeleraSinFS) {
+	if (not validador.verificarPermisos(username, pathEnPapeleraSinFS))	// username igual a la primera parte de la URI
+		return false;
+
+	string pathRealConHashYSecuencia = ParserURI::parsear(pathEnPapeleraSinFS, '/').back();
+	vector<string> partes = ParserURI::parsear(pathRealConHashYSecuencia, '#');
+	string pathRealSinFS = username + "/" + ParserURI::join(partes, '/', 0, partes.size()-1);	// descarta el numero de secuencia
+
+	if (not validador.puedoRestaurarA(pathEnPapeleraSinFS, pathRealSinFS, pathFileSystem))
+		return false;
+
+	string pathRealConFS = pathFileSystem + "/" + pathRealSinFS;
+	string pathEnPapeleraConFS = pathFileSystem + "/" + pathEnPapeleraSinFS;
+
+	if (rename(pathEnPapeleraConFS.c_str(), pathRealConFS.c_str()) != 0) {
+		Logger::logWarn("La restauracion del archivo " + pathEnPapeleraSinFS + " no fue correcta.");
+		return false;
+	}
+
+	Logger::logInfo("La restauracion del archivo " + pathEnPapeleraSinFS + " fue correcta.");
+
+	if (restaurarMetadatos(pathEnPapeleraSinFS, username, pathRealSinFS))
+		return true;
+
+	rename(pathRealConFS.c_str(), pathEnPapeleraConFS.c_str());	// deshace la eliminacion
+	Logger::logWarn("No se ha podido escribir el batch de eliminacion del archivo "
+			+ pathEnPapeleraSinFS + ", por lo que no fue restaurado");
+	return false;
+}
+
 // El path recibido no debe contener el nombre de un archivo.
 // En caso de que sea asi, se debera modificar este metodo.
 bool ManejadorArchivosYMetadatos::crearCarpeta (string username, string path) {
@@ -279,7 +319,7 @@ Batch ManejadorArchivosYMetadatos::armarBatchEliminarArchivo (const string& json
 			batch.modify(permisosUsuario, joined);
 		}
 	}
-	batch.modify(filepath, jsonMetadatosConFechaModif);
+//	batch.modify(filepath, jsonMetadatosConFechaModif);
 	batch.erase(filepath);
 	batch.put(pathCompletoPapelera, jsonMetadatosConFechaModif);
 	return batch;

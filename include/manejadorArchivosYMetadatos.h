@@ -28,6 +28,7 @@ private:
 	void actualizarMetadatosChequeados (const string& filepath, const string& jsonNuevosMetadatos, const string& username);
 	Batch armarBatchEliminarArchivo (const string& jsonMetadatos, const string& username, const string& filepath,
 			const string& pathCompletoPapelera);
+	bool restaurarMetadatos (const string& pathEnPapeleraSinFS, const string& username, const string& pathRealSinFS);
 
 public:
 	ManejadorArchivosYMetadatos(BD* dbMetadatos);
@@ -39,6 +40,7 @@ public:
 	string obtenerEstructuraCarpeta(string path);
 
 	bool eliminar(string username, string path); //Sirve para carpetas y archivos
+	bool restaurar(string username, string path);
 
 	bool subirArchivo(string username, string filepath, const char* data, int dataLen, string jsonMetadatos);
 	string descargarArchivo(string username, string filepath);
