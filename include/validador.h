@@ -33,6 +33,7 @@ public:
 	bool esPathValido(string path);
 	bool tienePermisos(string username, string path);
 	bool verificarPermisos(string username, string path);
+	bool puedoRestaurarA(string pathEnPapeleraSinFS, string pathRealSinFS, string pathFileSystem);
 	string obtenerNumeroSecuencia(string pathFileSystem, string propietario, string pathSinUsernameConHash);
 };
 

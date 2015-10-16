@@ -40,6 +40,15 @@ public:
 			salida.pop_back();
 		return salida;
 	}
+
+	static string replaceAll(string str, char original, char nuevo) {
+		const size_t SIZE = str.size();
+		for (size_t i = 0; i < SIZE; i++) {
+			if (str[i] == original)
+				str[i] = nuevo;
+		}
+		return str;
+	}
 };
 
 #endif /* PARSERURI_H_ */

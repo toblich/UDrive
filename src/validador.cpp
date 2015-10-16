@@ -82,3 +82,28 @@ string Validador::obtenerNumeroSecuencia(string pathFileSystem, string propietar
 	pclose(fp);
 	return nuevoNroSecuencia;
 }
+
+bool Validador::puedoRestaurarA (string pathEnPapeleraSinFS, string pathRealSinFS, string pathFileSystem) {
+	if (dbMetadatos->contains(pathRealSinFS)) {
+		Logger::logWarn("La restauracion del archivo " + pathEnPapeleraSinFS
+				+ " fallo porque ya existen sus metadatos en el filesystem");
+		return false;
+	}
+	if (this->existeArchivo(pathFileSystem + "/" + pathRealSinFS)) {
+		Logger::logWarn("La restauracion del archivo " + pathEnPapeleraSinFS
+				+ " fallo porque ya existe el archivo en el filesystem");
+		return false;
+	}
+	if (not dbMetadatos->contains(pathEnPapeleraSinFS)) {
+		Logger::logWarn("La restauracion del archivo " + pathEnPapeleraSinFS
+				+ " fallo porque no existen sus metadatos en la papelera");
+		return false;
+	}
+	if (not this->existeArchivo(pathFileSystem + "/" + pathEnPapeleraSinFS)) {
+		Logger::logWarn("La restauracion del archivo " + pathEnPapeleraSinFS
+				+ " fallo porque no existe el archivo en la papelera");
+		return false;
+	}
+
+	return true;
+}
