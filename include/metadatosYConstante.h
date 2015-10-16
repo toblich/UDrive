@@ -1,8 +1,18 @@
-#ifndef INCLUDE_METADATOS_H_
-#define INCLUDE_METADATOS_H_
+#ifndef INCLUDE_METADATOSYCONSTANTE_H_
+#define INCLUDE_METADATOSYCONSTANTE_H_
 
 #include <list>
 #include <iostream>
+
+#define RESERVED_CHAR '^'	// Ojo, mover los tres juntos
+const std::string RESERVED_STR = "^";
+const std::string RESERVED_REGEX = "\\^";
+
+const std::string TRASH = RESERVED_STR + "trash";
+const std::string PERMISOS = RESERVED_STR + "permisos";
+const std::string FOLDER = RESERVED_STR + "folder";
+
+const std::string DEFAULT_FS = "FileSystem";
 
 typedef struct{
 	std::string nombre;
@@ -31,4 +41,4 @@ typedef struct{
 	std::string token;
 }MetadatosSesion;
 
-#endif /* INCLUDE_METADATOS_H_ */
+#endif /* INCLUDE_METADATOSYCONSTANTE_H_ */

@@ -41,7 +41,7 @@ private:
 	bool esUsernameValido(const string& username);
 	bool esPasswordValida(const string& password);
 
-	const string CHARS_INVALIDOS = "/ ~#?=&";
+	const string CHARS_INVALIDOS = "/ ~#?=&" + RESERVED_STR;
 	const regex REGEX_NOMBRE = regex("^[ [:alpha:]]+$", std::regex_constants::ECMAScript);	 //TODO: ver si requiere aceptar tildes
 	const regex REGEX_EMAIL = regex("^[-_[:alnum:]]+@[[:alpha:]]+\\.([.[:alpha:]]+)+$");
 };

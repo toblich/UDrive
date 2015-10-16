@@ -2,8 +2,8 @@
 #define INCLUDE_PARSERJSON_H_
 
 #include "json/json.h"
-#include "metadatos.h"
 #include <map>
+#include "metadatosYConstante.h"
 
 
 class ParserJson {

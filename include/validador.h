@@ -15,15 +15,6 @@
 
 using namespace std;
 
-#define RESERVED_CHAR '^'	// Ojo, mover los tres juntos
-const string RESERVED_STR = "^";
-const string RESERVED_REGEX = "\\^";
-
-const string TRASH = RESERVED_STR + "trash";
-const string PERMISOS = RESERVED_STR + "permisos";
-const string FOLDER = RESERVED_STR + "folder";
-
-const string DEFAULT_FS = "FileSystem";
 const unsigned long int CUOTA = 2147483648; // 2GB
 
 class Validador {
