@@ -34,6 +34,7 @@ private:
 	bool restaurarMetadatos (const string& pathEnPapeleraSinFS, const string& username, const string& pathRealSinFS);
 	string metadatosConPermisosDepurados (const string& filepath, const string& usernameDestino);
 	string jsonArchivosPermitidos (const string& pathPermisos, const string& filepath);
+	string obtenerEstructuraCompartidos(string path);
 
 public:
 	ManejadorArchivosYMetadatos(BD* dbMetadatos);

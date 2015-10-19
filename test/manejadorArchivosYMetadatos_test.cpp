@@ -425,6 +425,32 @@ TEST_F(ManejadorArchivosYMetadatosTest, noDeberiaPoderSubirDosVecesUnArchivoConM
 	EXPECT_FALSE(manejador->subirArchivo("pablo", filepath, "hola pablo", 10, jsonArchOK));
 }
 
+TEST_F(ManejadorArchivosYMetadatosTest, deberiaObtenerEstructuraCorrectaDePermisos) {
+	MetadatoArchivo metadato = ParserJson::deserializarMetadatoArchivo(jsonArchOK);
+
+	metadato.usuariosHabilitados.push_back("juan");
+	string jsonConJuanHabilitado = ParserJson::serializarMetadatoArchivo(metadato);
+
+	metadato.nombre = "saludo2";
+	string jsonConJuanHabilitado2 = ParserJson::serializarMetadatoArchivo(metadato);
+
+	string filepath1 = "pablo/archivos/saludo.txt";
+	string filepath2 = "pablo/archivos/saludo2.txt";
+	manejador->crearUsuario("pablo");
+	manejador->crearUsuario("juan");
+	manejador->subirArchivo("pablo", filepath1, "hola pablo", 10, jsonArchOK);
+	manejador->actualizarMetadatos("pablo", filepath1, jsonConJuanHabilitado);
+	manejador->subirArchivo("pablo", filepath2, "hola panch", 10, jsonArchOK);
+	manejador->actualizarMetadatos("pablo", filepath2, jsonConJuanHabilitado2);
+
+	string jsonEstructura = manejador->obtenerEstructuraCarpeta("^permisos/juan");
+
+	map<string, string> mapa = ParserJson::deserializarMapa(jsonEstructura);
+
+	EXPECT_EQ(mapa.at("saludo.txt"), "txt");
+	EXPECT_EQ(mapa.at("saludo2.txt"), "txt");
+}
+
 TEST_F(ManejadorArchivosYMetadatosTest, deberiaBorrarElFileSystem) {
 	struct stat sb;
 	string path = "pablo/hola";
@@ -648,6 +674,22 @@ TEST_F(ManejadorArchivosYMetadatosTest, usuarioDeberiaPoderEliminarPermisosAlAct
 	string jsonVacio = manejador->consultarMetadatosArchivo("juan", filepath);
 
 	EXPECT_EQ("", jsonVacio);
+}
+
+TEST_F(ManejadorArchivosYMetadatosTest, usuarioDeberiaMantenerPermisosAlActualizarMetadatos) {
+	string filepath = "pablo/archivos/saludo.txt";
+	inic(manejador, filepath);
+	string jsonMetadato = manejador->consultarMetadatosArchivo("juan", filepath);
+	MetadatoArchivo metadato = ParserJson::deserializarMetadatoArchivo(jsonMetadato);
+	list<string> listaVacia;
+	metadato.usuariosHabilitados = listaVacia;
+	string jsonMetadatoModificado = ParserJson::serializarMetadatoArchivo(metadato);
+	ASSERT_TRUE(manejador->actualizarMetadatos("juan", filepath, jsonMetadatoModificado));
+
+	string jsonJuan = manejador->consultarMetadatosArchivo("juan", filepath);
+	EXPECT_NE("", jsonJuan);
+	string jsonPablo = manejador->consultarMetadatosArchivo("pablo", filepath);
+	EXPECT_NE("", jsonPablo);
 }
 
 // TESTS RESTAURACION

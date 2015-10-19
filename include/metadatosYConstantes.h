@@ -1,5 +1,5 @@
-#ifndef INCLUDE_METADATOSYCONSTANTE_H_
-#define INCLUDE_METADATOSYCONSTANTE_H_
+#ifndef INCLUDE_METADATOSYCONSTANTES_H_
+#define INCLUDE_METADATOSYCONSTANTES_H_
 
 #include <list>
 #include <iostream>
@@ -21,7 +21,7 @@ typedef struct{
 	std::string usuarioUltimaModificacion;
 	std::string propietario;
 	std::list<std::string> etiquetas;
-	std::list<std::string> usuariosHabilitados; //TODO: Seria correcto que aca figurara el propietario tambien
+	std::list<std::string> usuariosHabilitados; // Seria correcto que aca figurara el propietario tambien
 }MetadatoArchivo;
 
 typedef struct{
@@ -41,4 +41,4 @@ typedef struct{
 	std::string token;
 }MetadatosSesion;
 
-#endif /* INCLUDE_METADATOSYCONSTANTE_H_ */
+#endif /* INCLUDE_METADATOSYCONSTANTES_H_ */

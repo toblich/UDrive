@@ -244,12 +244,10 @@ void ManejadorArchivosYMetadatos::actualizarMetadatosChequeados (const string& f
 			string nuevoUsuario = (*itUsuNuevos);
 			// Si todavia no tenia permisos
 			if (find(usuariosViejos.begin(), usuariosViejos.end(), nuevoUsuario) == usuariosViejos.end()) {
-				cout << "Voy a agregar permiso a " << nuevoUsuario << " para el archivo " << filepath << endl;
-				bool ok = this->agregarPermiso(username, filepath, nuevoUsuario);
-				cout << "Agregar permisos: " << boolalpha << ok << endl;
+				this->agregarPermiso(username, filepath, nuevoUsuario);
 			}
 		}
-		// TODO: Si tenia permisos y ahora no los tiene, eliminarPermiso
+		// Si tenia permisos y ahora no los tiene, eliminarPermiso
 		list<string>::iterator itUsuViejos = usuariosViejos.begin();
 		for (; itUsuViejos != usuariosViejos.end(); itUsuViejos++) {
 			string viejoUsuario = (*itUsuViejos);
@@ -441,9 +439,32 @@ bool ManejadorArchivosYMetadatos::mandarArchivoATrash(string username, string fi
 	return false;
 }
 
+//TODO: Fijarse de mandar archivoCompartido en vez de metadato.nombre
+string ManejadorArchivosYMetadatos::obtenerEstructuraCompartidos(string path) {
+	if ( not dbMetadatos->contains(path) )
+		return "";
+	string compartidosConUsuario = dbMetadatos->get(path);
+	vector<string> archivosCompartidos = ParserURI::parsear(compartidosConUsuario, RESERVED_CHAR);
+	map<string, string> mapa;
+	vector<string>::iterator it = archivosCompartidos.begin();
+	for ( ; it != archivosCompartidos.end(); it++) {
+		string archivoCompartido = (*it);
+		string jsonMetadatoArchivoCompartido = dbMetadatos->get(archivoCompartido);
+		MetadatoArchivo metadatoArchivoCompartido = ParserJson::deserializarMetadatoArchivo(jsonMetadatoArchivoCompartido);
+		string nombre = metadatoArchivoCompartido.nombre;
+		if (metadatoArchivoCompartido.extension != "none")
+			nombre += "." + metadatoArchivoCompartido.extension;
+		mapa.insert(pair<string, string>(nombre, metadatoArchivoCompartido.extension));
+	}
+	string json = ParserJson::serializarMapa(mapa);
+	return json;
+}
+
 //TODO: Fijarse del caso especial de "compartidos conmigo"
 //TODO: Fijarse de mandar pathInterno en vez de metadato.nombre
 string ManejadorArchivosYMetadatos::obtenerEstructuraCarpeta (string path) {
+	if ( path.find(RESERVED_STR + "permisos") != string::npos )
+		return this->obtenerEstructuraCompartidos(path);
 	string pathCompleto = this->pathFileSystem + "/" + path;
 	DIR* dir;
 	if ((dir = opendir(pathCompleto.c_str())) != NULL) {
