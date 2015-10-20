@@ -214,7 +214,8 @@ class ServerTest(unittest.TestCase):
 		self.assertEquals(s.status_code, SUCCESS)
 
 		estructura = literal_eval(s.content)
-		expected = {"estructura" : {"db" : FOLDER_TYPE, "subcarpeta": FOLDER_TYPE} }
+		estructuraEsperada = {USER_SIMPLE["user"] + "/src/db" : "db." + FOLDER_TYPE, USER_SIMPLE["user"] + "/src/subcarpeta": "subcarpeta." + FOLDER_TYPE}
+		expected = {"estructura" : estructuraEsperada }
 		self.assertDictEqual(expected, estructura) 
 
 		t = requests.delete(BASE_FOLDER, data={"token": token, "user": USER_SIMPLE["user"]})

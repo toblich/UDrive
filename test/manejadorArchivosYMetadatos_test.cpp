@@ -380,8 +380,11 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaObtenerBienLaEstructuraDeLasCarpe
 	string metadatos3 = ParserJson::serializarMetadatoArchivo(metadato3);
 
 	manejador->crearUsuario("pablo");
-	manejador->crearCarpetaSegura("pablo","pablo/como estas/bien/vos?");
-	manejador->crearCarpetaSegura("pablo","pablo/como estas/bien/hola");
+	string folderpath1 = "pablo/como estas/bien/vos?";
+	string folderpath2 = "pablo/como estas/bien/hola";
+
+	manejador->crearCarpetaSegura("pablo", folderpath1);
+	manejador->crearCarpetaSegura("pablo", folderpath2);
 	manejador->subirArchivo("pablo", filepath1, "hola pablo", 10, metadatos1);
 	manejador->subirArchivo("pablo", filepath2, "hola pablo", 10, metadatos2);
 	manejador->subirArchivo("pablo", filepath3, "hola pablo", 10, metadatos3);
@@ -389,11 +392,11 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaObtenerBienLaEstructuraDeLasCarpe
 
 	map<string, string> mapa = ParserJson::deserializarMapa(estructura);
 
-	EXPECT_EQ(mapa.at("saludo.txt"), "txt");
-	EXPECT_EQ(mapa.at("juan"), "none");
-	EXPECT_EQ(mapa.at("pepe.hola"), "hola");
-	EXPECT_EQ(mapa.at("vos?"), FOLDER);
-	EXPECT_EQ(mapa.at("hola"), FOLDER);
+	EXPECT_EQ(mapa.at(filepath1), metadato1.nombre + "." + metadato1.extension);
+	EXPECT_EQ(mapa.at(filepath2), metadato2.nombre); // no tiene extension
+	EXPECT_EQ(mapa.at(filepath3), metadato3.nombre + "." + metadato3.extension);
+	EXPECT_EQ(mapa.at(folderpath1), "vos?." + FOLDER);
+	EXPECT_EQ(mapa.at(folderpath2), "hola." + FOLDER);
 }
 
 TEST_F(ManejadorArchivosYMetadatosTest, noDeberiaPoderEliminarArchivoInexistente) {
@@ -447,8 +450,8 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaObtenerEstructuraCorrectaDePermis
 
 	map<string, string> mapa = ParserJson::deserializarMapa(jsonEstructura);
 
-	EXPECT_EQ(mapa.at("saludo.txt"), "txt");
-	EXPECT_EQ(mapa.at("saludo2.txt"), "txt");
+	EXPECT_EQ(mapa.at(filepath1), "saludo.txt");
+	EXPECT_EQ(mapa.at(filepath2), "saludo2.txt");
 }
 
 TEST_F(ManejadorArchivosYMetadatosTest, deberiaBorrarElFileSystem) {

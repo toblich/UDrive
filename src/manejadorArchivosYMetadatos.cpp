@@ -454,7 +454,7 @@ string ManejadorArchivosYMetadatos::obtenerEstructuraCompartidos(string path) {
 		string nombre = metadatoArchivoCompartido.nombre;
 		if (metadatoArchivoCompartido.extension != "none")
 			nombre += "." + metadatoArchivoCompartido.extension;
-		mapa.insert(pair<string, string>(nombre, metadatoArchivoCompartido.extension));
+		mapa.insert(pair<string, string>(archivoCompartido, nombre));
 	}
 	string json = ParserJson::serializarMapa(mapa);
 	return json;
@@ -481,7 +481,7 @@ string ManejadorArchivosYMetadatos::obtenerEstructuraCarpeta (string path) {
 				vector<string> directorios = ParserURI::parsear(pathInterno, '/');
 				int size = directorios.size();
 				string foldername = directorios[size - 1];
-				mapa.insert(pair<string, string>(foldername, FOLDER));
+				mapa.insert(pair<string, string>(pathInterno, foldername + "." + FOLDER));
 			} else { //Es un archivo
 				if (not dbMetadatos->contains(pathInterno)) {
 					Logger::logWarn("Se quiso obtener los metadatos del archivo " + path + " pero este no existe.");
@@ -492,7 +492,7 @@ string ManejadorArchivosYMetadatos::obtenerEstructuraCarpeta (string path) {
 				string nombre = metadato.nombre;
 				if (metadato.extension != "none")
 					nombre += "." + metadato.extension;
-				mapa.insert(pair<string, string>(nombre, metadato.extension));
+				mapa.insert(pair<string, string>(pathInterno, nombre));
 			}
 		}
 		closedir(dir);
