@@ -227,11 +227,52 @@ string ManejadorArchivosYMetadatos::consultarMetadatosArchivo (string username, 
 	return dbMetadatos->get(filepath);
 }
 
-void ManejadorArchivosYMetadatos::actualizarMetadatosChequeados (const string& filepath,
+string ManejadorArchivosYMetadatos::pathConNuevoFilename (const string& pathInterno, const string& nuevoFilename) {
+	vector<string> partes = ParserURI::parsear(pathInterno, '/');
+	partes.pop_back();
+	partes.push_back(nuevoFilename);
+	string nuevoPathInterno = ParserURI::join(partes, '/');
+	return nuevoPathInterno;
+}
+
+bool ManejadorArchivosYMetadatos::renombrar(const string& pathInterno, const string& nuevoFilename) {
+	string nuevoPathInterno = pathConNuevoFilename(pathInterno, nuevoFilename);
+	string pathConFS = pathFileSystem + "/" + pathInterno;
+	string nuevoPathConFS = pathFileSystem + "/" + nuevoPathInterno;
+
+	if (validador.existeArchivo(nuevoPathConFS) or dbMetadatos->contains(nuevoPathInterno)) {
+		Logger::logWarn("No se renombro el archivo " + pathInterno + " a " + nuevoFilename
+				+ " porque ya existe un archivo allí con ese nombre en el FileSystem o la base de datos.");
+		return false;
+	}
+
+	if (rename(pathConFS.c_str(), nuevoPathConFS.c_str())) {
+		Logger::logError("Fallo el renombrado del archivo " + pathInterno + " a " + nuevoFilename);
+		return false;
+	}
+
+	Logger::logInfo("Se renombro correctamente " + pathInterno + " a " + nuevoFilename);
+	return true;
+}
+
+bool ManejadorArchivosYMetadatos::actualizarMetadatosChequeados (string filepath,
 		const string& jsonNuevosMetadatos, const string& username) {
 	string jsonMetadatosViejos = dbMetadatos->get(filepath);
 	MetadatoArchivo metadatosViejos = ParserJson::deserializarMetadatoArchivo(jsonMetadatosViejos);
 	MetadatoArchivo metadatosNuevos = ParserJson::deserializarMetadatoArchivo(jsonNuevosMetadatos);
+
+	bool deboRenombrar = metadatosViejos.nombre != metadatosNuevos.nombre or metadatosViejos.extension != metadatosNuevos.extension;
+	if (deboRenombrar) {
+		string nuevoFilename = metadatosNuevos.nombre + "." + metadatosNuevos.extension;
+		if (not renombrar(filepath, nuevoFilename)) {
+			Logger::logDebug("Metadatos que pinchan el renombrado: \nViejos: "
+					+ jsonMetadatosViejos +  "\nNuevos: " + jsonNuevosMetadatos);
+			return false;
+		} else {
+//			filepath = pathConNuevoFilename(filepath, nuevoFilename);
+		}
+	}
+
 	list<string> usuariosViejos = metadatosViejos.usuariosHabilitados;
 	list<string> usuariosNuevos = metadatosNuevos.usuariosHabilitados;
 	string nuevoJson;
@@ -259,6 +300,7 @@ void ManejadorArchivosYMetadatos::actualizarMetadatosChequeados (const string& f
 		nuevoJson = jsonNuevosMetadatos;
 	}
 	dbMetadatos->modify(filepath, nuevoJson);
+	return true;
 }
 
 // Lo que se va hacer es lo siguiente: Los nuevos metadatos vendran integramente por lo que se va a cambiar salvo por los usuarios habilitados.
@@ -275,8 +317,7 @@ bool ManejadorArchivosYMetadatos::actualizarMetadatos (string username, string f
 		Logger::logWarn("Se quiso actualizar los metadatos del archivo " + filepath + " pero este no existe.");
 		return false;
 	}
-	actualizarMetadatosChequeados(filepath, jsonNuevosMetadatos, username);
-	return true;
+	return actualizarMetadatosChequeados(filepath, jsonNuevosMetadatos, username);
 }
 
 bool ManejadorArchivosYMetadatos::agregarPermiso (string usernameOrigen, string filepath, string usernameDestino) {

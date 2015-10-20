@@ -28,13 +28,19 @@ private:
 	bool agregarPermiso(string usernameOrigen, string filepath, string usernameDestino);
 	bool eliminarPermiso(string usernameOrigen, string filepath, string usernameDestino);
 	bool guardarArchivo (const string& filepath, const string& username, const char* data, int dataLen);
-	void actualizarMetadatosChequeados (const string& filepath, const string& jsonNuevosMetadatos, const string& username);
+	bool renombrar(const string& pathInterno, const string& nuevoFilename);
+
+	// No ponerle "const string&" al filepath en este metodo
+	bool actualizarMetadatosChequeados (string filepath, const string& jsonNuevosMetadatos, const string& username);
 	Batch armarBatchEliminarArchivo (const string& jsonMetadatos, const string& username, const string& filepath,
 			const string& pathCompletoPapelera);
 	bool restaurarMetadatos (const string& pathEnPapeleraSinFS, const string& username, const string& pathRealSinFS);
 	string metadatosConPermisosDepurados (const string& filepath, const string& usernameDestino);
 	string jsonArchivosPermitidos (const string& pathPermisos, const string& filepath);
 	string obtenerEstructuraCompartidos(string path);
+	string pathConNuevoFilename (const string& pathInterno, const string& nuevoFilename);
+	void actualizarPermisosMetadatos (const MetadatoArchivo& metadatosViejos, MetadatoArchivo metadatosNuevos,
+			const string& username, const string& filepath, const string& jsonNuevosMetadatos);
 
 public:
 	ManejadorArchivosYMetadatos(BD* dbMetadatos);

@@ -49,14 +49,10 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaParsearBienPathComun) {
 	ASSERT_TRUE(directorios.size() == 4);
 	int i = 0;
 	for ( ; itDir != directorios.end() ; itDir++, i++){
-		if (i==0) EXPECT_EQ("pablo", (*itDir));
-		else {
-			if (i==1) EXPECT_EQ("hola", (*itDir));
-			else {
-				if (i==2) EXPECT_EQ("como", (*itDir));
-				else if (i==3) EXPECT_EQ("estas", (*itDir));
-			}
-		}
+		if (i==0) 		EXPECT_EQ("pablo", (*itDir));
+		else if (i==1) 	EXPECT_EQ("hola", (*itDir));
+		else if (i==2) 	EXPECT_EQ("como", (*itDir));
+		else if (i==3) 	EXPECT_EQ("estas", (*itDir));
 	}
 }
 
@@ -67,11 +63,9 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaParsearBienPathConEspacios) {
 	ASSERT_TRUE(directorios.size() == 3);
 	int i = 0;
 	for ( ; itDir != directorios.end() ; itDir++, i++){
-		if (i==0) EXPECT_EQ("pablo", (*itDir));
-		else {
-			if (i==1) EXPECT_EQ("hola", (*itDir));
-			else if (i==2) EXPECT_EQ("como estas", (*itDir));
-		}
+		if (i==0) 		EXPECT_EQ("pablo", (*itDir));
+		else if (i==1) 	EXPECT_EQ("hola", (*itDir));
+		else if (i==2) 	EXPECT_EQ("como estas", (*itDir));
 	}
 }
 
@@ -188,10 +182,10 @@ TEST_F(ManejadorArchivosYMetadatosTest, alActualizarMetadatoDeArchivoConUsuarios
 			"\t\"etiquetas\" : [ \"pepe\" ],\n"
 			"\t\"extension\" : \"png\",\n"
 			"\t\"fecha ultima modificacion\" : \"10/09/2015\",\n"
-			"\t\"nombre\" : \"luna\",\n"
+			"\t\"nombre\" : \"sol\",\n"
 			"\t\"propietario\" : \"pablo\",\n"
 			"\t\"usuario ultima modificacion\" : \"Juan\",\n"
-			"\t\"usuarios\" : \n"
+			"\t\"usuarios\" : []\n"
 			"}";
 	manejador->actualizarMetadatos("pablo",filepath, nuevoJson);
 	string jsonNuevoMetadato = manejador->consultarMetadatosArchivo("pablo", filepath);
@@ -430,12 +424,15 @@ TEST_F(ManejadorArchivosYMetadatosTest, noDeberiaPoderSubirDosVecesUnArchivoConM
 
 TEST_F(ManejadorArchivosYMetadatosTest, deberiaObtenerEstructuraCorrectaDePermisos) {
 	MetadatoArchivo metadato = ParserJson::deserializarMetadatoArchivo(jsonArchOK);
+	MetadatoArchivo metadato2 = ParserJson::deserializarMetadatoArchivo(jsonArchOK);
+
+	metadato2.nombre = "saludo2";
+	string jsonArchOK2 = ParserJson::serializarMetadatoArchivo(metadato2);
 
 	metadato.usuariosHabilitados.push_back("juan");
+	metadato2.usuariosHabilitados.push_back("juan");
 	string jsonConJuanHabilitado = ParserJson::serializarMetadatoArchivo(metadato);
-
-	metadato.nombre = "saludo2";
-	string jsonConJuanHabilitado2 = ParserJson::serializarMetadatoArchivo(metadato);
+	string jsonConJuanHabilitado2 = ParserJson::serializarMetadatoArchivo(metadato2);
 
 	string filepath1 = "pablo/archivos/saludo.txt";
 	string filepath2 = "pablo/archivos/saludo2.txt";
@@ -443,7 +440,7 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaObtenerEstructuraCorrectaDePermis
 	manejador->crearUsuario("juan");
 	manejador->subirArchivo("pablo", filepath1, "hola pablo", 10, jsonArchOK);
 	manejador->actualizarMetadatos("pablo", filepath1, jsonConJuanHabilitado);
-	manejador->subirArchivo("pablo", filepath2, "hola panch", 10, jsonArchOK);
+	manejador->subirArchivo("pablo", filepath2, "hola panch", 10, jsonArchOK2);
 	manejador->actualizarMetadatos("pablo", filepath2, jsonConJuanHabilitado2);
 
 	string jsonEstructura = manejador->obtenerEstructuraCarpeta("^permisos/juan");
@@ -763,4 +760,23 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaEliminarDefinitivamenteArchivoAlB
 	ASSERT_TRUE(manejador->eliminar(propietario, pathEnPapelera)); // lo borra definitivamente
 	EXPECT_EQ("", manejador->descargarArchivo(propietario, pathEnPapelera));
 	EXPECT_EQ("", manejador->consultarMetadatosArchivo(propietario, pathEnPapelera));
+}
+
+TEST_F(ManejadorArchivosYMetadatosTest, deberiaRenombrarArchivoAlActualizarMetadatosConOtroNombre) {
+	string filepath = "pablo/archivos/saludo.txt";
+	inic(manejador, filepath);	// sube el archivo con metadatos jsonArchOK
+	EXPECT_TRUE(validador->existeArchivo(pathFS + "/" + filepath));
+	EXPECT_TRUE(db->contains(filepath));
+
+	MetadatoArchivo metadatos = ParserJson::deserializarMetadatoArchivo(jsonArchOK);
+	metadatos.nombre = "nuevoNombre";
+	metadatos.extension = "nuevaExtension";
+	string nuevoFilepath = "pablo/archivos/nuevoNombre.nuevaExtension";
+	string jsonNuevo = ParserJson::serializarMetadatoArchivo(metadatos);
+	manejador->actualizarMetadatos("pablo", filepath, jsonNuevo);
+
+	EXPECT_FALSE(validador->existeArchivo(pathFS + "/" + filepath));
+	EXPECT_FALSE(db->contains(filepath));
+	EXPECT_TRUE(validador->existeArchivo(pathFS + "/" + nuevoFilepath));
+	EXPECT_TRUE(db->contains(nuevoFilepath));
 }
