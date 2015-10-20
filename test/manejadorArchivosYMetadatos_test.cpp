@@ -152,9 +152,9 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaPoderActualizarMetadatosDeArchivo
 	manejador->subirArchivo("pablo", filepath, "hola pablo", 10, jsonArchOK);
 	std::string nuevoJson = "{\n"
 			"\t\"etiquetas\" : [ \"pepe\" ],\n"
-			"\t\"extension\" : \"png\",\n"
+			"\t\"extension\" : \"txt\",\n"
 			"\t\"fecha ultima modificacion\" : \"10/09/2015\",\n"
-			"\t\"nombre\" : \"luna\",\n"
+			"\t\"nombre\" : \"saludo\",\n"
 			"\t\"propietario\" : \"pablo\",\n"
 			"\t\"usuario ultima modificacion\" : \"Juan\",\n"
 			"\t\"usuarios\" : [ \"Pancheitor\", \"Juan\", \"Pepe\", \"Santi\", \"Pablo\" ]\n"
@@ -163,9 +163,9 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaPoderActualizarMetadatosDeArchivo
 	string jsonNuevoMetadato = manejador->consultarMetadatosArchivo("pablo", filepath);
 	MetadatoArchivo nuevoMetadato = ParserJson::deserializarMetadatoArchivo(jsonNuevoMetadato);
 
-	EXPECT_EQ("png", nuevoMetadato.extension);
+	EXPECT_EQ("txt", nuevoMetadato.extension);
 	EXPECT_EQ("10/09/2015", nuevoMetadato.fechaUltimaModificacion);
-	EXPECT_EQ("luna", nuevoMetadato.nombre);
+	EXPECT_EQ("saludo", nuevoMetadato.nombre);
 	EXPECT_EQ("pablo", nuevoMetadato.propietario);
 	EXPECT_EQ("Juan", nuevoMetadato.usuarioUltimaModificacion);
 	EXPECT_EQ("pepe", nuevoMetadato.etiquetas.front());
@@ -180,9 +180,9 @@ TEST_F(ManejadorArchivosYMetadatosTest, alActualizarMetadatoDeArchivoConUsuarios
 	manejador->subirArchivo("pablo", filepath, "hola pablo", 10, jsonArchOK);
 	std::string nuevoJson = "{\n"
 			"\t\"etiquetas\" : [ \"pepe\" ],\n"
-			"\t\"extension\" : \"png\",\n"
+			"\t\"extension\" : \"txt\",\n"
 			"\t\"fecha ultima modificacion\" : \"10/09/2015\",\n"
-			"\t\"nombre\" : \"sol\",\n"
+			"\t\"nombre\" : \"saludo\",\n"
 			"\t\"propietario\" : \"pablo\",\n"
 			"\t\"usuario ultima modificacion\" : \"Juan\",\n"
 			"\t\"usuarios\" : []\n"

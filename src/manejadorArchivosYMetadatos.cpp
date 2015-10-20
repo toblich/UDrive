@@ -255,11 +255,46 @@ bool ManejadorArchivosYMetadatos::renombrar(const string& pathInterno, const str
 	return true;
 }
 
-bool ManejadorArchivosYMetadatos::actualizarMetadatosChequeados (string filepath,
+string ManejadorArchivosYMetadatos::actualizarPermisosMetadato (const MetadatoArchivo& metadatosViejos,
+		MetadatoArchivo metadatosNuevos, const string& username, const string& filepath,
+		const string& jsonNuevosMetadatos) {
+	list<string> usuariosViejos = metadatosViejos.usuariosHabilitados;
+	list<string> usuariosNuevos = metadatosNuevos.usuariosHabilitados;
+
+	if (usuariosNuevos.empty()) {
+		metadatosNuevos.usuariosHabilitados = usuariosViejos;
+		return ParserJson::serializarMetadatoArchivo(metadatosNuevos);
+	}
+	list<string>::iterator itUsuNuevos = usuariosNuevos.begin();
+	for (; itUsuNuevos != usuariosNuevos.end(); itUsuNuevos++) {
+		string nuevoUsuario = (*itUsuNuevos);
+		// Si todavia no tenia permisos
+		if (find(usuariosViejos.begin(), usuariosViejos.end(), nuevoUsuario) == usuariosViejos.end()) {
+			this->agregarPermiso(username, filepath, nuevoUsuario);
+		}
+	}
+	// Si tenia permisos y ahora no los tiene, eliminarPermiso
+	list<string>::iterator itUsuViejos = usuariosViejos.begin();
+	for (; itUsuViejos != usuariosViejos.end(); itUsuViejos++) {
+		string viejoUsuario = (*itUsuViejos);
+		// Si tenia permisos y ahora ya no
+		if (find(usuariosNuevos.begin(), usuariosNuevos.end(), viejoUsuario) == usuariosNuevos.end()) {
+			this->eliminarPermiso(username, filepath, viejoUsuario);
+		}
+	}
+	return jsonNuevosMetadatos;
+}
+
+bool ManejadorArchivosYMetadatos::actualizarMetadatosChequeados (const string& filepath,
 		const string& jsonNuevosMetadatos, const string& username) {
+
 	string jsonMetadatosViejos = dbMetadatos->get(filepath);
 	MetadatoArchivo metadatosViejos = ParserJson::deserializarMetadatoArchivo(jsonMetadatosViejos);
 	MetadatoArchivo metadatosNuevos = ParserJson::deserializarMetadatoArchivo(jsonNuevosMetadatos);
+
+	string nuevoJson = actualizarPermisosMetadato(metadatosViejos, metadatosNuevos, username, filepath,
+			jsonNuevosMetadatos);
+	dbMetadatos->modify(filepath, nuevoJson);
 
 	bool deboRenombrar = metadatosViejos.nombre != metadatosNuevos.nombre or metadatosViejos.extension != metadatosNuevos.extension;
 	if (deboRenombrar) {
@@ -268,38 +303,14 @@ bool ManejadorArchivosYMetadatos::actualizarMetadatosChequeados (string filepath
 			Logger::logDebug("Metadatos que pinchan el renombrado: \nViejos: "
 					+ jsonMetadatosViejos +  "\nNuevos: " + jsonNuevosMetadatos);
 			return false;
-		} else {
-//			filepath = pathConNuevoFilename(filepath, nuevoFilename);
 		}
+		string nuevoFilepath = pathConNuevoFilename(filepath, nuevoFilename);
+		actualizarPermisosPathArchivo(filepath, nuevoFilepath);
+		Batch batch;
+		batch.erase(filepath);
+		batch.put(nuevoFilepath, nuevoJson);
+		dbMetadatos->writeBatch(batch);
 	}
-
-	list<string> usuariosViejos = metadatosViejos.usuariosHabilitados;
-	list<string> usuariosNuevos = metadatosNuevos.usuariosHabilitados;
-	string nuevoJson;
-	if (usuariosNuevos.empty()) {
-		metadatosNuevos.usuariosHabilitados = usuariosViejos;
-		nuevoJson = ParserJson::serializarMetadatoArchivo(metadatosNuevos);
-	} else {
-		list<string>::iterator itUsuNuevos = usuariosNuevos.begin();
-		for (; itUsuNuevos != usuariosNuevos.end(); itUsuNuevos++) {
-			string nuevoUsuario = (*itUsuNuevos);
-			// Si todavia no tenia permisos
-			if (find(usuariosViejos.begin(), usuariosViejos.end(), nuevoUsuario) == usuariosViejos.end()) {
-				this->agregarPermiso(username, filepath, nuevoUsuario);
-			}
-		}
-		// Si tenia permisos y ahora no los tiene, eliminarPermiso
-		list<string>::iterator itUsuViejos = usuariosViejos.begin();
-		for (; itUsuViejos != usuariosViejos.end(); itUsuViejos++) {
-			string viejoUsuario = (*itUsuViejos);
-			// Si tenia permisos y ahora ya no
-			if (find(usuariosNuevos.begin(), usuariosNuevos.end(), viejoUsuario) == usuariosNuevos.end()) {
-				this->eliminarPermiso(username, filepath, viejoUsuario);
-			}
-		}
-		nuevoJson = jsonNuevosMetadatos;
-	}
-	dbMetadatos->modify(filepath, nuevoJson);
 	return true;
 }
 
@@ -627,6 +638,9 @@ void ManejadorArchivosYMetadatos::eliminarArchivoDefinitivamente (string filepat
 	string command = "exec rm '" + filepathConFS + "'";
 	system(command.c_str());
 	Logger::logInfo("Se borro definitivamente el archivo " + filepath);
+}
+
+void ManejadorArchivosYMetadatos::actualizarPermisosPathArchivo (const string& filepath, const string& nuevoFilepath) {
 }
 
 bool ManejadorArchivosYMetadatos::deleteFileSystem () {
