@@ -110,6 +110,73 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaCrearCarpetaTrashAlCrearUsuario) 
 	EXPECT_TRUE(stat(trash.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode));
 }
 
+TEST_F(ManejadorArchivosYMetadatosTest, deberiaCrearCarpetaFotosAlCrearUsuario) {
+	struct stat sb;
+	string usuario = "pablo";
+	ASSERT_TRUE(manejador->crearUsuario(usuario));
+	string fotos = pathFS + "/" + FOTOS;
+	EXPECT_TRUE(stat(fotos.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode));
+}
+
+TEST_F(ManejadorArchivosYMetadatosTest, deberiaCrearFotoDePerfilAlCrearUsuario) {
+	struct stat buffer;
+	string usuario = "pablo";
+	ASSERT_TRUE(manejador->crearUsuario(usuario));
+	string fotoDePerfil = pathFS + "/" + FOTOS + "/" + "pablo.jpg";
+	EXPECT_TRUE(stat (fotoDePerfil.c_str(), &buffer) == 0);
+}
+
+TEST_F(ManejadorArchivosYMetadatosTest, deberiaPoderActualizarFotoDePerfil) {
+	struct stat buffer;
+	string usuario = "pablo";
+	ASSERT_TRUE(manejador->crearUsuario(usuario));
+
+	ASSERT_TRUE( manejador->actualizarFotoPerfil(FOTOS + "/pablo.jpg", FOTOS + "/pablo.txt", "hola pablo", 10) );
+
+	string fotoDePerfil = pathFS + "/" + FOTOS + "/" + "pablo.txt";
+	EXPECT_TRUE(stat (fotoDePerfil.c_str(), &buffer) == 0);
+
+	ifstream archivo(fotoDePerfil.c_str());
+	string texto;
+	ASSERT_TRUE(archivo.is_open());
+	while ( getline(archivo,texto) ) {
+		EXPECT_EQ(texto, "hola pablo");
+	}
+	archivo.close();
+}
+
+TEST_F(ManejadorArchivosYMetadatosTest, deberiaEliminarArchivoViejoAlActualizarFotoDePerfil) {
+	struct stat buffer;
+	string usuario = "pablo";
+	ASSERT_TRUE(manejador->crearUsuario(usuario));
+
+	ASSERT_TRUE( manejador->actualizarFotoPerfil(FOTOS + "/pablo.jpg", FOTOS + "/pablo.txt", "hola pablo", 10) );
+
+	string fotoDePerfil = pathFS + "/" + FOTOS + "/" + "pablo.jpg";
+	EXPECT_FALSE(stat (fotoDePerfil.c_str(), &buffer) == 0);
+}
+
+TEST_F(ManejadorArchivosYMetadatosTest, deberiaActualizarFotoDePerfilConMismoNombreDeArchivo) {
+	struct stat buffer;
+	string usuario = "pablo";
+	ASSERT_TRUE(manejador->crearUsuario(usuario));
+
+	ASSERT_TRUE( manejador->actualizarFotoPerfil(FOTOS + "/pablo.jpg", FOTOS + "/pablo.txt", "hola pablo", 10) );
+
+	ASSERT_FALSE( manejador->actualizarFotoPerfil(FOTOS + "/pablo.txt", FOTOS + "/pablo.txt", "hola panch", 10) );
+
+	string fotoDePerfil = pathFS + "/" + FOTOS + "/" + "pablo.txt";
+	EXPECT_TRUE(stat (fotoDePerfil.c_str(), &buffer) == 0);
+
+	ifstream archivo(fotoDePerfil.c_str());
+	string texto;
+	ASSERT_TRUE(archivo.is_open());
+	while ( getline(archivo,texto) ) {
+		EXPECT_EQ(texto, "hola panch");
+	}
+	archivo.close();
+}
+
 TEST_F(ManejadorArchivosYMetadatosTest, deberiaSubirBienArchivoDeTexto) {
 	string path = "pablo/archivos";
 	string filepath = "pablo/archivos/saludo.txt";
