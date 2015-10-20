@@ -119,15 +119,59 @@ TEST(ParserJsonTest, deberiaDeserializarBienNombreInexistenteMetadatoUsuario){
 	EXPECT_EQ("", pruebaUsu.nombre);
 }
 
+TEST(ParserJsonTest, deberiaDeserializarBienCuotaCorrectaMetadatoUsuario){
+	MetadatoUsuario pruebaUsu = ParserJson::deserializarMetadatoUsuario(jsonUsuOK);
+	EXPECT_EQ(1024, pruebaUsu.cuota);
+}
+
+TEST(ParserJsonTest, deberiaDeserializarBienCuotaIncorrectaMetadatoUsuario){
+	string jsonUsu = "{\n"
+			"\t\"email\" : \"panch@eitor.com\",\n"
+			"\t\"nombre\" : \"Pancheitor\",\n"
+			"\t\"path foto de perfil\" : \"fotos/pancheitor.jpg\",\n"
+			"\t\"cuota\" : \"hola\",\n"
+			"\t\"ultima ubicacion\" : {\n"
+				"\t \t\"latitud\" : 45.0123,\n"
+				"\t \t\"longitud\" : -37.1293\n"
+			"\t}\n"
+			"}";
+	MetadatoUsuario pruebaUsu = ParserJson::deserializarMetadatoUsuario(jsonUsu);
+	EXPECT_EQ(CUOTA, pruebaUsu.cuota);
+}
+
+TEST(ParserJsonTest, deberiaDeserializarBienCuotaMenorACeroMetadatoUsuario){
+	string jsonUsu = "{\n"
+			"\t\"email\" : \"panch@eitor.com\",\n"
+			"\t\"nombre\" : \"Pancheitor\",\n"
+			"\t\"path foto de perfil\" : \"fotos/pancheitor.jpg\",\n"
+			"\t\"cuota\" : -3,\n"
+			"\t\"ultima ubicacion\" : {\n"
+				"\t \t\"latitud\" : 45.0123,\n"
+				"\t \t\"longitud\" : -37.1293\n"
+			"\t}\n"
+			"}";
+	MetadatoUsuario pruebaUsu = ParserJson::deserializarMetadatoUsuario(jsonUsu);
+	EXPECT_EQ(CUOTA, pruebaUsu.cuota);
+}
+
 TEST(ParserJsonTest, deberiaDeserializarBienUltimaUbicacionCorrectaMetadatoUsuario){
 	MetadatoUsuario pruebaUsu = ParserJson::deserializarMetadatoUsuario(jsonUsuOK);
 	EXPECT_FLOAT_EQ(45.0123, pruebaUsu.ultimaUbicacion.latitud);
 	EXPECT_FLOAT_EQ(-37.1293, pruebaUsu.ultimaUbicacion.longitud);
 }
 
-TEST(ParserJsonTest, deberiaDeserializarBienCuotaCorrectaMetadatoUsuario){
-	MetadatoUsuario pruebaUsu = ParserJson::deserializarMetadatoUsuario(jsonUsuOK);
-	EXPECT_FLOAT_EQ(1024, pruebaUsu.cuota);
+TEST(ParserJsonTest, deberiaDeserializarBienCuotaInexistenteMetadatoUsuario){
+	string jsonUsu = "{\n"
+			"\t\"email\" : \"panch@eitor.com\",\n"
+			"\t\"nombre\" : \"Pancheitor\",\n"
+			"\t\"path foto de perfil\" : \"fotos/pancheitor.jpg\",\n"
+			"\t\"ultima ubicacion\" : {\n"
+				"\t \t\"latitud\" : 45.0123,\n"
+				"\t \t\"longitud\" : -37.1293\n"
+			"\t}\n"
+			"}";
+	MetadatoUsuario pruebaUsu = ParserJson::deserializarMetadatoUsuario(jsonUsu);
+	EXPECT_EQ(CUOTA, pruebaUsu.cuota);
 }
 
 TEST(ParserJsonTest, deberiaDeserializarBienUltimaUbicacionLatitudInvalidaMetadatoUsuario){

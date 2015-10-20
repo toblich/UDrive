@@ -49,7 +49,7 @@ int ParserJson::verificarInt(std::string key, Json::Value raiz) {
 		Logger logger;
 		string error = "Parametro de tipo int \"" + key + "\" invalido, inexistente o menor que 0 en un Json. Se asigna el valor \"2048\" (2 GB) para esta key.";
 		logger.loggear(error, WARN);
-		value = 2048;
+		value = CUOTA;
 	}
 	return value;
 }

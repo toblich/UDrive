@@ -14,6 +14,8 @@ const std::string FOLDER = RESERVED_STR + "folder";
 
 const std::string DEFAULT_FS = "FileSystem";
 
+const int CUOTA = 2048;
+
 typedef struct{
 	std::string nombre;
 	std::string extension;
