@@ -67,6 +67,7 @@ if [[ -d build ]]; then
 fi
 
 mkdir build
+cp "default.jpg" "build"
 cd build
 mkdir db
 mkdir files

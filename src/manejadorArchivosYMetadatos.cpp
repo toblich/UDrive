@@ -103,6 +103,13 @@ bool ManejadorArchivosYMetadatos::crearCarpeta (string username, string path) {
 								+ " por lo que ha sido creada.");
 		}
 	}
+	string directorioFotos = this->pathFileSystem + "/" + FOTOS;
+	if (not validador.existeCarpeta(directorioFotos)) {
+		mkdir(directorioFotos.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+		Logger::logInfo("La carpeta " + FOTOS + " no existe dentro de " + this->pathFileSystem
+							+ " por lo que ha sido creada.");
+	}
+
 	return true;
 }
 
@@ -118,10 +125,17 @@ bool ManejadorArchivosYMetadatos::agregarPermisosABD (string username) {
 }
 
 bool ManejadorArchivosYMetadatos::crearUsuario (string username) {
-	//Creo tanto la carpeta del username como su papelera
+	//Creo tanto la carpeta del username como su papelera y su foto de perfil por default
 	string pathTrash = username + "/" + TRASH;
 	bool agregoPermisos = this->agregarPermisosABD(username);
-	return (agregoPermisos and this->crearCarpeta(username, pathTrash));
+	if (not agregoPermisos) return false;
+	bool creoCarpeta = this->crearCarpeta(username, pathTrash);
+//	return (agregoPermisos and this->crearCarpeta(username, pathTrash));
+	string filepathConFS = this->pathFileSystem + "/" + FOTOS + "/" + username + ".jpg";
+	string command = "exec cp '" + PATH_DEFAULT_FOTO_PERFIL + "' '" + filepathConFS + "'";
+	system(command.c_str());
+	Logger::logInfo("Se copio la imagen default para el usuario " + username);
+	return creoCarpeta;
 }
 
 //Borrara todos los archivos de la carpeta y, en caso de que quede vacia, la carpeta fisica del fileSystem tambien
@@ -150,6 +164,21 @@ bool ManejadorArchivosYMetadatos::eliminarCarpeta (string username, string path)
 		return this->deleteCarpeta(pathConFS);
 	else
 		return false;
+}
+
+bool ManejadorArchivosYMetadatos::actualizarFotoPerfil(string filepathViejo, string filepathNuevo, const char* data, int dataLen) {
+	string filepathViejoConFS = this->pathFileSystem + "/" + filepathViejo;
+	string command = "exec rm '" + filepathViejoConFS + "'";
+	system(command.c_str());
+	Logger::logInfo("Se borro definitivamente el archivo " + filepathViejo);
+
+	string filepathNuevoConFS = this->pathFileSystem + "/" + filepathNuevo;
+	ofstream outFile(filepathNuevoConFS, ofstream::binary);
+	outFile.write(data, dataLen);
+	outFile.close();
+
+	if ( filepathViejo != filepathNuevo ) return true;
+	return true;
 }
 
 // En la base de datos se guarda el path sin la carpeta del FS
@@ -590,8 +619,4 @@ void ManejadorArchivosYMetadatos::eliminarArchivoDefinitivamente (string filepat
 
 bool ManejadorArchivosYMetadatos::deleteFileSystem () {
 	return this->deleteCarpeta(this->pathFileSystem);
-}
-
-string ManejadorArchivosYMetadatos::actualizaFotoPerfil(string filepath, const char* data, int dataLen) {
-	return string();
 }

@@ -53,10 +53,9 @@ mg_result Profile::PUTHandler (mg_connection* connection) {
 		this->logInfo("Se autenticó la sesión correctamente.");
 
 		if (datosArch.dataLength != 0){ //Se subio una nueva foto de perfil.
-			string pathFoto = manejadorAyM->actualizaFotoPerfil(FOTOS, datosArch.fileData, datosArch.dataLength);
-			if (pathFoto != ""){ //Si se pudo subir la foto, la actualizo en el perfil del usuario.
+			if ( manejadorAyM->actualizarFotoPerfil(FOTOS, FOTOS, datosArch.fileData, datosArch.dataLength) ){ //Si se pudo subir la foto, la actualizo en el perfil del usuario.
 				MetadatoUsuario perfilUsuario = ParserJson::deserializarMetadatoUsuario(nuevoPerfil);
-				perfilUsuario.pathFotoPerfil = pathFoto;
+				perfilUsuario.pathFotoPerfil = "hola";
 				string nuevoPerfil = ParserJson::serializarMetadatoUsuario(perfilUsuario);
 			} else {
 				this->logError("ERROR, no se pudo actualizar la foto de perfil.");
