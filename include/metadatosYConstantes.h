@@ -11,6 +11,7 @@ const std::string RESERVED_REGEX = "\\^";
 const std::string TRASH = RESERVED_STR + "trash";
 const std::string PERMISOS = RESERVED_STR + "permisos";
 const std::string FOLDER = RESERVED_STR + "folder";
+const std::string FOTOS = RESERVED_STR + "fotos";
 
 const std::string DEFAULT_FS = "FileSystem";
 

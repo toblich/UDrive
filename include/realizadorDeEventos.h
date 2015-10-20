@@ -39,6 +39,7 @@ public:
 		string fileName;
 		string user;
 		string token;
+		string perfil;
 	}DatosArchivo;
 
 	RealizadorDeEventos();

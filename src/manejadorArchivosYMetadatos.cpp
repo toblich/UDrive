@@ -591,3 +591,7 @@ void ManejadorArchivosYMetadatos::eliminarArchivoDefinitivamente (string filepat
 bool ManejadorArchivosYMetadatos::deleteFileSystem () {
 	return this->deleteCarpeta(this->pathFileSystem);
 }
+
+string ManejadorArchivosYMetadatos::actualizaFotoPerfil(string filepath, const char* data, int dataLen) {
+	return string();
+}

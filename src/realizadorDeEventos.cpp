@@ -42,6 +42,7 @@ string RealizadorDeEventos::getVar(mg_connection* connection, string varName){
 
 RealizadorDeEventos::DatosArchivo RealizadorDeEventos::getMultipartData(mg_connection* connection, string variable){
 	DatosArchivo datosArch;
+	datosArch.dataLength = 0;
 	const char* data;
 	char varName[100], fileName[100];
 	int dataLength, n1 = 0, n2 = 0;
@@ -57,6 +58,7 @@ RealizadorDeEventos::DatosArchivo RealizadorDeEventos::getMultipartData(mg_conne
 		}
 		if (string(varName) == "user") datosArch.user = string(data, dataLength);
 		if (string(varName) == "token") datosArch.token = string(data, dataLength);
+		if (string(varName) == "profile") datosArch.perfil = string(data, dataLength);
 	}
 
 	return datosArch;

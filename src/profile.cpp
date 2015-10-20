@@ -42,13 +42,29 @@ mg_result Profile::PUTHandler (mg_connection* connection) {
 	vector<string> uris = ParserURI::parsear(uri, '/');
 	this->logInfo("Se parseó la uri correctamente.");
 
-	string token = getVar(connection, "token");
+	string varFile = "picture";
+	DatosArchivo datosArch = getMultipartData(connection, varFile);
+	string token = datosArch.token;
 	this->logInfo("Se obtuvo la variable token con valor: " + token);
-	string nuevoPerfil = getVar(connection, "profile");
+	string nuevoPerfil = datosArch.perfil;
 	this->logInfo("Se obtuvo la variable con el nuevo perfil.");
 
 	if (manejadorUs->autenticarToken(token, uris[1])) {
 		this->logInfo("Se autenticó la sesión correctamente.");
+
+		if (datosArch.dataLength != 0){ //Se subio una nueva foto de perfil.
+			string pathFoto = manejadorAyM->actualizaFotoPerfil(FOTOS, datosArch.fileData, datosArch.dataLength);
+			if (pathFoto != ""){ //Si se pudo subir la foto, la actualizo en el perfil del usuario.
+				MetadatoUsuario perfilUsuario = ParserJson::deserializarMetadatoUsuario(nuevoPerfil);
+				perfilUsuario.pathFotoPerfil = pathFoto;
+				string nuevoPerfil = ParserJson::serializarMetadatoUsuario(perfilUsuario);
+			} else {
+				this->logError("ERROR, no se pudo actualizar la foto de perfil.");
+				mg_send_status(connection, CODESTATUS_INTERNAL_SERVER_ERROR);
+				mg_send_header(connection, contentType.c_str(), jsonType.c_str());
+				printfData(connection, "{\"error\": \"Hubo un problema al actualizar la foto de perfil, intentelo nuevamente\"}");
+			}
+		}
 
 		if (manejadorUs->modifyPerfil(uris[1], nuevoPerfil)) {
 			this->logInfo("Se modificó el perfil del usuario correctamente.");
