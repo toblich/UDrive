@@ -57,7 +57,6 @@ protected:
 	bool sendFile(mg_connection* connection, string filePath);
 	DatosArchivo getMultipartData(mg_connection* connection, string variable);
 	string getVar(mg_connection* connection, string varName);
-	float getVarFloat(mg_connection* connection, string varName);
 	virtual mg_result POSTHandler(mg_connection* connection);
 	virtual mg_result GETHandler(mg_connection* connection);
 	virtual mg_result PUTHandler(mg_connection* connection);

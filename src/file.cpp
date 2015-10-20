@@ -132,20 +132,36 @@ mg_result File::DELETEHandler (mg_connection* connection) {
 	this->logInfo("Se obtuvo la variable token con valor: " + token);
 	string user = getVar(connection, "user");
 	this->logInfo("Se obtuvo la variable user con valor: " + user);
+	string restore = getVar(connection, "restore");
+	this->logInfo("Se obtuvo la variable restore con valor: " + restore);
 
 	if (manejadorUs->autenticarToken(token, user)) {
 		this->logInfo("Se autenticó la sesión correctamente.");
 		string filepath = getFilepathFrom(uris);
-		if (manejadorArchYMet->eliminar(user, filepath)) {
-			this->logInfo("Se eliminó el archivo: " + filepath + " correctamente.");
-			mg_send_status(connection, CODESTATUS_SUCCES);
-			mg_send_header(connection, contentType.c_str(), jsonType.c_str());
-			printfData(connection, "{\"success\": \"Se elimino el archivo exitosamente.\"}");
+		if (restore == "true"){
+			if (manejadorArchYMet->restaurar(user, filepath)){
+				this->logInfo("Se restauró el archivo: " + filepath + " correctamente.");
+				mg_send_status(connection, CODESTATUS_SUCCES);
+				mg_send_header(connection, contentType.c_str(), jsonType.c_str());
+				printfData(connection, "{\"success\": \"Se restauro el archivo exitosamente.\"}");
+			} else {
+				this->logInfo("Path inválido, no se encontró el archivo: " + filepath);
+				mg_send_status(connection, CODESTATUS_RESOURCE_NOT_FOUND);
+				mg_send_header(connection, contentType.c_str(), jsonType.c_str());
+				printfData(connection, "{\"error\": \"Path invalido, no se pudo restaurar el archivo.\"}");
+			}
 		} else {
-			this->logInfo("Path inválido, no se encontró el archivo: " + filepath);
-			mg_send_status(connection, CODESTATUS_RESOURCE_NOT_FOUND);
-			mg_send_header(connection, contentType.c_str(), jsonType.c_str());
-			printfData(connection, "{\"error\": \"Path invalido, no se encontro el archivo.\"}");
+			if (manejadorArchYMet->eliminar(user, filepath)) {
+				this->logInfo("Se eliminó el archivo: " + filepath + " correctamente.");
+				mg_send_status(connection, CODESTATUS_SUCCES);
+				mg_send_header(connection, contentType.c_str(), jsonType.c_str());
+				printfData(connection, "{\"success\": \"Se elimino el archivo exitosamente.\"}");
+			} else {
+				this->logInfo("Path inválido, no se encontró el archivo: " + filepath);
+				mg_send_status(connection, CODESTATUS_RESOURCE_NOT_FOUND);
+				mg_send_header(connection, contentType.c_str(), jsonType.c_str());
+				printfData(connection, "{\"error\": \"Path invalido, no se encontro el archivo.\"}");
+			}
 		}
 	} else {
 		this->responderAutenticacionFallida(connection);
