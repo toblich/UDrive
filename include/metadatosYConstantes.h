@@ -25,13 +25,14 @@ typedef struct{
 }MetadatoArchivo;
 
 typedef struct{
-	float latitud, longitud;
+	double latitud, longitud;
 }Ubicacion;
 
 typedef struct{
 	std::string nombre;
 	std::string email;
 	std::string pathFotoPerfil;
+	int cuota; // En MB
 	Ubicacion ultimaUbicacion;
 }MetadatoUsuario;
 

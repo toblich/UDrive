@@ -87,8 +87,9 @@ void File::subirArchivo (const vector<string>& uris, const DatosArchivo& datosAr
 	MetadatoArchivo metArch = extractMetadataFrom(nombreYExtension, user, uris);
 	string jsonMetadata = ParserJson::serializarMetadatoArchivo(metArch);
 	this->logInfo("Se serializaron los metadatos del archivo correctamente.");
+	int cuota = 2048;
 
-	if (manejadorArchYMet->subirArchivo(user, filepath, datosArch.fileData, datosArch.dataLength, jsonMetadata)) {
+	if (manejadorArchYMet->subirArchivo(user, filepath, datosArch.fileData, datosArch.dataLength, jsonMetadata, cuota)) {
 		this->logInfo("Se subió el archivo: " + filepath + " correctamente.");
 		mg_send_status(connection, CODESTATUS_RESOURCE_CREATED);
 		mg_send_header(connection, contentType.c_str(), jsonType.c_str());

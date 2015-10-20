@@ -153,7 +153,7 @@ bool ManejadorArchivosYMetadatos::eliminarCarpeta (string username, string path)
 }
 
 // En la base de datos se guarda el path sin la carpeta del FS
-bool ManejadorArchivosYMetadatos::subirArchivo (string username, string filepath, const char* data, int dataLen, string jsonMetadatos) {
+bool ManejadorArchivosYMetadatos::subirArchivo (string username, string filepath, const char* data, int dataLen, string jsonMetadatos, int cuota) {
 	if (not validador.verificarPermisos(username, filepath))
 		return false;
 
@@ -166,7 +166,7 @@ bool ManejadorArchivosYMetadatos::subirArchivo (string username, string filepath
 		Logger::logWarn("Se quiso subir el archivo " + filepath + " pero este ya existe. Debe utilizar el metodo actualizarArchivo.");
 		return false;
 	}
-	if (not this->actualizarArchivo(username, filepath, data, dataLen))
+	if (not this->actualizarArchivo(username, filepath, data, dataLen, cuota))
 		return false;
 	return dbMetadatos->put(filepath, jsonMetadatos);
 }
@@ -197,19 +197,19 @@ bool ManejadorArchivosYMetadatos::guardarArchivo (const string& filepath, const 
 }
 
 // El filename deberia venir con los path de carpetas tambien y dentro tambien el nombre de usuario
-bool ManejadorArchivosYMetadatos::actualizarArchivo (string username, string filepath, const char* data, int dataLen) {
+bool ManejadorArchivosYMetadatos::actualizarArchivo (string username, string filepath, const char* data, int dataLen, int cuota) {
 	//No le agrego el FileSystem porque se agrega despues en el metodo crearCarpeta
 	if (not validador.verificarPermisos(username, filepath))
 		return false;
 
 	unsigned long int folderSize = 0;
 	if (tamanioCarpeta(username, folderSize)) {
-		if (folderSize + dataLen <= CUOTA) {
+		int cuotaBytes = cuota * 1024 * 1024;
+		if (folderSize + dataLen <= cuotaBytes) { //TODO: Restar el tamanio del archivo viejo
 			return guardarArchivo(filepath, username, data, dataLen);
 		}
-		unsigned long int cuotaMB = CUOTA / 1048576;
 		string texto = "No se ha podido subir el archivo " + filepath + " debido a que se ha superado la cuota de "; // + cuotaMB + " MB.";
-		texto += cuotaMB;
+		texto += cuota;
 		texto += " MB.";
 		Logger::logWarn(texto);
 	}

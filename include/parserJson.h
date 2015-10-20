@@ -12,6 +12,7 @@ class ParserJson {
 private:
 	static std::string verificarString(std::string key, Json::Value raiz);
 	static double verificarDouble(std::string key, Json::Value raiz);
+	static int verificarInt(std::string key, Json::Value raiz);
 	ParserJson() {}
 
 public:
