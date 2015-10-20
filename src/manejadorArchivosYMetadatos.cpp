@@ -178,7 +178,7 @@ bool ManejadorArchivosYMetadatos::actualizarFotoPerfil(string filepathViejo, str
 	outFile.close();
 
 	if ( filepathViejo != filepathNuevo ) return true;
-	return true;
+	return false;
 }
 
 // En la base de datos se guarda el path sin la carpeta del FS
