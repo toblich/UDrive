@@ -91,7 +91,12 @@ mg_result Profile::POSTHandler (mg_connection* connection) {
 	string profile = getVar(connection, "profile");
 	this->logInfo("Se obtuvo la variable profile.");
 
-	if (manejadorUs->registrarUsuario(username, password, profile) and manejadorAyM->crearUsuario(username)) {
+	//Le agrego al perfil del usuario la foto por defecto
+	MetadatoUsuario perfilSinPathFoto = ParserJson::deserializarMetadatoUsuario(profile);
+	perfilSinPathFoto.pathFotoPerfil = FOTOS + "/" + username + ".jpg";
+	string perfilConPathFoto = ParserJson::serializarMetadatoUsuario(perfilSinPathFoto);
+
+	if (manejadorUs->registrarUsuario(username, password, perfilConPathFoto) and manejadorAyM->crearUsuario(username)) {
 		this->logInfo("Se registro la cuenta con usuario: " + username + " y pass: " + password + " exitosamente.");
 		mg_send_status(connection, CODESTATUS_RESOURCE_CREATED);
 		mg_send_header(connection, contentType.c_str(), jsonType.c_str());

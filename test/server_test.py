@@ -12,6 +12,9 @@ def definirConstantesGlobales():
 	global FOLDER_TYPE
 	FOLDER_TYPE = "^folder"
 
+	global TRASH_TYPE
+	TRASH_TYPE = "^trash/"
+
 	global BASE 
 	BASE = "http://localhost:8080/"
 	
@@ -142,7 +145,7 @@ class ServerTest(unittest.TestCase):
 		self.assertEquals(perfilObtenido.get("nombre"), perfilOriginal.get("nombre"))
 		self.assertEquals(perfilObtenido.get("email"), perfilOriginal.get("email"))
 
-		s = requests.put(PROFILE + username, data={"profile": '{"nombre": "otroNombre", "email": "otro@e.mail"}',
+		s = requests.put(PROFILE + username, files={"profile": '{"nombre": "otroNombre", "email": "otro@e.mail"}',
 			"token": token}) # actualizar perfil
 		self.assertEquals(s.status_code, SUCCESS)
 		
@@ -255,6 +258,37 @@ class ServerTest(unittest.TestCase):
 		r = requests.get(PROFILE + USER_SIMPLE["user"], data={"user": USER_SIMPLE["user"], "token": "123456789"})
 		self.assertEquals(r.status_code, UNAUTHORIZED)
 
+
+	def test_SubirBorrarYRestaurarUnArchivo(self):
+		token = registrarYLoguearUser(USER_SIMPLE)
+		FILENAME = "Makefile"
+
+		uri = FILE + USER_SIMPLE["user"] + "/" + FILENAME
+		r = requests.put(uri, files={'file': open(FILENAME, 'rb'), "token": token, "user": USER_SIMPLE["user"]})	# lo sube
+		self.assertEquals(r.status_code, RESOURCE_CREATED)
+
+		s = requests.delete(uri, data={"user": USER_SIMPLE["user"], "token": token}) # lo borra
+		self.assertEquals(s.status_code, SUCCESS)
+
+		uri = FILE + USER_SIMPLE["user"] + "/" + TRASH_TYPE + FILENAME + "^0"
+		t = requests.delete(uri, data={"user": USER_SIMPLE["user"], "token": token, "restore": "true"}) # lo restaura
+		self.assertEquals(t.status_code, SUCCESS)
+
+
+	def test_SubirBorrarYEliminarDefinitivamenteUnArchiv(self):	
+		token = registrarYLoguearUser(USER_SIMPLE)
+		FILENAME = "Makefile"
+
+		uri = FILE + USER_SIMPLE["user"] + "/" + FILENAME
+		r = requests.put(uri, files={'file': open(FILENAME, 'rb'), "token": token, "user": USER_SIMPLE["user"]})	# lo sube
+		self.assertEquals(r.status_code, RESOURCE_CREATED)
+
+		s = requests.delete(uri, data={"user": USER_SIMPLE["user"], "token": token}) # lo borra
+		self.assertEquals(s.status_code, SUCCESS)
+
+		uri = FILE + USER_SIMPLE["user"] + "/" + TRASH_TYPE + FILENAME + "^0"
+		t = requests.delete(uri, data={"user": USER_SIMPLE["user"], "token": token, "restore": "false"}) # lo borra de la papelera
+		self.assertEquals(t.status_code, SUCCESS)
 
 
 if __name__ == '__main__':
