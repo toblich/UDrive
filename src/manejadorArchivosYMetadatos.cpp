@@ -297,14 +297,13 @@ bool ManejadorArchivosYMetadatos::actualizarMetadatosChequeados (const string& f
 
 	bool deboRenombrar = metadatosViejos.nombre != metadatosNuevos.nombre or metadatosViejos.extension != metadatosNuevos.extension;
 	if (not deboRenombrar) {
-		Logger::logDebug("No renombra");
 		dbMetadatos->modify(filepath, nuevoJson);
 		return true;
 	}
 
 	string nuevoFilename = metadatosNuevos.nombre + "." + metadatosNuevos.extension;
 	if (not renombrar(filepath, nuevoFilename)) {
-		Logger::logDebug("Metadatos que pinchan el renombrado: \nViejos: "
+		Logger::logError("Metadatos que pinchan el renombrado: \nViejos: "
 				+ jsonMetadatosViejos +  "\nNuevos: " + jsonNuevosMetadatos);
 		return false;
 	}
@@ -316,7 +315,6 @@ bool ManejadorArchivosYMetadatos::actualizarMetadatosChequeados (const string& f
 	batch.erase(filepath);
 	batch.put(nuevoFilepath, nuevoJson);
 	dbMetadatos->writeBatch(batch);
-	Logger::logDebug("Escrito el batch de renombrado de archivo (en dbMetadatos)");
 	return true;
 }
 
@@ -502,18 +500,16 @@ string ManejadorArchivosYMetadatos::obtenerEstructuraCompartidos(string path) {
 	if ( not dbMetadatos->contains(path) )
 		return "";
 	string compartidosConUsuario = dbMetadatos->get(path);
-	Logger::logDebug("Compartidos con " + path + " " + compartidosConUsuario);
+	Logger::logDebug("Compartidos con " + path + " " + compartidosConUsuario + " al obtener estructura de Compartidos");
 	vector<string> archivosCompartidos = ParserURI::parsear(compartidosConUsuario, RESERVED_CHAR);
 	map<string, string> mapa;
 	vector<string>::iterator it = archivosCompartidos.begin();
 	for ( ; it != archivosCompartidos.end(); it++) {
 		string archivoCompartido = (*it);
-		Logger::logDebug("va a hacer el get del archivoCompartido " + archivoCompartido);
-		if (not dbMetadatos->contains(archivoCompartido)) {
+		if (not dbMetadatos->contains(archivoCompartido)) {	// debug
 			Logger::logError("En la base de datos no esta el archivo compartido " + archivoCompartido);
 		}
 		string jsonMetadatoArchivoCompartido = dbMetadatos->get(archivoCompartido);
-		Logger::logDebug("Lo hizo");
 		MetadatoArchivo metadatoArchivoCompartido = ParserJson::deserializarMetadatoArchivo(jsonMetadatoArchivoCompartido);
 		string nombre = metadatoArchivoCompartido.nombre;
 		if (metadatoArchivoCompartido.extension != "none")
@@ -655,20 +651,18 @@ void ManejadorArchivosYMetadatos::eliminarArchivoDefinitivamente (string filepat
 void ManejadorArchivosYMetadatos::actualizarPermisosPathArchivo (const string& filepath, const string& nuevoFilepath,
 		const list<string>& usuariosHabilitados) {
 
-	Logger::logDebug("ACTUALIZA PATH DE ARCHIVO COMPARTIDO EN EL USUARIO");
 	list<string>::const_iterator it = usuariosHabilitados.cbegin();
 	const list<string>::const_iterator END = usuariosHabilitados.cend();
 	for (; it != END; it++) {
 		string usuario = *it;
 		string archivos = dbMetadatos->get(PERMISOS + "/" + usuario);
-		Logger::logDebug("Archivos compartidos a " + usuario);
+		Logger::logDebug("Archivos compartidos a " + usuario + ": " + archivos);
 		vector<string> partes = ParserURI::parsear(archivos, RESERVED_CHAR);
 		partes.erase(remove(partes.begin(), partes.end(), filepath), partes.end());
 		partes.push_back(nuevoFilepath);
 		string nuevosArchivos = ParserURI::join(partes, RESERVED_CHAR);
 		Logger::logDebug("nuevosArchivos de " + usuario + ": " + nuevosArchivos);
 		dbMetadatos->modify(PERMISOS + "/" + usuario, nuevosArchivos);
-		Logger::logDebug("Cambiado");
 	}
 }
 

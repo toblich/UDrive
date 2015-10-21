@@ -782,7 +782,6 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaRenombrarArchivoAlActualizarMetad
 }
 
 TEST_F(ManejadorArchivosYMetadatosTest, deberiaCambiarElPathDeLosArchivosConPermisoDeUnUsuarioAlRenombrarEseArchivo) {
-	Logger::logDebug("COMIENZA");
 	string filepath = "pablo/archivos/saludo.txt";
 	inic(manejador, filepath);	// sube el archivo con metadatos jsonArchOK, y juan tiene permiso sobre el arch de pablo
 
@@ -790,17 +789,11 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaCambiarElPathDeLosArchivosConPerm
 	metadatos.nombre = "nuevoNombre";
 	metadatos.extension = "nuevaExtension";
 	metadatos.usuariosHabilitados.clear();
-	EXPECT_TRUE(metadatos.usuariosHabilitados.empty());
-
 	string nuevoFilepath = "pablo/archivos/nuevoNombre.nuevaExtension";
 	string jsonNuevo = ParserJson::serializarMetadatoArchivo(metadatos);
 	manejador->actualizarMetadatos("pablo", filepath, jsonNuevo);	// lo renombra
 
-	Logger::logDebug("Va a obtener estuctura carpeta permisos juan");
 	string compartidosConJuan = manejador->obtenerEstructuraCarpeta(PERMISOS + "/juan");
-	Logger::logDebug("Obtenido");
-	Logger::logDebug("CompartidosConJuan: " + compartidosConJuan);
 	EXPECT_EQ(string::npos, compartidosConJuan.find(filepath));		// no tiene el archivo con el nombre viejo
 	EXPECT_NE(string::npos, compartidosConJuan.find(nuevoFilepath));// si tiene el archivo con el nombre nuevo
-	Logger::logDebug("FIN");
 }
