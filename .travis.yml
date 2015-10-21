@@ -44,7 +44,8 @@ before_script:
   - ls $INCLUDE/gtest/
 
   - mkdir build
-  - cd build 
+  - cp "default.jpg" "build"
+  - cd build
 
 script:
   - cmake -Dtest=ON -Drocksdb=OFF ../ && make unitTest && ./unitTest && make udrive && python ../test/server_test.py
