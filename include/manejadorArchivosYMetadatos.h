@@ -39,7 +39,8 @@ private:
 	string pathConNuevoFilename (const string& pathInterno, const string& nuevoFilename);
 	string actualizarPermisosMetadato (const MetadatoArchivo& metadatosViejos, MetadatoArchivo metadatosNuevos,
 			const string& username, const string& filepath, const string& jsonNuevosMetadatos);
-	void actualizarPermisosPathArchivo(const string& filepath, const string& nuevoFilepath);
+	void actualizarPermisosPathArchivo(const string& filepath, const string& nuevoFilepath,
+			const list<string>& usuariosHabilitados);
 
 public:
 	ManejadorArchivosYMetadatos(BD* dbMetadatos);
