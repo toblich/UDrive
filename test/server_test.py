@@ -145,7 +145,7 @@ class ServerTest(unittest.TestCase):
 		self.assertEquals(perfilObtenido.get("nombre"), perfilOriginal.get("nombre"))
 		self.assertEquals(perfilObtenido.get("email"), perfilOriginal.get("email"))
 
-		s = requests.put(PROFILE + username, files={"profile": '{"nombre": "otroNombre", "email": "otro@e.mail"}',
+		s = requests.put(PROFILE + username, files={"nombre": "otroNombre", "email": "otro@e.mail",
 			"token": token}) # actualizar perfil
 		self.assertEquals(s.status_code, SUCCESS)
 		
