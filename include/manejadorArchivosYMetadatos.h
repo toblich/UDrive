@@ -43,7 +43,8 @@ private:
 	void actualizarPermisosPathArchivo(const string& filepath, const string& nuevoFilepath,
 			const list<string>& usuariosHabilitados);
 
-	string buscar(string username, function<bool(MetadatoArchivo&)> predicate);
+	map<string, string> buscar(string username, function<bool(MetadatoArchivo&)> predicate);
+	string obtenerEstructuraCarpeta(string path, bool esRecursivo, function<bool(MetadatoArchivo&)> predicate);
 
 public:
 	ManejadorArchivosYMetadatos(BD* dbMetadatos);

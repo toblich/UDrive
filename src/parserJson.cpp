@@ -252,3 +252,9 @@ std::map<std::string, std::string> ParserJson::deserializarMapa(std::string json
 	}
 	return mapa;
 }
+
+string ParserJson::estructurasMerge(map<string, string> estructuraPermisos, string jsonEstructuraFileSystem) {
+	map<string, string> estructuraFileSystem = ParserJson::deserializarMapa(jsonEstructuraFileSystem);
+	estructuraFileSystem.insert(estructuraPermisos.begin(), estructuraPermisos.end());
+	return ParserJson::serializarMapa(estructuraFileSystem);
+}
