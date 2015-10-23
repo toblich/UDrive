@@ -125,6 +125,11 @@ string ParserJson::serializarMapa(map<string, string>& mapa){
 		json[it->first] = it->second;
 	}
 
+	if (mapa.empty()) {
+		Logger::logWarn("Se quiso serializar un mapa vacio.");
+		return "{}";
+	}
+
 	string serializado = json.toStyledString();
 	return serializado;
 }

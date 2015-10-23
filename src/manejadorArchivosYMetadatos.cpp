@@ -561,9 +561,10 @@ string ManejadorArchivosYMetadatos::obtenerEstructuraCarpeta (string path, bool 
 			string pathInterno = path + "/" + ent->d_name;
 			string pathInternoConFS = this->pathFileSystem + "/" + pathInterno;
 			if (validador.existeCarpeta(pathInternoConFS)) {
-				if (esRecursivo)
-					obtenerEstructuraCarpeta(pathInterno);
-				else {
+				if (esRecursivo) {
+					string jsonEstructura = obtenerEstructuraCarpeta(pathInterno, true, predicate);
+					mapa = ParserJson::deserializarMapa( ParserJson::estructurasMerge( mapa, jsonEstructura ) );
+				} else {
 					vector<string> directorios = ParserURI::parsear(pathInterno, '/');
 					int size = directorios.size();
 					string foldername = directorios[size - 1];
