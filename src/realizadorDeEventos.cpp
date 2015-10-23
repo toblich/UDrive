@@ -131,35 +131,35 @@ void RealizadorDeEventos::responderBadRequest(mg_connection* connection, string 
 	this->logInfo(errMsg);
 	mg_send_status(connection, CODESTATUS_BAD_REQUEST);
 	mg_send_header(connection, contentType.c_str(), jsonType.c_str());
-	printfData(connection, "{\"error\": %s}", errMsg.c_str());
+	printfData(connection, "{\"error\": \"%s\"}", errMsg.c_str());
 }
 
 void RealizadorDeEventos::responderResourceNotFound(mg_connection* connection, string errMsg){
 	this->logInfo(errMsg);
 	mg_send_status(connection, CODESTATUS_RESOURCE_NOT_FOUND);
 	mg_send_header(connection, contentType.c_str(), jsonType.c_str());
-	printfData(connection, "{\"error\": %s}", errMsg.c_str());
+	printfData(connection, "{\"error\": \"%s\"}", errMsg.c_str());
 }
 
 void RealizadorDeEventos::responderInternalServerError(mg_connection* connection, string errMsg){
 	this->logError(errMsg);
 	mg_send_status(connection, CODESTATUS_INTERNAL_SERVER_ERROR);
 	mg_send_header(connection, contentType.c_str(), jsonType.c_str());
-	printfData(connection, "{\"error\": %s}", errMsg.c_str());
+	printfData(connection, "{\"error\": \"%s\"}", errMsg.c_str());
 }
 
 void RealizadorDeEventos::responderSucces(mg_connection* connection, string msg){
 	this->logInfo(msg);
 	mg_send_status(connection, CODESTATUS_SUCCESS);
 	mg_send_header(connection, contentType.c_str(), jsonType.c_str());
-	printfData(connection, "{\"success\": %s}", msg.c_str());
+	printfData(connection, "{\"success\": \"%s\"}", msg.c_str());
 }
 
 void RealizadorDeEventos::responderResourceCreated(mg_connection* connection, string msg){
 	this->logInfo(msg);
 	mg_send_status(connection, CODESTATUS_RESOURCE_CREATED);
 	mg_send_header(connection, contentType.c_str(), jsonType.c_str());
-	printfData(connection, "{\"success\": %s}", msg.c_str());
+	printfData(connection, "{\"success\": \"%s\"}", msg.c_str());
 }
 
 string RealizadorDeEventos::getFilepathFrom(const vector<string>& uris) {
