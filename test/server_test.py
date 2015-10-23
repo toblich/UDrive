@@ -195,8 +195,24 @@ class ServerTest(unittest.TestCase):
 		self.assertEquals(metadata.get("etiquetas"), [])
 		self.assertEquals(metadata.get("usuarios"), [USER_SIMPLE["user"]])
 
-		t = requests.delete(FILE + internalUri, data={"user": USER_SIMPLE["user"], "token": token}) # lo borra
+		nuevosMetadatos = '{"propietario" : "' +  USER_SIMPLE["user"] + '" , "extension" : "cpp", "nombre" : "batch", "etiquetas" : ["nuevaEtiqueta"], "usuarios" : [], ' \
+			+ '"usuario ultima modificacion" : "' + USER_SIMPLE["user"] + '" , "fecha ultima modificacion" : "23/10/2015"}'
+
+		s = requests.put(METADATA + internalUri, data={"token" : token, "user": USER_SIMPLE["user"], "metadatos" : nuevosMetadatos})
+		self.assertEquals(s.status_code, SUCCESS)
+
+		t = requests.get(METADATA + internalUri, data={"user": USER_SIMPLE["user"], "token": token})
 		self.assertEquals(t.status_code, SUCCESS)
+		nuevaMetadata = t.json().get("metadatos")
+		self.assertEquals(nuevaMetadata.get("propietario"), USER_SIMPLE["user"])
+		self.assertEquals(nuevaMetadata.get("nombre"), "batch")
+		self.assertEquals(nuevaMetadata.get("usuario ultima modificacion"), USER_SIMPLE["user"])
+		self.assertEquals(nuevaMetadata.get("extension"), "cpp")
+		self.assertEquals(nuevaMetadata.get("etiquetas"), ["nuevaEtiqueta"])	# este se actualizo
+		self.assertEquals(nuevaMetadata.get("usuarios"), [USER_SIMPLE["user"]])
+
+		u = requests.delete(FILE + internalUri, data={"user": USER_SIMPLE["user"], "token": token}) # lo borra
+		self.assertEquals(u.status_code, SUCCESS)
 
 
 	def test_obtenerEstructuraDeCarpetaYBorrarCarperta(self):
@@ -228,6 +244,33 @@ class ServerTest(unittest.TestCase):
 		self.assertEquals(v.status_code, UNAUTHORIZED)
 
 
+	def test_DeberiaCambiarEstructuraCarpetaAlRenombrar(self):
+		token = registrarYLoguearUser(USER_SIMPLE)
+		FILENAME = "../src/db/batch.cpp"
+		internalUri = USER_SIMPLE["user"] + FILENAME[2:] # saca los '..'
+		requests.put(FILE + internalUri, files={'file': open(FILENAME, 'rb'), "token": token, "user": USER_SIMPLE["user"]})	# sube archivo
+
+		nuevosMetadatos = '{"propietario" : "' +  USER_SIMPLE["user"] + '" , "extension" : "nuevaExtension", "nombre" : "nuevoNombre", ' \
+			+ '"etiquetas" : ["nuevaEtiqueta"], "usuarios" : [], "usuario ultima modificacion" : "' + USER_SIMPLE["user"] + '" , ' \
+			+ '"fecha ultima modificacion" : "23/10/2015"}'
+
+		s = requests.put(METADATA + internalUri, data={"token" : token, "user": USER_SIMPLE["user"], "metadatos" : nuevosMetadatos})
+		self.assertEquals(s.status_code, SUCCESS)
+
+		t = requests.get(METADATA + internalUri, data={"token": token, "user": USER_SIMPLE["user"]})
+		self.assertEquals(t.status_code, NOT_FOUND)	# como se renombro, existe pero bajo otra uri
+
+		newInternalUri = USER_SIMPLE["user"] + "/src/db/nuevoNombre.nuevaExtension"
+		u = requests.get(METADATA + newInternalUri, data={"token": token, "user": USER_SIMPLE["user"]})
+		self.assertEquals(u.status_code, SUCCESS)
+
+		estructuraEsperada = {USER_SIMPLE["user"] + "/src/db/nuevoNombre.nuevaExtension" : "nuevoNombre.nuevaExtension"}
+		expected = {"estructura" : estructuraEsperada}
+		v = requests.get(FOLDER + USER_SIMPLE["user"] + "/src/db", data={"token" : token, "user": USER_SIMPLE["user"]})
+		estructuraRecibida = literal_eval(v.content)
+		self.assertDictEqual(expected, estructuraRecibida)
+
+
 	def test_DeberiaDarErrorAlQuererIngresarAUnRecursoInexistente(self):
 		r = requests.get(BASE)
 		self.assertEquals(r.status_code, NOT_FOUND)
@@ -255,6 +298,8 @@ class ServerTest(unittest.TestCase):
 		token = registrarYLoguearUser(USER_SIMPLE)
 		r = requests.get(PROFILE + USER_SIMPLE["user"], data={"user": USER_SIMPLE["user"], "token": "123456789"})
 		self.assertEquals(r.status_code, UNAUTHORIZED)
+
+
 
 
 
