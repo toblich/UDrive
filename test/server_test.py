@@ -9,11 +9,15 @@ from ast import literal_eval
 
 
 def definirConstantesGlobales():
+
+	global RESERVED_STR
+	RESERVED_STR = "!"
+
 	global FOLDER_TYPE
-	FOLDER_TYPE = "^folder"
+	FOLDER_TYPE = RESERVED_STR + "folder"
 
 	global TRASH_TYPE
-	TRASH_TYPE = "^trash/"
+	TRASH_TYPE = RESERVED_STR + "trash/"
 
 	global BASE 
 	BASE = "http://localhost:8080/"
@@ -314,7 +318,7 @@ class ServerTest(unittest.TestCase):
 		s = requests.delete(uri, data={"user": USER_SIMPLE["user"], "token": token}) # lo borra
 		self.assertEquals(s.status_code, SUCCESS)
 
-		uri = FILE + USER_SIMPLE["user"] + "/" + TRASH_TYPE + FILENAME + "^0"
+		uri = FILE + USER_SIMPLE["user"] + "/" + TRASH_TYPE + FILENAME + RESERVED_STR + "0"
 		t = requests.delete(uri, data={"user": USER_SIMPLE["user"], "token": token, "restore": "true"}) # lo restaura
 		self.assertEquals(t.status_code, SUCCESS)
 
@@ -330,7 +334,7 @@ class ServerTest(unittest.TestCase):
 		s = requests.delete(uri, data={"user": USER_SIMPLE["user"], "token": token}) # lo borra
 		self.assertEquals(s.status_code, SUCCESS)
 
-		uri = FILE + USER_SIMPLE["user"] + "/" + TRASH_TYPE + FILENAME + "^0"
+		uri = FILE + USER_SIMPLE["user"] + "/" + TRASH_TYPE + FILENAME + RESERVED_STR + "0"
 		t = requests.delete(uri, data={"user": USER_SIMPLE["user"], "token": token, "restore": "false"}) # lo borra de la papelera
 		self.assertEquals(t.status_code, SUCCESS)
 

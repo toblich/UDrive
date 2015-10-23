@@ -4,9 +4,9 @@
 #include <list>
 #include <iostream>
 
-#define RESERVED_CHAR '^'	// Ojo, mover los tres juntos
-const std::string RESERVED_STR = "^";
-const std::string RESERVED_REGEX = "\\^";
+#define RESERVED_CHAR '!'	// Ojo, mover los tres juntos
+const std::string RESERVED_STR = "!";
+const std::string RESERVED_REGEX = "\\!";
 
 const std::string TRASH = RESERVED_STR + "trash";
 const std::string PERMISOS = RESERVED_STR + "permisos";

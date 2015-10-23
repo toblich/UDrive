@@ -510,7 +510,7 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaObtenerEstructuraCorrectaDePermis
 	manejador->subirArchivo("pablo", filepath2, "hola panch", 10, jsonArchOK2, 2048);
 	manejador->actualizarMetadatos("pablo", filepath2, jsonConJuanHabilitado2);
 
-	string jsonEstructura = manejador->obtenerEstructuraCarpeta("^permisos/juan");
+	string jsonEstructura = manejador->obtenerEstructuraCarpeta(RESERVED_STR + "permisos/juan");
 
 	map<string, string> mapa = ParserJson::deserializarMapa(jsonEstructura);
 
