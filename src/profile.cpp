@@ -11,11 +11,11 @@ Profile::~Profile () {
 mg_result Profile::GETHandler (mg_connection* connection) {
 	string uri = string(connection->uri);
 	vector<string> uris = ParserURI::parsear(uri, '/');
-	this->logInfo("Se parseó la uri correctamente.");
+	Logger::logInfo("Se parseó la uri correctamente.");
 	string token = getVar(connection, "token");
-	this->logInfo("Se obtuvo la variable token con valor: " + token);
+	Logger::logInfo("Se obtuvo la variable token con valor: " + token);
 	string user = getVar(connection, "user");
-	this->logInfo("Se obtuvo la variable user con valor: " + user);
+	Logger::logInfo("Se obtuvo la variable user con valor: " + user);
 
 	if (uris.size() != 2 and uris.size() !=3){
 		string mensaje = "El recurso al que se quiso acceder no existe.";
@@ -23,7 +23,7 @@ mg_result Profile::GETHandler (mg_connection* connection) {
 		return MG_TRUE;
 	}
 	if (manejadorUs->autenticarToken(token, user)) {
-		this->logInfo("Se autenticó la sesión correctamente.");
+		Logger::logInfo("Se autenticó la sesión correctamente.");
 
 		//Si uris[1] == ^fotos se quiere descargar una foto de perfil
 		if (uris[1] == FOTOS){
@@ -45,7 +45,7 @@ mg_result Profile::GETHandler (mg_connection* connection) {
 			string userPerfil = uris[1];
 			string perfil = manejadorUs->getPerfil(userPerfil);
 			if (perfil != "") {
-				this->logInfo("Se envió el perfil correctamente.");
+				Logger::logInfo("Se envió el perfil correctamente.");
 				mg_send_status(connection, CODESTATUS_SUCCESS);
 				mg_send_header(connection, contentType.c_str(), jsonType.c_str());
 				printfData(connection, "{\"perfil\": %s}", perfil.c_str());
@@ -63,7 +63,7 @@ mg_result Profile::GETHandler (mg_connection* connection) {
 mg_result Profile::PUTHandler (mg_connection* connection) {
 	string uri = string(connection->uri);
 	vector<string> uris = ParserURI::parsear(uri, '/');
-	this->logInfo("Se parseó la uri correctamente.");
+	Logger::logInfo("Se parseó la uri correctamente.");
 
 	if (uris.size() != 2){
 		string mensaje = "El recurso al que se quiso acceder no existe.";
@@ -75,14 +75,14 @@ mg_result Profile::PUTHandler (mg_connection* connection) {
 	string varFile = "picture";
 	DatosArchivo datosArch = getMultipartData(connection, varFile);
 	string token = datosArch.token;
-	this->logInfo("Se obtuvo la variable token con valor: " + token);
+	Logger::logInfo("Se obtuvo la variable token con valor: " + token);
 	string nombre = datosArch.nombre;
-	this->logInfo("Se obtuvo la variable nombre con valor: " + nombre);
+	Logger::logInfo("Se obtuvo la variable nombre con valor: " + nombre);
 	string email = datosArch.email;
-	this->logInfo("Se obtuvo la variable email con valor: " + email);
+	Logger::logInfo("Se obtuvo la variable email con valor: " + email);
 
 	if (manejadorUs->autenticarToken(token, user)) {
-		this->logInfo("Se autenticó la sesión correctamente.");
+		Logger::logInfo("Se autenticó la sesión correctamente.");
 
 		//Deserializo el perfil viejo.
 		MetadatoUsuario viejoPerfil = ParserJson::deserializarMetadatoUsuario(manejadorUs->getPerfil(user));
@@ -105,14 +105,14 @@ mg_result Profile::PUTHandler (mg_connection* connection) {
 
 			//Parseo el nombre y extension del archivo para ver si cambio la extension.
 			vector<string> nombreYExtension = ParserURI::parsear(datosArch.fileName, '.');
-			this->logInfo("Se parseó el nombre del archivo correctamente.");
+			Logger::logInfo("Se parseó el nombre del archivo correctamente.");
 
 			//Obtengo el nuevo path para la foto de perfil -> ^fotos/user.extension
 			string pathFotoNuevo = FOTOS + "/" + user + "." + nombreYExtension[nombreYExtension.size() - 1];
 
 			//Si se cambio el path de la foto, la actualizo en el perfil del usuario. Sino queda como antes.
 			if (manejadorAyM->actualizarFotoPerfil(pathFotoViejo, pathFotoNuevo, datosArch.fileData, datosArch.dataLength)) {
-				this->logInfo("Se actualizo la foto de perfil y cambio el path.");
+				Logger::logInfo("Se actualizo la foto de perfil y cambio el path.");
 				viejoPerfil.pathFotoPerfil = pathFotoNuevo;
 			}
 		}
@@ -135,13 +135,13 @@ mg_result Profile::PUTHandler (mg_connection* connection) {
 
 mg_result Profile::POSTHandler (mg_connection* connection) {
 	string username = getVar(connection, "user");
-	this->logInfo("Se obtuvo la variable user con valor: " + username);
+	Logger::logInfo("Se obtuvo la variable user con valor: " + username);
 	string password = getVar(connection, "pass");
-	this->logInfo("Se obtuvo la variable pass con valor: " + password);
+	Logger::logInfo("Se obtuvo la variable pass con valor: " + password);
 	string profile = getVar(connection, "profile");
-	this->logInfo("Se obtuvo la variable profile.");
+	Logger::logInfo("Se obtuvo la variable profile.");
 	string premium = getVar(connection, "premium");
-	this->logInfo("Se obtuvo la variable premium con valor: " + premium);
+	Logger::logInfo("Se obtuvo la variable premium con valor: " + premium);
 
 	//Le agrego al perfil del usuario la foto por defecto
 	MetadatoUsuario perfil = ParserJson::deserializarMetadatoUsuario(profile);

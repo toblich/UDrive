@@ -43,6 +43,8 @@ public:
 		string token;
 		string nombre;
 		string email;
+		string latitud;
+		string longitud;
 	}DatosArchivo;
 
 	RealizadorDeEventos();
