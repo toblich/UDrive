@@ -55,6 +55,8 @@ bool Validador::tienePermisos (string username, string path) {
 bool Validador::verificarPermisos (string username, string path) {
 	vector<string> directorios = ParserURI::parsear(path, '/');
 	if (directorios.size() > 0) {
+		//Si el directorio raiz es ^fotos cualquiera tiene permisos.
+		if (directorios[0] == FOTOS) return true;
 		string fileOwner = directorios[0];
 		if (username == fileOwner or this->tienePermisos(username, path))
 			return true;

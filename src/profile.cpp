@@ -14,32 +14,49 @@ mg_result Profile::GETHandler (mg_connection* connection) {
 	this->logInfo("Se parseó la uri correctamente.");
 	string token = getVar(connection, "token");
 	this->logInfo("Se obtuvo la variable token con valor: " + token);
+	string user = getVar(connection, "user");
+	this->logInfo("Se obtuvo la variable user con valor: " + user);
 
-	if (uris.size() != 2){
+	if (uris.size() != 2 and uris.size() !=3){
 		string mensaje = "El recurso al que se quiso acceder no existe.";
 		this->responderBadRequest(connection, mensaje);
 		return MG_TRUE;
 	}
-
-	string user = uris[1];
-
 	if (manejadorUs->autenticarToken(token, user)) {
 		this->logInfo("Se autenticó la sesión correctamente.");
 
-		string perfil = manejadorUs->getPerfil(user);
-		if (perfil != "") {
-			this->logInfo("Se envió el perfil correctamente.");
-			mg_send_status(connection, CODESTATUS_SUCCESS);
-			mg_send_header(connection, contentType.c_str(), jsonType.c_str());
-			printfData(connection, "{\"perfil\": %s}", perfil.c_str());
-		} else {
-			string mensaje = "El perfil al que se quizo acceder no existe, o bien el usuario no existe.";
-			this->responderResourceNotFound(connection, mensaje);
+		//Si uris[1] == ^fotos se quiere descargar una foto de perfil
+		if (uris[1] == FOTOS){
+			string filePath = getFilepathFrom(uris);
+			string filePathCompleto = manejadorAyM->descargarArchivo(user, filePath);
+			if (filePathCompleto != "") {
+				if (sendFile(connection, filePathCompleto)) {
+					string mensaje = "Se descargó el archivo: " + filePathCompleto + " correctamente.";
+					this->responderSucces(connection, mensaje);
+				} else {
+					string mensaje = "ERROR, no se pudo descargar el archivo: " + filePathCompleto;
+					this->responderInternalServerError(connection, mensaje);
+				}
+			} else {
+				string mensaje = "Path inválido, no se encontró el archivo: " + filePathCompleto;
+				this->responderResourceNotFound(connection, mensaje);
+			}
+		} else { //Si no se quiere descargar el perfil de un usuario
+			string userPerfil = uris[1];
+			string perfil = manejadorUs->getPerfil(userPerfil);
+			if (perfil != "") {
+				this->logInfo("Se envió el perfil correctamente.");
+				mg_send_status(connection, CODESTATUS_SUCCESS);
+				mg_send_header(connection, contentType.c_str(), jsonType.c_str());
+				printfData(connection, "{\"perfil\": %s}", perfil.c_str());
+			} else {
+				string mensaje = "El perfil al que se quizo acceder no existe, o bien el usuario no existe.";
+				this->responderResourceNotFound(connection, mensaje);
+			}
 		}
 	} else {
 		this->responderAutenticacionFallida(connection);
 	}
-
 	return MG_TRUE;
 }
 
@@ -71,8 +88,8 @@ mg_result Profile::PUTHandler (mg_connection* connection) {
 		MetadatoUsuario viejoPerfil = ParserJson::deserializarMetadatoUsuario(manejadorUs->getPerfil(user));
 
 		//Actualizo el perfil viejo con el nuevo email y nombre en caso de que se hayan modificado.
-		viejoPerfil.nombre = nombre;
-		viejoPerfil.email = email;
+		if (nombre != "") viejoPerfil.nombre = nombre;
+		if (email != "") viejoPerfil.email = email;
 
 		//Verifico si ambos son validos antes de seguir, sino hay problema en que se actualiza la foto
 		//y tal vez el perfil no es valido.
