@@ -20,10 +20,8 @@ mg_result Session::POSTHandler (mg_connection* connection) {
 		mg_send_header(connection, contentType.c_str(), jsonType.c_str());
 		printfData(connection, "{\"token\": \"%s\"}", token.c_str());
 	} else {
-		this->logInfo("No se pudo inicia sesion, usuario y/o contraseña incorrecto/s.");
-		mg_send_status(connection, CODESTATUS_BAD_REQUEST);
-		mg_send_header(connection, contentType.c_str(), jsonType.c_str());
-		printfData(connection, "{\"error\":\"No es posible conectar, usuario y/o contraseña incorrecto/s.\"}");
+		string mensaje = "No se pudo inicia sesion, usuario y/o contraseña incorrecto/s.";
+		this->responderBadRequest(connection, mensaje);
 	}
 
 	return MG_TRUE;
@@ -38,21 +36,15 @@ mg_result Session::DELETEHandler (mg_connection* connection) {
 
 	if (uris.size() == 2) {
 		if (manejadorUs->cerrarSesion(uris[1], username)) {
-			this->logInfo("La sesion se cerró correctamente.");
-			mg_send_status(connection, CODESTATUS_SUCCES);
-			mg_send_header(connection, contentType.c_str(), jsonType.c_str());
-			printfData(connection, "{\"succes\": \"Sesion cerrada correctamente.\"}");
+			string mensaje = "La sesion se cerró correctamente.";
+			this->responderSucces(connection, mensaje);
 		} else {
-			this->logInfo("La sesion que se quizo cerrar ya no existe");
-			mg_send_status(connection, CODESTATUS_RESOURCE_NOT_FOUND);
-			mg_send_header(connection, contentType.c_str(), jsonType.c_str());
-			printfData(connection, "{\"error\":\"La sesión no existe o ya ha sido cerrada.\"}");
+			string mensaje = "La sesion que se quizo cerrar ya no existe";
+			this->responderResourceNotFound(connection, mensaje);
 		}
 	} else {
-		this->logInfo("La uri a la que se quizo acceder es incorrecta.");
-		mg_send_status(connection, CODESTATUS_BAD_REQUEST);
-		mg_send_header(connection, contentType.c_str(), jsonType.c_str());
-		printfData(connection, "{\"error\":\"La uri es incorrecta, debe ser /session/token.\"}");
+		string mensaje = "La uri es incorrecta, debe ser /session/token.";
+		this->responderBadRequest(connection, mensaje);
 	}
 	return MG_TRUE;
 }

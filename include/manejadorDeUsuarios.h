@@ -30,6 +30,7 @@ public:
 
 	string getPerfil(string username);
 	bool modifyPerfil(string username, string perfil);
+	bool esPerfilValido(const string& perfil);
 
 private:
 	BD* perfiles;
@@ -37,7 +38,6 @@ private:
 	BD* passwords;
 	string generarToken(string username, time_t timestamp);
 	bool esCaracterInvalido(char c);
-	bool esPerfilValido(const string& perfil);
 	bool esUsernameValido(const string& username);
 	bool esPasswordValida(const string& password);
 

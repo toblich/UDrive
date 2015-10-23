@@ -22,7 +22,7 @@ public:
 
 	typedef enum CodeStatus {
 		// 2xx Exito
-		CODESTATUS_SUCCES = 200,
+		CODESTATUS_SUCCESS = 200,
 		CODESTATUS_RESOURCE_CREATED = 201,
 
 		// 4xx Errores del Cliente
@@ -41,6 +41,8 @@ public:
 		string fileName;
 		string user;
 		string token;
+		string nombre;
+		string email;
 	}DatosArchivo;
 
 	RealizadorDeEventos();
@@ -52,21 +54,33 @@ protected:
 	string contentType = "Content-Type";
 	string jsonType = "application/json";
 
+	//Log
 	void logInfo(std::string mensaje);
 	void logWarn(std::string mensaje);
 	void logError(std::string mensaje);
-	size_t printfData(mg_connection* connection, const char* format, ...);
-	bool sendFile(mg_connection* connection, string filePath);
-	DatosArchivo getMultipartData(mg_connection* connection, string variable);
-	string getVar(mg_connection* connection, string varName);
+
+	//API REST
 	virtual mg_result POSTHandler(mg_connection* connection);
 	virtual mg_result GETHandler(mg_connection* connection);
 	virtual mg_result PUTHandler(mg_connection* connection);
 	virtual mg_result DELETEHandler(mg_connection* connection);
-	void unsupportedMethod(mg_connection* connection);
 
-	void responderAutenticacionFallida(mg_connection* connection);
+	//Funciones extra de la API REST
+	size_t printfData(mg_connection* connection, const char* format, ...);
+	bool sendFile(mg_connection* connection, string filePath);
+	DatosArchivo getMultipartData(mg_connection* connection, string variable);
+	string getVar(mg_connection* connection, string varName);
 	string getFilepathFrom(const vector<string>& uris);
+
+	//Funciones para contestarle al usuario
+	void responderUnsupportedMethod(mg_connection* connection);
+	void responderAutenticacionFallida(mg_connection* connection);
+	void responderBadRequest(mg_connection* connection, string errMsg);
+	void responderResourceNotFound(mg_connection* connection, string errMsg);
+	void responderInternalServerError(mg_connection* connection, string errMsg);
+	void responderSucces(mg_connection* connection, string msg);
+	void responderResourceCreated(mg_connection* connection, string msg);
+
 };
 
 #endif /* REALIZADORDEEVENTOS_H_ */

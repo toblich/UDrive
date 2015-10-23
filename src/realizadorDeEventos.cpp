@@ -41,6 +41,7 @@ string RealizadorDeEventos::getVar(mg_connection* connection, string varName){
 
 RealizadorDeEventos::DatosArchivo RealizadorDeEventos::getMultipartData(mg_connection* connection, string variable){
 	DatosArchivo datosArch;
+	datosArch.dataLength = 0;
 	const char* data;
 	char varName[MAX_LENGTH], fileName[MAX_LENGTH];
 	int dataLength, n1 = 0, n2 = 0;
@@ -54,8 +55,10 @@ RealizadorDeEventos::DatosArchivo RealizadorDeEventos::getMultipartData(mg_conne
 			datosArch.dataLength = dataLength;
 			datosArch.fileName = string(fileName);
 		}
-		if (string(varName) == "user") datosArch.user = string(data, dataLength);
-		if (string(varName) == "token") datosArch.token = string(data, dataLength);
+		if (string(varName) == "user") 	 datosArch.user   = string(data, dataLength);
+		if (string(varName) == "token")  datosArch.token  = string(data, dataLength);
+		if (string(varName) == "nombre") datosArch.nombre = string(data, dataLength);
+		if (string(varName) == "email")  datosArch.email  = string(data, dataLength);
 	}
 
 	return datosArch;
@@ -84,32 +87,32 @@ mg_result RealizadorDeEventos::handler(mg_connection* connection) {
 	else if (verb == "PUT")		return this->PUTHandler(connection);
 	else if (verb == "DELETE")	return this->DELETEHandler(connection);
 	else {
-		this->unsupportedMethod(connection);
+		this->responderUnsupportedMethod(connection);
 		return MG_TRUE;
 	}
 }
 
 mg_result RealizadorDeEventos::GETHandler(mg_connection* connection) {
-	this->unsupportedMethod(connection);
+	this->responderUnsupportedMethod(connection);
 	return MG_TRUE;
 }
 
 mg_result RealizadorDeEventos::PUTHandler(mg_connection* connection) {
-	this->unsupportedMethod(connection);
+	this->responderUnsupportedMethod(connection);
 	return MG_TRUE;
 }
 
 mg_result RealizadorDeEventos::POSTHandler(mg_connection* connection) {
-	this->unsupportedMethod(connection);
+	this->responderUnsupportedMethod(connection);
 	return MG_TRUE;
 }
 
 mg_result RealizadorDeEventos::DELETEHandler(mg_connection* connection) {
-	this->unsupportedMethod(connection);
+	this->responderUnsupportedMethod(connection);
 	return MG_TRUE;
 }
 
-void RealizadorDeEventos::unsupportedMethod(mg_connection* connection) {
+void RealizadorDeEventos::responderUnsupportedMethod(mg_connection* connection) {
 	logWarn("El método al que se intentó acceder no está permitido por ésta clase.");
 	mg_send_status(connection, CODESTATUS_UNSUPPORTED_METHOD);
 	mg_send_header(connection, contentType.c_str(), jsonType.c_str());
@@ -121,6 +124,41 @@ void RealizadorDeEventos::responderAutenticacionFallida(mg_connection* connectio
 	mg_send_status(connection, CODESTATUS_UNAUTHORIZED_CLIENT);
 	mg_send_header(connection, contentType.c_str(), jsonType.c_str());
 	printfData(connection, "{\"error\": \"El token no corresponde con la sesion del usuario\"}");
+}
+
+void RealizadorDeEventos::responderBadRequest(mg_connection* connection, string errMsg) {
+	this->logInfo(errMsg);
+	mg_send_status(connection, CODESTATUS_BAD_REQUEST);
+	mg_send_header(connection, contentType.c_str(), jsonType.c_str());
+	printfData(connection, "{\"error\": \"%s\"}", errMsg.c_str());
+}
+
+void RealizadorDeEventos::responderResourceNotFound(mg_connection* connection, string errMsg){
+	this->logInfo(errMsg);
+	mg_send_status(connection, CODESTATUS_RESOURCE_NOT_FOUND);
+	mg_send_header(connection, contentType.c_str(), jsonType.c_str());
+	printfData(connection, "{\"error\": \"%s\"}", errMsg.c_str());
+}
+
+void RealizadorDeEventos::responderInternalServerError(mg_connection* connection, string errMsg){
+	this->logError(errMsg);
+	mg_send_status(connection, CODESTATUS_INTERNAL_SERVER_ERROR);
+	mg_send_header(connection, contentType.c_str(), jsonType.c_str());
+	printfData(connection, "{\"error\": \"%s\"}", errMsg.c_str());
+}
+
+void RealizadorDeEventos::responderSucces(mg_connection* connection, string msg){
+	this->logInfo(msg);
+	mg_send_status(connection, CODESTATUS_SUCCESS);
+	mg_send_header(connection, contentType.c_str(), jsonType.c_str());
+	printfData(connection, "{\"success\": \"%s\"}", msg.c_str());
+}
+
+void RealizadorDeEventos::responderResourceCreated(mg_connection* connection, string msg){
+	this->logInfo(msg);
+	mg_send_status(connection, CODESTATUS_RESOURCE_CREATED);
+	mg_send_header(connection, contentType.c_str(), jsonType.c_str());
+	printfData(connection, "{\"success\": \"%s\"}", msg.c_str());
 }
 
 string RealizadorDeEventos::getFilepathFrom(const vector<string>& uris) {

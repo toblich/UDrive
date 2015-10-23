@@ -11,21 +11,15 @@ File::~File () {
 void File::enviarArchivo (const string& completePath, mg_connection* connection) {
 	if (completePath != "") {
 		if (sendFile(connection, completePath)) {
-			this->logInfo("Se descargó el archivo: " + completePath + " correctamente.");
-			mg_send_status(connection, CODESTATUS_SUCCES);
-			mg_send_header(connection, contentType.c_str(), jsonType.c_str());
-			printfData(connection, "{\"success\": \"Se descargo el archivo exitosamente\"}");
+			string mensaje = "Se descargó el archivo: " + completePath + " correctamente.";
+			this->responderSucces(connection, mensaje);
 		} else {
-			this->logError("ERROR, no se pudo descargar el archivo: " + completePath);
-			mg_send_status(connection, CODESTATUS_INTERNAL_SERVER_ERROR);
-			mg_send_header(connection, contentType.c_str(), jsonType.c_str());
-			printfData(connection, "{\"error\": \"Hubo un problema y no se pudo enviar el archivo, intentelo nuevamente.\"}");
+			string mensaje = "ERROR, no se pudo descargar el archivo: " + completePath;
+			this->responderInternalServerError(connection, mensaje);
 		}
 	} else {
-		this->logInfo("Path inválido, no se encontró el archivo: " + completePath);
-		mg_send_status(connection, CODESTATUS_RESOURCE_NOT_FOUND);
-		mg_send_header(connection, contentType.c_str(), jsonType.c_str());
-		printfData(connection, "{\"error\": \"El archivo al que quiere acceder no existe.\"}");
+		string mensaje = "Path inválido, no se encontró el archivo: " + completePath;
+		this->responderResourceNotFound(connection, mensaje);
 	}
 }
 
@@ -90,15 +84,11 @@ void File::subirArchivo (const vector<string>& uris, const DatosArchivo& datosAr
 	int cuotaUsuario = ParserJson::deserializarMetadatoUsuario(manejadorUs->getPerfil(user)).cuota;
 
 	if (manejadorArchYMet->subirArchivo(user, filepath, datosArch.fileData, datosArch.dataLength, jsonMetadata, cuotaUsuario)) {
-		this->logInfo("Se subió el archivo: " + filepath + " correctamente.");
-		mg_send_status(connection, CODESTATUS_RESOURCE_CREATED);
-		mg_send_header(connection, contentType.c_str(), jsonType.c_str());
-		printfData(connection, "{\"success\": \"Se subio el archivo exitosamente\"}");
+		string mensaje = "Se subió el archivo: " + filepath + " correctamente.";
+		this->responderResourceCreated(connection, mensaje);
 	} else {
-		this->logError("ERROR, no se pudo subir el archivo: " + filepath);
-		mg_send_status(connection, CODESTATUS_INTERNAL_SERVER_ERROR);
-		mg_send_header(connection, contentType.c_str(), jsonType.c_str());
-		printfData(connection, "{\"error\": \"Hubo un problema al subir el archivo, intentelo nuevamente\"}");
+		string mensaje = "ERROR, no se pudo subir el archivo: " + filepath;
+		this->responderInternalServerError(connection, mensaje);
 	}
 }
 
@@ -109,7 +99,6 @@ mg_result File::PUTHandler (mg_connection* connection) {
 
 	string varFile = "file";
 	DatosArchivo datosArch = getMultipartData(connection, varFile);
-	this->logInfo("Se obtuvo el archivo correctamente con tamaño: " + datosArch.dataLength);
 	string token = datosArch.token;
 	this->logInfo("Se obtuvo la variable token con valor: " + token);
 	string user = datosArch.user;
@@ -141,27 +130,19 @@ mg_result File::DELETEHandler (mg_connection* connection) {
 		string filepath = getFilepathFrom(uris);
 		if (restore == "true"){
 			if (manejadorArchYMet->restaurar(user, filepath)){
-				this->logInfo("Se restauró el archivo: " + filepath + " correctamente.");
-				mg_send_status(connection, CODESTATUS_SUCCES);
-				mg_send_header(connection, contentType.c_str(), jsonType.c_str());
-				printfData(connection, "{\"success\": \"Se restauro el archivo exitosamente.\"}");
+				string mensaje = "Se restauró el archivo: " + filepath + " correctamente.";
+				this->responderSucces(connection, mensaje);
 			} else {
-				this->logInfo("Path inválido, no se encontró el archivo: " + filepath);
-				mg_send_status(connection, CODESTATUS_RESOURCE_NOT_FOUND);
-				mg_send_header(connection, contentType.c_str(), jsonType.c_str());
-				printfData(connection, "{\"error\": \"Path invalido, no se pudo restaurar el archivo.\"}");
+				string mensaje = "Path inválido, no se encontró el archivo: " + filepath;
+				this->responderResourceNotFound(connection, mensaje);
 			}
 		} else {
 			if (manejadorArchYMet->eliminar(user, filepath)) {
-				this->logInfo("Se eliminó el archivo: " + filepath + " correctamente.");
-				mg_send_status(connection, CODESTATUS_SUCCES);
-				mg_send_header(connection, contentType.c_str(), jsonType.c_str());
-				printfData(connection, "{\"success\": \"Se elimino el archivo exitosamente.\"}");
+				string mensaje = "Se eliminó el archivo: " + filepath + " correctamente.";
+				this->responderSucces(connection, mensaje);
 			} else {
-				this->logInfo("Path inválido, no se encontró el archivo: " + filepath);
-				mg_send_status(connection, CODESTATUS_RESOURCE_NOT_FOUND);
-				mg_send_header(connection, contentType.c_str(), jsonType.c_str());
-				printfData(connection, "{\"error\": \"Path invalido, no se encontro el archivo.\"}");
+				string mensaje = "Path inválido, no se encontró el archivo: " + filepath;
+				this->responderResourceNotFound(connection, mensaje);
 			}
 		}
 	} else {

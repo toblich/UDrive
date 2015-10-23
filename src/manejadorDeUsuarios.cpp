@@ -95,9 +95,6 @@ bool ManejadorDeUsuarios::modifyPerfil(string username, string perfil){
 		if (perfiles->contains(username)){
 			perfiles->modify(username, perfil);
 			return true;
-		}else {
-			perfiles->put(username, perfil);
-			return true;
 		}
 	}
 	return false;

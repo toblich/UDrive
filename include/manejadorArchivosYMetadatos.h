@@ -57,6 +57,7 @@ public:
 	bool subirArchivo(string username, string filepath, const char* data, int dataLen, string jsonMetadatos, int cuota);
 	string descargarArchivo(string username, string filepath);
 	bool actualizarArchivo(string username, string filepath, const char* data, int dataLen, int cuota);
+	bool actualizarFotoPerfil(string filepathViejo, string filepathNuevo, const char* data, int dataLen);
 
 	string consultarMetadatosArchivo(string username, string filename);
 	bool actualizarMetadatos(string username, string filepath, string jsonNuevosMetadatos);
