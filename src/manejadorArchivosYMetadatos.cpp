@@ -237,10 +237,7 @@ bool ManejadorArchivosYMetadatos::actualizarArchivo (string username, string fil
 		if (folderSize + dataLen <= cuotaBytes) { //TODO: Restar el tamanio del archivo viejo
 			return guardarArchivo(filepath, username, data, dataLen);
 		}
-		string texto = "No se ha podido subir el archivo " + filepath + " debido a que se ha superado la cuota de "; // + cuotaMB + " MB.";
-		texto += cuota;
-		texto += " MB.";
-		Logger::logWarn(texto);
+		Logger::logWarn("No se ha podido subir el archivo " + filepath + " debido a que se ha superado la cuota de " + to_string(cuota) + " MB.");
 	}
 	return false;
 }

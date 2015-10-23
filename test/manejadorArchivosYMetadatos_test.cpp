@@ -521,7 +521,7 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaObtenerEstructuraCorrectaDePermis
 TEST_F(ManejadorArchivosYMetadatosTest, deberiaNoPermitirSubirArchivoPorExcesoDeCuota) {
 	manejador->crearUsuario("pablo");
 	string path = "pablo/como estas/bien/saludo.txt";
-	manejador->subirArchivo("pablo", path, "hola pablo", 10, jsonArchOK, 0);
+	EXPECT_FALSE( manejador->subirArchivo("pablo", path, "hola pablo", 10, jsonArchOK, 0) );
 }
 
 TEST_F(ManejadorArchivosYMetadatosTest, deberiaBorrarElFileSystem) {
