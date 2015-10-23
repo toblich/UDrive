@@ -21,6 +21,8 @@
 
 using namespace std;
 
+#define POLL_MILLISEC 1000
+
 class Server {
 public:
 	Server(string portNumber, BD* perfiles, BD* sesiones, BD* passwords, BD* metadatos);
@@ -28,14 +30,14 @@ public:
 
 	mg_result eventHandler(mg_connection *connection, mg_event event);
 	static int mgEventHandler(mg_connection *connection, mg_event event);
-	void pollServer(int milliseconds);
-	const char* getListeningPort() { return mg_get_option(server, "listening_port"); }
+	static void *pollServer(void* server);
+//	const char* getListeningPort() { return mg_get_option(server, "listening_port"); }
 	bool isRunning() { return running; }
 
 private:
-	bool running;
+	static bool running;
 	map<string, RealizadorDeEventos*> mapaURI;
-	mg_server* server;
+//	mg_server* server;
 	ManejadorDeUsuarios* manejadorUsuarios;
 	ManejadorArchivosYMetadatos* manejadorAYM;
 	BD* perfiles;

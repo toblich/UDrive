@@ -13,11 +13,11 @@ void lanzarServer(BD* perfiles, BD* sesiones, BD* passwords, BD* metadatos) {
 	logger.escribirHoraEnElLog();
 
 	string puerto = "8080";
+	cout << "Lanzando servidor en el puerto " << puerto << endl;
 	Server server(puerto, perfiles, sesiones, passwords, metadatos);
-	cout << "Lanzando servidor en el puerto " << server.getListeningPort() << endl;
 
 	while (server.isRunning()) {
-		server.pollServer(1000);
+		sleep(1);
 	}
 
 	cout << "Cerrando servidor" << endl;

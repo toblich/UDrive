@@ -2,12 +2,10 @@
 
 using namespace std;
 
+
+bool Server::running = true;
+
 Server::Server (string listeningPort, BD* perfiles, BD* sesiones, BD* passwords, BD* metadatos) {
-	//Server
-	server = mg_create_server((void *) this, Server::mgEventHandler);
-	mg_set_option(server, "listening_port", listeningPort.c_str());
-	mg_set_option(server, "document_root", ".");
-	running = true;
 
 	//BD
 	this->perfiles = perfiles;
@@ -25,11 +23,21 @@ Server::Server (string listeningPort, BD* perfiles, BD* sesiones, BD* passwords,
 	mapaURI.insert(pair<string, RealizadorDeEventos*>("file", new File(manejadorUsuarios, manejadorAYM)));
 	mapaURI.insert(pair<string, RealizadorDeEventos*>("metadata", new Metadata(manejadorUsuarios, manejadorAYM)));
 	mapaURI.insert(pair<string, RealizadorDeEventos*>("folder", new Folder(manejadorUsuarios, manejadorAYM)));
+
+	//Server
+	struct mg_server* primerServer = mg_create_server((void *) this, Server::mgEventHandler);
+	mg_set_option(primerServer, "listening_port", listeningPort.c_str());
+	mg_set_option(primerServer, "document_root", ".");
+	for (int i = 1; i < 2; i++) {
+		struct mg_server* server = mg_create_server((void *) this, Server::mgEventHandler);
+		mg_copy_listeners(primerServer, server);
+		mg_start_thread(pollServer, (void*)server);
+	}
 }
 
 Server::~Server () {
 	//Server
-	mg_destroy_server(&server);
+//	mg_destroy_server(&server);
 
 	//TODO: Sacar estas instrucciones para que despues persistan los datos.
 	perfiles->deleteBD(); //
@@ -84,8 +92,11 @@ mg_result Server::closeHandler (mg_connection* connection) {
 	return MG_TRUE;
 }
 
-void Server::pollServer (int milliseconds) {
-	mg_poll_server(server, milliseconds);
+void *Server::pollServer (void* server) {
+	while (running) {
+		mg_poll_server((struct mg_server*) server, POLL_MILLISEC);
+	}
+	return NULL;
 }
 
 mg_result Server::requestHandler (mg_connection* connection) {
