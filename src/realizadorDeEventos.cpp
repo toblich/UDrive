@@ -29,10 +29,9 @@ size_t RealizadorDeEventos::printfData(mg_connection* connection, const char* fo
 
 string RealizadorDeEventos::getVar(mg_connection* connection, string varName){
 	string variable;
-	int maxLenght = 200;
 
-	variable.resize(maxLenght);
-	int result = mg_get_var(connection, varName.c_str(), (char*) variable.data(), maxLenght);
+	variable.resize(MAX_LENGTH);
+	int result = mg_get_var(connection, varName.c_str(), (char*) variable.data(), MAX_LENGTH);
 	//Si no existe una variable con ese varName, devuelvo un string vacio.
 	if (result == -1) return string();
 	variable.resize(strlen(variable.data()));
@@ -43,7 +42,7 @@ string RealizadorDeEventos::getVar(mg_connection* connection, string varName){
 RealizadorDeEventos::DatosArchivo RealizadorDeEventos::getMultipartData(mg_connection* connection, string variable){
 	DatosArchivo datosArch;
 	const char* data;
-	char varName[100], fileName[100];
+	char varName[MAX_LENGTH], fileName[MAX_LENGTH];
 	int dataLength, n1 = 0, n2 = 0;
 
 	while ((n2 = mg_parse_multipart(connection->content + n1, connection->content_len - n1,

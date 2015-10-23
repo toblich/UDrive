@@ -15,6 +15,8 @@
 
 using namespace std;
 
+#define MAX_LENGTH 1024
+
 class RealizadorDeEventos {
 public:
 
