@@ -15,8 +15,6 @@
 
 using namespace std;
 
-const unsigned long int CUOTA = 2147483648; // 2GB
-
 class Validador {
 private:
 	BD* dbMetadatos;

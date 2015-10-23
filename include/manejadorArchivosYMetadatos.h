@@ -54,9 +54,9 @@ public:
 	bool eliminar(string username, string path); //Sirve para carpetas y archivos
 	bool restaurar(string username, string path);
 
-	bool subirArchivo(string username, string filepath, const char* data, int dataLen, string jsonMetadatos);
+	bool subirArchivo(string username, string filepath, const char* data, int dataLen, string jsonMetadatos, int cuota);
 	string descargarArchivo(string username, string filepath);
-	bool actualizarArchivo(string username, string filepath, const char* data, int dataLen);
+	bool actualizarArchivo(string username, string filepath, const char* data, int dataLen, int cuota);
 
 	string consultarMetadatosArchivo(string username, string filename);
 	bool actualizarMetadatos(string username, string filepath, string jsonNuevosMetadatos);

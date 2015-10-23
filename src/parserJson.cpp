@@ -40,6 +40,20 @@ double ParserJson::verificarDouble(string key, Value raiz){
 	return value;
 }
 
+int ParserJson::verificarInt(std::string key, Json::Value raiz) {
+	Value parametro = raiz.get(key, "NO");
+	int value;
+	if (not parametro.isNull() and parametro.isInt() and parametro.asInt() > 0){
+		value = parametro.asInt();
+	} else {
+		Logger logger;
+		string error = "Parametro de tipo int \"" + key + "\" invalido, inexistente o menor que 0 en un Json. Se asigna el valor \"2048\" (2 GB) para esta key.";
+		logger.loggear(error, WARN);
+		value = CUOTA;
+	}
+	return value;
+}
+
 string ParserJson::serializarMetadatoArchivo(MetadatoArchivo metadato) {
 	Value archivo;
 
@@ -68,7 +82,6 @@ string ParserJson::serializarMetadatoArchivo(MetadatoArchivo metadato) {
 	archivo["usuarios"] = usuarios;
 
 	string serializado = archivo.toStyledString();
-//	std::cout << serializado << std::endl;
 	return serializado;
 }
 
@@ -80,6 +93,7 @@ string ParserJson::serializarMetadatoUsuario(MetadatoUsuario metadato) {
 	archivo["nombre"] = metadato.nombre;
 	archivo["email"] = metadato.email;
 	archivo["path foto de perfil"] = metadato.pathFotoPerfil;
+	archivo["cuota"] = metadato.cuota;
 
 	Value ubicacion;
 	ubicacion["latitud"] = metadato.ultimaUbicacion.latitud;
@@ -87,7 +101,6 @@ string ParserJson::serializarMetadatoUsuario(MetadatoUsuario metadato) {
 	archivo["ultima ubicacion"] = ubicacion;
 
 	string serializado = archivo.toStyledString();
-//	std::cout << serializado << std::endl;
 	return serializado;
 }
 
@@ -101,7 +114,6 @@ string ParserJson::serializarMetadatoSesion(MetadatosSesion metadato){
 	archivo["token"] = metadato.token;
 
 	string serializado = archivo.toStyledString();
-//	std::cout << serializado << std::endl;
 	return serializado;
 }
 
@@ -180,6 +192,7 @@ MetadatoUsuario ParserJson::deserializarMetadatoUsuario(string json) {
 		metadatos.nombre = ParserJson::verificarString("nombre", raiz);
 		metadatos.email = ParserJson::verificarString("email", raiz);
 		metadatos.pathFotoPerfil = ParserJson::verificarString("path foto de perfil", raiz);
+		metadatos.cuota = ParserJson::verificarInt("cuota", raiz);
 
 		Value ubicacion = raiz.get("ultima ubicacion", "NO");
 		if (not ubicacion.isNull() and ubicacion.isObject()){
