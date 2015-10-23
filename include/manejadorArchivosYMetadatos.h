@@ -2,6 +2,7 @@
 #define MANEJADORARCHIVOSYMETADATOS_H_
 
 #include "validador.h"
+#include <functional>
 
 using std::string;
 
@@ -42,6 +43,8 @@ private:
 	void actualizarPermisosPathArchivo(const string& filepath, const string& nuevoFilepath,
 			const list<string>& usuariosHabilitados);
 
+	string buscar(string username, function<bool(MetadatoArchivo&)> predicate);
+
 public:
 	ManejadorArchivosYMetadatos(BD* dbMetadatos);
 	ManejadorArchivosYMetadatos(BD* dbMetadatos, string path);
@@ -63,6 +66,13 @@ public:
 	bool actualizarMetadatos(string username, string filepath, string jsonNuevosMetadatos);
 
 	bool deleteFileSystem();
+
+	//busquedas
+	string buscarPorExtension(string username, string extension);
+	string buscarPorEtiqueta(string username, string etiqueta);
+	string buscarPorNombre(string username, string nombre);
+	//Esta busqueda implica mostrar todos los archivos que me compartio ese propietario
+	string buscarPorPropietario(string username, string propietario);
 };
 
 #endif /* MANEJADORARCHIVOSYMETADATOS_H_ */
