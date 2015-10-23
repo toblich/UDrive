@@ -139,7 +139,7 @@ class ServerTest(unittest.TestCase):
 		token = registrarYLoguear(username, password, PERFIL)
 		perfilOriginal = json.loads(PERFIL)
 
-		r = requests.get(PROFILE + username, data={"token": token})	# obtener perfil
+		r = requests.get(PROFILE + username, data={"token": token, "user": username})	# obtener perfil
 		self.assertEquals(r.status_code, SUCCESS)
 		perfilObtenido = r.json().get("perfil")
 		self.assertEquals(perfilObtenido.get("nombre"), perfilOriginal.get("nombre"))
@@ -149,7 +149,7 @@ class ServerTest(unittest.TestCase):
 			"token": token}) # actualizar perfil
 		self.assertEquals(s.status_code, SUCCESS)
 		
-		t = requests.get(PROFILE + username, data={"token": token})	# obtener nuevo perfil
+		t = requests.get(PROFILE + username, data={"token": token, "user": username})	# obtener nuevo perfil
 		self.assertEquals(t.status_code, SUCCESS)
 		nuevoPerfilObtenido = t.json().get("perfil")
 		self.assertEquals(nuevoPerfilObtenido.get("nombre"), "otroNombre")
