@@ -22,14 +22,12 @@ void Metadata::GETMetadatos(mg_connection* connection, vector<string> uris, stri
 	}
 }
 
-void Metadata::busquedaEtiquetas(mg_connection* connection, string user) {
-	//TODO:
-	//Ver como obtener la lista de etiquetas por parametro
-	//list<string> etiquetasParaBuscar = ?;
-	//Iterar por la lista de etiquetas e ir buscando una por una
-	//string resultado = manejadorArchYMet->buscarPorEtiqueta(user, etiqueta);
-	//Devolverle al usuario la busqueda.
-	//responderBusqueda(connection, resultado);
+void Metadata::busquedaEtiqueta(mg_connection* connection, string user) {
+	//TODO: queda la version para buscar de a una etiqueta por vez
+	//despues si termina siendo una lista hay que ver como cambiarlo.
+	string etiquetaABuscar = getVar(connection, "etiqueta");
+	string resultado = manejadorArchYMet->buscarPorEtiqueta(user, etiquetaABuscar);
+	responderBusqueda(connection, resultado);
 }
 
 void Metadata::busquedaExtension(mg_connection* connection, string user) {
@@ -74,7 +72,7 @@ mg_result Metadata::GETHandler (mg_connection* connection) {
 		if (busqueda != ""){
 			//TODO: No se como hacer un map o algo que dependiendo el tipo de busqueda mapee a la funcion.
 			//Hago 4 ifs por ahora
-			if (busqueda == "etiquetas") 	busquedaEtiquetas(connection, user);
+			if (busqueda == "etiqueta") 	busquedaEtiqueta(connection, user);
 			if (busqueda == "extension") 	busquedaExtension(connection, user);
 			if (busqueda == "nombre") 		busquedaNombre(connection, user);
 			if (busqueda == "propietario") 	busquedaPropietario(connection, user);
