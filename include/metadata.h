@@ -16,7 +16,10 @@ protected:
 	ManejadorArchivosYMetadatos* manejadorArchYMet;
 
 	void GETMetadatos(mg_connection* connection, vector<string> uris, string user);
-	void GETBusquedas(mg_connection* connection, vector<string> uris, string query);
+	void busquedaEtiquetas(mg_connection* connection, string user);
+	void busquedaExtension(mg_connection* connection, string user);
+	void busquedaNombre(mg_connection* connection, string user);
+	void busquedaPropietario(mg_connection* connection, string user);
 	mg_result GETHandler(mg_connection* connection);
 	mg_result PUTHandler(mg_connection* connection);
 };

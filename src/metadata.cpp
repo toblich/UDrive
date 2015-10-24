@@ -22,23 +22,44 @@ void Metadata::GETMetadatos(mg_connection* connection, vector<string> uris, stri
 	}
 }
 
-void Metadata::GETBusquedas(mg_connection* connection, vector<string> uris, string query) {
-	string path = getFilepathFrom(uris);
-	//TODO: queda esto para que haga algo pero falta implementar bien
+void Metadata::busquedaEtiquetas(mg_connection* connection, string user) {
+	//TODO:
+	//Ver como obtener la lista de etiquetas por parametro
+	//list<string> etiquetasParaBuscar = ?;
+	//Iterar por la lista de etiquetas e ir buscando una por una
+	//string resultado = manejadorArchYMet->buscarPorEtiqueta(user, etiqueta);
+	//Devolverle al usuario la busqueda.
+	//Logger::logInfo("Se envio el resultado de la busqueda por etiquetas: " + etiqueta + " correctamente.");
+	//mg_send_status(connection, CODESTATUS_SUCCESS);
+	//mg_send_header(connection, contentType.c_str(), jsonType.c_str());
+	//printfData(connection, "{\"busqueda\": %s}", resultado.c_str());
+}
+
+void Metadata::busquedaExtension(mg_connection* connection, string user) {
+	string extensionABuscar = getVar(connection, "extension");
+	string resultado = manejadorArchYMet->buscarPorExtension(user, extensionABuscar);
+	Logger::logInfo("Se envio el resultado de la busqueda por extension: " + extensionABuscar + " correctamente.");
 	mg_send_status(connection, CODESTATUS_SUCCESS);
 	mg_send_header(connection, contentType.c_str(), jsonType.c_str());
-	printfData(connection, "{\"success\": %s}", query.c_str());
-	//TODO: Ver a que funcion del manejar de archivos y metadatos llamar
-//	string busqueda = manejadorArchYMet->buscarArchivos(user, filepath, query);
-//	if (metadatosArch != "") {
-//		Logger::logInfo("Se enviaron los metadatos del archivo: " + filepath + " correctamente.");
-//		mg_send_status(connection, CODESTATUS_SUCCES);
-//		mg_send_header(connection, contentType.c_str(), jsonType.c_str());
-//		printfData(connection, "{\"metadatos\": %s}", metadatosArch.c_str());
-//	} else {
-//		string mensaje = "No se encontraron los metadatos del archivo: " + filepath;
-//		this->responderResourceNotFound(connection, mensaje);
-//	}
+	printfData(connection, "{\"busqueda\": %s}", resultado.c_str());
+}
+
+void Metadata::busquedaNombre(mg_connection* connection, string user) {
+	string nombreABuscar = getVar(connection, "nombre");
+	string resultado = manejadorArchYMet->buscarPorNombre(user, nombreABuscar);
+	Logger::logInfo("Se envio el resultado de la busqueda por nombre: " + nombreABuscar + " correctamente.");
+	mg_send_status(connection, CODESTATUS_SUCCESS);
+	mg_send_header(connection, contentType.c_str(), jsonType.c_str());
+	printfData(connection, "{\"busqueda\": %s}", resultado.c_str());
+}
+
+void Metadata::busquedaPropietario(mg_connection* connection, string user) {
+	string propiestarioABuscar = getVar(connection, "propietario");
+	string resultado = manejadorArchYMet->buscarPorPropietario(user, propiestarioABuscar);
+	Logger::logInfo("Se envio el resultado de la busqueda por propietario: " + propiestarioABuscar + " correctamente.");
+	mg_send_status(connection, CODESTATUS_SUCCESS);
+	mg_send_header(connection, contentType.c_str(), jsonType.c_str());
+	printfData(connection, "{\"busqueda\": %s}", resultado.c_str());
 }
 
 mg_result Metadata::GETHandler (mg_connection* connection) {
@@ -53,14 +74,18 @@ mg_result Metadata::GETHandler (mg_connection* connection) {
 	if (manejadorUs->autenticarToken(token, user)) {
 		Logger::logInfo("Se autenticó la sesión correctamente.");
 
-		if (connection->query_string != NULL){
-			string query = string(connection->query_string);
-			Logger::logInfo("Se obtuvo la query correctamente.");
-			this->GETBusquedas(connection, uris, query);
+		string busqueda = getVar(connection, "busqueda");
+		Logger::logInfo("Se obtuvo la variable busqueda con valor: " + busqueda);
+		if (busqueda != ""){
+			//TODO: No se como hacer un map o algo que dependiendo el tipo de busqueda mapee a la funcion.
+			//Hago 4 ifs por ahora
+			if (busqueda == "etiquetas") 	busquedaEtiquetas(connection, user);
+			if (busqueda == "extension") 	busquedaExtension(connection, user);
+			if (busqueda == "nombre") 		busquedaNombre(connection, user);
+			if (busqueda == "propietario") 	busquedaPropietario(connection, user);
 		} else {
 			this->GETMetadatos(connection, uris, user);
 		}
-
 	} else {
 		this->responderAutenticacionFallida(connection);
 	}
