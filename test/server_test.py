@@ -19,6 +19,9 @@ def definirConstantesGlobales():
 	global TRASH_TYPE
 	TRASH_TYPE = RESERVED_STR + "trash/"
 
+	global FOTOS_TYPE
+	FOTOS_TYPE = RESERVED_STR + "fotos/"
+
 	global BASE 
 	BASE = "http://localhost:8080/"
 	
@@ -137,11 +140,12 @@ class ServerTest(unittest.TestCase):
 		self.assertEquals(w.status_code, SUCCESS)
 
 
-	def test_perfilSubidoYActualizado(self):
+	def test_perfilSubidoYActualizadoConFotoDePerfil(self):
 		username = "hola"
 		password = "masdeocholetras"
 		token = registrarYLoguear(username, password, PERFIL)
 		perfilOriginal = json.loads(PERFIL)
+		FOTO = "default.jpg"
 
 		r = requests.get(PROFILE + username, data={"token": token, "user": username})	# obtener perfil
 		self.assertEquals(r.status_code, SUCCESS)
@@ -150,7 +154,7 @@ class ServerTest(unittest.TestCase):
 		self.assertEquals(perfilObtenido.get("email"), perfilOriginal.get("email"))
 
 		s = requests.put(PROFILE + username, files={"nombre": "otroNombre", "email": "otro@e.mail",
-			"token": token}) # actualizar perfil
+			"token": token, 'picture': open(FOTO, 'rb')}) # actualizar perfil con foto
 		self.assertEquals(s.status_code, SUCCESS)
 		
 		t = requests.get(PROFILE + username, data={"token": token, "user": username})	# obtener nuevo perfil
@@ -159,13 +163,23 @@ class ServerTest(unittest.TestCase):
 		self.assertEquals(nuevoPerfilObtenido.get("nombre"), "otroNombre")
 		self.assertEquals(nuevoPerfilObtenido.get("email"), "otro@e.mail")
 
+		pathFoto = nuevoPerfilObtenido.get("path foto de perfil") #Veo si es la misma foto que subi
+		uriAFoto = PROFILE + pathFoto
+		uriRealAFoto = PROFILE + FOTOS_TYPE + username + ".jpg"
+		self.assertEquals(uriAFoto, uriRealAFoto)
 
-	def test_subirBajarYBorrarArchivoTexto(self):
+		u = requests.get(uriAFoto, data={"token": token, "user": username})
+		contenido = open(FOTO, 'rb').read()	# compara el archivo bajado con el original
+		self.assertEquals(u.content, contenido)
+
+
+	def test_subirBajarYBorrarArchivoTextoActualizandoUltimaUbicacion(self):
 		token = registrarYLoguearUser(USER_SIMPLE)
 		FILENAME = "Makefile"
 
 		uri = FILE + USER_SIMPLE["user"] + "/" + FILENAME
-		r = requests.put(uri, files={'file': open(FILENAME, 'rb'), "token": token, "user": USER_SIMPLE["user"]})	# lo sube
+		r = requests.put(uri, files={'file': open(FILENAME, 'rb'), "token": token, "user": USER_SIMPLE["user"], 
+							"latitud": "10.5", "longitud":"20.0"})	# lo sube pasandole la ubicacion para que la actualice
 		self.assertEquals(r.status_code, RESOURCE_CREATED)
 
 		s = requests.get(uri, data={"user": USER_SIMPLE["user"], "token": token})	# lo baja
@@ -182,6 +196,13 @@ class ServerTest(unittest.TestCase):
 
 		v = requests.get(uri, data={"user": USER_SIMPLE["user"], "token": token})	# trata de bajarlo
 		self.assertEquals(v.status_code, NOT_FOUND)
+
+		w = requests.get(PROFILE + USER_SIMPLE["user"], data={"token": token, "user": USER_SIMPLE["user"]})
+		self.assertEquals(w.status_code, SUCCESS)
+		perfilObtenido = w.json().get("perfil")
+		ultimaUbicacion = perfilObtenido.get("ultima ubicacion")
+		self.assertEquals(ultimaUbicacion.get("latitud"), 10.5)
+		self.assertEquals(ultimaUbicacion.get("longitud"), 20.0)
 
 
 	def test_obtenerYActualizarMetadatos(self):
@@ -339,6 +360,14 @@ class ServerTest(unittest.TestCase):
 		self.assertEquals(t.status_code, SUCCESS)
 
 
+	def test_DeberiaDarErrorAlQuererActualizarElPerfilYQueSeaInvalido(self):
+		username = "hola"
+		password = "masdeocholetras"
+		token = registrarYLoguear(username, password, PERFIL)
+
+		r = requests.put(PROFILE + username, files={"nombre": "otroNombre", "email": "otro@email",
+			"token": token}) # actualizar perfil con email invalido
+		self.assertEquals(r.status_code, BAD_REQUEST)
 
 
 if __name__ == '__main__':
