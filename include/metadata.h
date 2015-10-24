@@ -20,6 +20,7 @@ protected:
 	void busquedaExtension(mg_connection* connection, string user);
 	void busquedaNombre(mg_connection* connection, string user);
 	void busquedaPropietario(mg_connection* connection, string user);
+	void responderBusqueda(mg_connection* connection, string resultado);
 	mg_result GETHandler(mg_connection* connection);
 	mg_result PUTHandler(mg_connection* connection);
 };

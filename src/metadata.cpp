@@ -29,34 +29,29 @@ void Metadata::busquedaEtiquetas(mg_connection* connection, string user) {
 	//Iterar por la lista de etiquetas e ir buscando una por una
 	//string resultado = manejadorArchYMet->buscarPorEtiqueta(user, etiqueta);
 	//Devolverle al usuario la busqueda.
-	//Logger::logInfo("Se envio el resultado de la busqueda por etiquetas: " + etiqueta + " correctamente.");
-	//mg_send_status(connection, CODESTATUS_SUCCESS);
-	//mg_send_header(connection, contentType.c_str(), jsonType.c_str());
-	//printfData(connection, "{\"busqueda\": %s}", resultado.c_str());
+	//responderBusqueda(connection, resultado);
 }
 
 void Metadata::busquedaExtension(mg_connection* connection, string user) {
 	string extensionABuscar = getVar(connection, "extension");
 	string resultado = manejadorArchYMet->buscarPorExtension(user, extensionABuscar);
-	Logger::logInfo("Se envio el resultado de la busqueda por extension: " + extensionABuscar + " correctamente.");
-	mg_send_status(connection, CODESTATUS_SUCCESS);
-	mg_send_header(connection, contentType.c_str(), jsonType.c_str());
-	printfData(connection, "{\"busqueda\": %s}", resultado.c_str());
+	responderBusqueda(connection, resultado);
 }
 
 void Metadata::busquedaNombre(mg_connection* connection, string user) {
 	string nombreABuscar = getVar(connection, "nombre");
 	string resultado = manejadorArchYMet->buscarPorNombre(user, nombreABuscar);
-	Logger::logInfo("Se envio el resultado de la busqueda por nombre: " + nombreABuscar + " correctamente.");
-	mg_send_status(connection, CODESTATUS_SUCCESS);
-	mg_send_header(connection, contentType.c_str(), jsonType.c_str());
-	printfData(connection, "{\"busqueda\": %s}", resultado.c_str());
+	responderBusqueda(connection, resultado);
 }
 
 void Metadata::busquedaPropietario(mg_connection* connection, string user) {
 	string propiestarioABuscar = getVar(connection, "propietario");
 	string resultado = manejadorArchYMet->buscarPorPropietario(user, propiestarioABuscar);
-	Logger::logInfo("Se envio el resultado de la busqueda por propietario: " + propiestarioABuscar + " correctamente.");
+	responderBusqueda(connection, resultado);
+}
+
+void Metadata::responderBusqueda(mg_connection* connection, string resultado) {
+	Logger::logInfo("Se envio el resultado de la busqueda correctamente.");
 	mg_send_status(connection, CODESTATUS_SUCCESS);
 	mg_send_header(connection, contentType.c_str(), jsonType.c_str());
 	printfData(connection, "{\"busqueda\": %s}", resultado.c_str());
@@ -83,6 +78,9 @@ mg_result Metadata::GETHandler (mg_connection* connection) {
 			if (busqueda == "extension") 	busquedaExtension(connection, user);
 			if (busqueda == "nombre") 		busquedaNombre(connection, user);
 			if (busqueda == "propietario") 	busquedaPropietario(connection, user);
+			//Si la busqueda no es ninguna de estas, BAD REQUEST
+			string mensaje = "La busqueda que quiere realizar no existe.";
+			this->responderBadRequest(connection, mensaje);
 		} else {
 			this->GETMetadatos(connection, uris, user);
 		}
