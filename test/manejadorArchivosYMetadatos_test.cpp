@@ -976,7 +976,6 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaBuscarBienPorEtiquetasEnArchivosC
 	subirArchivoYAgregarPermiso(manejador, "pablo", filepath4, "saludo4", "txt", "juan", "hola santi", etiquetas4);
 
 	string jsonEstructura = manejador->buscarPorEtiqueta("juan", "chauchi");
-	Logger::logDebug(jsonEstructura);
 	map<string, string> busquedaEtiqueta = ParserJson::deserializarMapa(jsonEstructura);
 
 	EXPECT_FALSE(busquedaEtiqueta.count(filepath) > 0); // no existe en el mapa
