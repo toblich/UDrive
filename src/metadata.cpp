@@ -22,29 +22,25 @@ void Metadata::GETMetadatos(mg_connection* connection, vector<string> uris, stri
 	}
 }
 
-void Metadata::busquedaEtiqueta(mg_connection* connection, string user) {
+void Metadata::busquedaEtiqueta(mg_connection* connection, string user, string etiqueta) {
 	//TODO: queda la version para buscar de a una etiqueta por vez
 	//despues si termina siendo una lista hay que ver como cambiarlo.
-	string etiquetaABuscar = getVar(connection, "etiqueta");
-	string resultado = manejadorArchYMet->buscarPorEtiqueta(user, etiquetaABuscar);
+	string resultado = manejadorArchYMet->buscarPorEtiqueta(user, etiqueta);
 	responderBusqueda(connection, resultado);
 }
 
-void Metadata::busquedaExtension(mg_connection* connection, string user) {
-	string extensionABuscar = getVar(connection, "extension");
-	string resultado = manejadorArchYMet->buscarPorExtension(user, extensionABuscar);
+void Metadata::busquedaExtension(mg_connection* connection, string user, string extension) {
+	string resultado = manejadorArchYMet->buscarPorExtension(user, extension);
 	responderBusqueda(connection, resultado);
 }
 
-void Metadata::busquedaNombre(mg_connection* connection, string user) {
-	string nombreABuscar = getVar(connection, "nombre");
-	string resultado = manejadorArchYMet->buscarPorNombre(user, nombreABuscar);
+void Metadata::busquedaNombre(mg_connection* connection, string user, string nombre) {
+	string resultado = manejadorArchYMet->buscarPorNombre(user, nombre);
 	responderBusqueda(connection, resultado);
 }
 
-void Metadata::busquedaPropietario(mg_connection* connection, string user) {
-	string propiestarioABuscar = getVar(connection, "propietario");
-	string resultado = manejadorArchYMet->buscarPorPropietario(user, propiestarioABuscar);
+void Metadata::busquedaPropietario(mg_connection* connection, string user, string propietario) {
+	string resultado = manejadorArchYMet->buscarPorPropietario(user, propietario);
 	responderBusqueda(connection, resultado);
 }
 
@@ -67,21 +63,22 @@ mg_result Metadata::GETHandler (mg_connection* connection) {
 	if (manejadorUs->autenticarToken(token, user)) {
 		Logger::logInfo("Se autenticó la sesión correctamente.");
 
-		string busqueda = getVar(connection, "busqueda");
-		Logger::logInfo("Se obtuvo la variable busqueda con valor: " + busqueda);
-		if (busqueda != ""){
-			//TODO: No se como hacer un map o algo que dependiendo el tipo de busqueda mapee a la funcion.
-			//Hago 4 ifs por ahora
-			if (busqueda == "etiqueta") 	busquedaEtiqueta(connection, user);
-			if (busqueda == "extension") 	busquedaExtension(connection, user);
-			if (busqueda == "nombre") 		busquedaNombre(connection, user);
-			if (busqueda == "propietario") 	busquedaPropietario(connection, user);
-			//Si la busqueda no es ninguna de estas, BAD REQUEST
-			string mensaje = "La busqueda que quiere realizar no existe.";
-			this->responderBadRequest(connection, mensaje);
-		} else {
-			this->GETMetadatos(connection, uris, user);
-		}
+		string etiqueta = getVar(connection, "etiqueta");
+		Logger::logInfo("Se obtuvo la variable etiqueta con valor: " + etiqueta);
+		string extension = getVar(connection, "extension");
+		Logger::logInfo("Se obtuvo la variable extension con valor: " + extension);
+		string nombre = getVar(connection, "nombre");
+		Logger::logInfo("Se obtuvo la variable nombre con valor: " + nombre);
+		string propietario = getVar(connection, "propietario");
+		Logger::logInfo("Se obtuvo la variable propietario con valor: " + propietario);
+
+		//Solo se puede realizar de a una busqueda por vez.
+		if 		(etiqueta != "") 	busquedaEtiqueta(connection, user, etiqueta);
+		else if (extension != "") 	busquedaExtension(connection, user, extension);
+		else if (nombre != "") 		busquedaNombre(connection, user, nombre);
+		else if (propietario != "") busquedaPropietario(connection, user, propietario);
+		//Si no es ninguna de las busquedas estoy pidiendo los metadatos de algun archivo.
+		else 						GETMetadatos(connection, uris, user);
 	} else {
 		this->responderAutenticacionFallida(connection);
 	}
