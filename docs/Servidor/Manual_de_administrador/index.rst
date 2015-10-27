@@ -6,9 +6,8 @@ Contenido:
 .. toctree::
    :maxdepth: 2
 
-   seccion1
-   seccion2
-   etc
+   docker
+   manual
 
 
 Indices y tablas
