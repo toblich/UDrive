@@ -8,6 +8,44 @@ Profile::Profile (ManejadorDeUsuarios* manejadorUsuarios, ManejadorArchivosYMeta
 Profile::~Profile () {
 }
 
+void Profile::enviarUsuariosCon(mg_connection* connection, string nombre){
+	string resultado = manejadorUs->buscarUsuariosCon(nombre);
+	Logger::logInfo("Se envio el resultado de la busqueda de usuarios correctamente.");
+	mg_send_status(connection, CODESTATUS_SUCCESS);
+	mg_send_header(connection, contentType.c_str(), jsonType.c_str());
+	printfData(connection, "{\"busqueda\": %s}", resultado.c_str());
+}
+
+void Profile::enviarFotoPerfil(mg_connection* connection, string filePath, string user){
+	string filePathCompleto = manejadorAyM->descargarArchivo(user, filePath);
+	if (filePathCompleto != "") {
+		if (sendFile(connection, filePathCompleto)) {
+			string mensaje = "Se descargó el archivo: " + filePathCompleto + " correctamente.";
+			this->responderSucces(connection, mensaje);
+		} else {
+			string mensaje = "ERROR, no se pudo descargar el archivo: " + filePathCompleto;
+			this->responderInternalServerError(connection, mensaje);
+		}
+	} else {
+		string mensaje = "Path inválido, no se encontró el archivo: " + filePathCompleto;
+		this->responderResourceNotFound(connection, mensaje);
+	}
+}
+
+void Profile::enviarPerfil(mg_connection* connection, string userPerfil){
+	string perfil = manejadorUs->getPerfil(userPerfil);
+	if (perfil != "") {
+		Logger::logInfo("Se envió el perfil correctamente.");
+		mg_send_status(connection, CODESTATUS_SUCCESS);
+		mg_send_header(connection, contentType.c_str(), jsonType.c_str());
+		printfData(connection, "{\"perfil\": %s}", perfil.c_str());
+	} else {
+		string mensaje = "El perfil al que se quizo acceder no existe, o bien el usuario no existe.";
+		this->responderResourceNotFound(connection, mensaje);
+	}
+}
+
+
 mg_result Profile::GETHandler (mg_connection* connection) {
 	string uri = string(connection->uri);
 	vector<string> uris = ParserURI::parsear(uri, '/');
@@ -16,43 +54,27 @@ mg_result Profile::GETHandler (mg_connection* connection) {
 	Logger::logInfo("Se obtuvo la variable token con valor: " + token);
 	string user = getVar(connection, "user");
 	Logger::logInfo("Se obtuvo la variable user con valor: " + user);
+	string nombre = getVar(connection, "busqueda");
+	Logger::logInfo("Se obtuvo la variable busqueda con valor: " + nombre);
 
-	if (uris.size() != 2 and uris.size() !=3){
-		string mensaje = "El recurso al que se quiso acceder no existe.";
+	if (uris.size() > 3){
+		string mensaje = "El recurso al que quiere acceder es invalido.";
 		this->responderBadRequest(connection, mensaje);
-		return MG_TRUE;
 	}
+
 	if (manejadorUs->autenticarToken(token, user)) {
 		Logger::logInfo("Se autenticó la sesión correctamente.");
 
+		if (nombre != "")	enviarUsuariosCon(connection, nombre);
+
 		//Si uris[1] == ^fotos se quiere descargar una foto de perfil
-		if (uris[1] == FOTOS){
+		else if (uris[1] == FOTOS){
 			string filePath = getFilepathFrom(uris);
-			string filePathCompleto = manejadorAyM->descargarArchivo(user, filePath);
-			if (filePathCompleto != "") {
-				if (sendFile(connection, filePathCompleto)) {
-					string mensaje = "Se descargó el archivo: " + filePathCompleto + " correctamente.";
-					this->responderSucces(connection, mensaje);
-				} else {
-					string mensaje = "ERROR, no se pudo descargar el archivo: " + filePathCompleto;
-					this->responderInternalServerError(connection, mensaje);
-				}
-			} else {
-				string mensaje = "Path inválido, no se encontró el archivo: " + filePathCompleto;
-				this->responderResourceNotFound(connection, mensaje);
-			}
+			enviarFotoPerfil(connection, filePath, user);
+
 		} else { //Si no se quiere descargar el perfil de un usuario
 			string userPerfil = uris[1];
-			string perfil = manejadorUs->getPerfil(userPerfil);
-			if (perfil != "") {
-				Logger::logInfo("Se envió el perfil correctamente.");
-				mg_send_status(connection, CODESTATUS_SUCCESS);
-				mg_send_header(connection, contentType.c_str(), jsonType.c_str());
-				printfData(connection, "{\"perfil\": %s}", perfil.c_str());
-			} else {
-				string mensaje = "El perfil al que se quizo acceder no existe, o bien el usuario no existe.";
-				this->responderResourceNotFound(connection, mensaje);
-			}
+			enviarPerfil(connection, userPerfil);
 		}
 	} else {
 		this->responderAutenticacionFallida(connection);
