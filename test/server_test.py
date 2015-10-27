@@ -370,6 +370,51 @@ class ServerTest(unittest.TestCase):
 		self.assertEquals(r.status_code, BAD_REQUEST)
 
 
+	def test_DeberiaFiltrarBienLosUsuariosDadoUnString(self):
+		#Primero registro tres usuarios
+		username1 = "hola"
+		password = "masdeocholetras"
+		token = registrarYLoguear(username1, password, PERFIL)
+		username2 = "como"
+		token2 = registrarYLoguear(username2, password, PERFIL)
+		username3 = "estas"
+		token3 = registrarYLoguear(username3, password, PERFIL)
+		username4 = "COmi"
+		token4 = registrarYLoguear(username4, password, PERFIL)
+
+		#Busco usuario que tengan la letra a
+		r = requests.get(PROFILE, data={"user": username1, "token": token, "busqueda": "a"})
+		self.assertEquals(r.status_code, SUCCESS)
+		resultado = r.json().get("busqueda")
+		usuariosMacheados = resultado.get("usuarios").split(RESERVED_STR)
+		self.assertEquals(usuariosMacheados[0], username1)
+		self.assertEquals(usuariosMacheados[1], username3)
+
+		#Busco usuario que tengan la letra o
+		t = requests.get(PROFILE, data={"user": username1, "token": token, "busqueda": "o"})
+		self.assertEquals(t.status_code, SUCCESS)
+		resultado = t.json().get("busqueda")
+		usuariosMacheados = resultado.get("usuarios").split(RESERVED_STR)
+		self.assertEquals(usuariosMacheados[0], username1)
+		self.assertEquals(usuariosMacheados[1], username2)
+		self.assertEquals(usuariosMacheados[2], username4)
+
+		#Busco usuario que tengan la letra u
+		u = requests.get(PROFILE, data={"user": username1, "token": token, "busqueda": "u"})
+		self.assertEquals(u.status_code, SUCCESS)
+		resultado = u.json().get("busqueda")
+		usuariosMacheados = resultado.get("usuarios").split(RESERVED_STR)
+		self.assertEquals(usuariosMacheados, [''])
+
+		#Busco usuario que tengan com
+		s = requests.get(PROFILE, data={"user": username1, "token": token, "busqueda": "com"})
+		self.assertEquals(s.status_code, SUCCESS)
+		resultado = s.json().get("busqueda")
+		usuariosMacheados = resultado.get("usuarios").split(RESERVED_STR)
+		self.assertEquals(usuariosMacheados[0], username2)
+		self.assertEquals(usuariosMacheados[1], username4)
+
+
 if __name__ == '__main__':
 	definirConstantesGlobales()
 	unittest.main()

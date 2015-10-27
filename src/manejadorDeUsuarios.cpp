@@ -130,7 +130,7 @@ string ManejadorDeUsuarios::usuariosConSubstring (const string& substring) {
 		string usuarioMinuscula(usuario);
 		transform(usuarioMinuscula.begin(), usuarioMinuscula.end(), usuarioMinuscula.begin(), ::tolower);
 		if (usuarioMinuscula.find(substringMinuscula) != string::npos)
-			usuariosConSubstring += (RESERVED_STR + usuario);
+			usuariosConSubstring += (usuariosConSubstring != "") ? (RESERVED_STR + usuario) : usuario;
 	}
 	return usuariosConSubstring;
 }
