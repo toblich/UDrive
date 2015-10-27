@@ -245,6 +245,8 @@ bool ManejadorArchivosYMetadatos::actualizarArchivo (string username, string fil
 string ManejadorArchivosYMetadatos::consultarMetadatosArchivo (string username, string filepath) {
 	if (not validador.verificarPermisos(username, filepath))
 		return "";
+	if (filepath.find(TRASH) != string::npos)	// Los metadatos de la papelera son inaccesibles
+		return "";
 
 	if (not dbMetadatos->contains(filepath)) {
 		Logger::logWarn("Se quiso consultar los metadatos del archivo " + filepath + " pero este no existe.");
