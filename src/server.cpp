@@ -25,19 +25,34 @@ Server::Server (string listeningPort, BD* perfiles, BD* sesiones, BD* passwords,
 	mapaURI.insert(pair<string, RealizadorDeEventos*>("folder", new Folder(manejadorUsuarios, manejadorAYM)));
 
 	//Server
-	struct mg_server* primerServer = mg_create_server((void *) this, Server::mgEventHandler);
+	mg_server* primerServer = mg_create_server((void *) this, Server::mgEventHandler);
 	mg_set_option(primerServer, "listening_port", listeningPort.c_str());
-	mg_set_option(primerServer, "document_root", ".");
+//	mg_set_option(primerServer, "document_root", ".");
+	servers.push_back(primerServer);
 	for (int i = 1; i < 2; i++) {
-		struct mg_server* server = mg_create_server((void *) this, Server::mgEventHandler);
+		mg_server* server = mg_create_server((void *) this, Server::mgEventHandler);
 		mg_copy_listeners(primerServer, server);
-		mg_start_thread(pollServer, (void*)server);
+//		mg_set_option(server, "document_root", ".");
+		servers.push_back(server);
+	}
+	for (auto &server : servers) {
+		threads.push_back(new thread(pollServer, server));
+//		mg_start_thread(serv_func, (void*) server);
 	}
 }
 
 Server::~Server () {
+	Logger::logDebug("DESTRUCTOR");
 	//Server
-//	mg_destroy_server(&server);
+//	for (auto &thread : threads) {
+//		thread->join();
+//		delete thread;
+//		cout << "Se cerro un thread" << endl;
+//	}
+//	for (auto &server : servers) {
+//		Logger::logDebug("Se destuye un servidor");
+//		mg_destroy_server(&server);
+//	}
 
 	//TODO: Sacar estas instrucciones para que despues persistan los datos.
 	perfiles->deleteBD(); //
@@ -60,6 +75,20 @@ Server::~Server () {
 	delete mapaURI.at("file");
 	delete mapaURI.at("metadata");
 	delete mapaURI.at("folder");
+	Logger::logDebug("FIN DESTRUCTOR");
+}
+
+void Server::close() {
+	running = false;
+	for (auto &thread : threads) {
+		thread->join();
+		delete thread;
+		cout << "Se cerro un thread" << endl;
+	}
+	for (auto &server : servers) {
+		Logger::logDebug("Se destuye un servidor");
+		mg_destroy_server(&server);
+	}
 }
 
 int Server::mgEventHandler (mg_connection* connection, mg_event event) {
@@ -92,11 +121,24 @@ mg_result Server::closeHandler (mg_connection* connection) {
 	return MG_TRUE;
 }
 
-void *Server::pollServer (void* server) {
+void Server::pollServer (mg_server* server) {
 	while (running) {
-		mg_poll_server((struct mg_server*) server, POLL_MILLISEC);
+		mg_poll_server(server, POLL_MILLISEC);
 	}
+}
+
+void* Server::serv_func(void* server) {
+	pollServer((mg_server*) server);
 	return NULL;
+}
+
+
+size_t sarasa(mg_connection* connection, const char* format, ...) {
+	va_list ap;
+	va_start(ap, format);
+	size_t ret = mg_vprintf_data(connection, format, ap);
+	va_end(ap);
+	return ret;
 }
 
 mg_result Server::requestHandler (mg_connection* connection) {
@@ -105,8 +147,12 @@ mg_result Server::requestHandler (mg_connection* connection) {
 
 	if (uris.size() > 0) {
 		if (uris[0] == "close") {
+//			mg_printf_data(connection, "Se cerro el servidor\n");
+			mg_send_status(connection, 200);
+			mg_send_header(connection, "Content-Type", "text/plain");
+			sarasa(connection, "Se cerro el servidor\n");
+			Logger::logDebug("CLOSE");
 			running = false;
-			mg_printf_data(connection, "Se cerro el servidor\n");
 			return MG_TRUE;
 		}
 		try {

@@ -79,7 +79,7 @@ class ServerTest(unittest.TestCase):
 		if exists("FileSystem"):
 			rmtree("FileSystem")
 		self.serverProcess = Popen(["./udrive", "&"])
-		sleep(0.1)
+		sleep(0.01)
 
 
 	def tearDown(self):

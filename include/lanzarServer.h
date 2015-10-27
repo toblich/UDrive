@@ -17,10 +17,12 @@ void lanzarServer(BD* perfiles, BD* sesiones, BD* passwords, BD* metadatos) {
 	Server server(puerto, perfiles, sesiones, passwords, metadatos);
 
 	while (server.isRunning()) {
-		sleep(1);
+		sleep(0.1);
 	}
 
+	Logger::logDebug("Cerrando servidor");
 	cout << "Cerrando servidor" << endl;
+	server.close();
 }
 
 #endif /* LANZAR_SERVER */

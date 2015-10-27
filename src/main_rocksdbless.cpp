@@ -17,5 +17,7 @@ int main(int argc, char** argv) {
 
 	lanzarServer(perfiles, sesiones, passwords, metadatos);
 
+	Logger::logDebug("FIN MAIN");
+
 	return 0;
 }
