@@ -1,4 +1,4 @@
-Bienvenido a la documentacion tecnica del servidor de UDrive
+Bienvenido a la documentación técnica del servidor de UDrive
 =============================================================
 
 Contenido:
@@ -7,15 +7,15 @@ Contenido:
    :maxdepth: 2
 
    ambiente_de_desarrollo
-   librerias_y_compilacion
+   api_rest
    disenio
    clases
    codigo
-   api_rest
+   librerias_y_compilacion
    pruebas
 
 
-Indices y tablas
+Índices y tablas
 ==================
 
 * :ref:`genindex`

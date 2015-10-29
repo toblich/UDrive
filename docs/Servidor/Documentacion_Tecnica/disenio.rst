@@ -1,4 +1,4 @@
-Documentacion de la arquitectura y diseño
+Arquitectura y diseño
 =========================================
 
 
