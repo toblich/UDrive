@@ -86,7 +86,7 @@ class ServerTest(unittest.TestCase):
 		if exists("FileSystem"):
 			rmtree("FileSystem")
 		self.serverProcess = Popen(["./udrive", "&"])
-		sleep(0.1)
+		sleep(0.01)
 
 
 	def tearDown(self):
@@ -376,19 +376,11 @@ class ServerTest(unittest.TestCase):
 		password = "masdeocholetras"
 		token = registrarYLoguear(username1, password, PERFIL)
 		username2 = "como"
-		token2 = registrarYLoguear(username2, password, PERFIL)
+		registrarYLoguear(username2, password, PERFIL)
 		username3 = "estas"
-		token3 = registrarYLoguear(username3, password, PERFIL)
+		registrarYLoguear(username3, password, PERFIL)
 		username4 = "COmi"
-		token4 = registrarYLoguear(username4, password, PERFIL)
-
-		#Busco usuario que tengan la letra a
-		r = requests.get(PROFILE, data={"user": username1, "token": token, "busqueda": "a"})
-		self.assertEquals(r.status_code, SUCCESS)
-		resultado = r.json().get("busqueda")
-		usuariosMacheados = resultado.get("usuarios").split(RESERVED_STR)
-		self.assertEquals(usuariosMacheados[0], username1)
-		self.assertEquals(usuariosMacheados[1], username3)
+		registrarYLoguear(username4, password, PERFIL)
 
 		#Busco usuario que tengan la letra o
 		t = requests.get(PROFILE, data={"user": username1, "token": token, "busqueda": "o"})
@@ -413,6 +405,49 @@ class ServerTest(unittest.TestCase):
 		usuariosMacheados = resultado.get("usuarios").split(RESERVED_STR)
 		self.assertEquals(usuariosMacheados[0], username2)
 		self.assertEquals(usuariosMacheados[1], username4)
+
+		#Trato de buscar usuarios que tengan string vacio
+		r = requests.get(PROFILE, data={"user": username1, "token": token, "busqueda": ""})
+		self.assertEquals(r.status_code, BAD_REQUEST)
+
+
+	def test_deberiaBuscarBienArchivosPorExtensionYNombre(self):
+		token = registrarYLoguearUser(USER_SIMPLE)
+		
+		TXT_FILENAME_ROOT = 'CMakeCache.txt'
+		JPG_FILENAME_ROOT = 'default.jpg'
+		TXT_FILENAME_SUBFOLDER = 'files/log.txt'
+
+		requests.put(FILE + USER_SIMPLE["user"] + "/" + TXT_FILENAME_ROOT, \
+			files={'file': open(TXT_FILENAME_ROOT, 'rb'), "token": token, "user": USER_SIMPLE["user"]})
+		requests.put(FILE + USER_SIMPLE["user"] + "/" + JPG_FILENAME_ROOT, \
+			files={'file': open(JPG_FILENAME_ROOT, 'rb'), "token": token, "user": USER_SIMPLE["user"]})
+		requests.put(FILE + USER_SIMPLE["user"] + "/" + TXT_FILENAME_SUBFOLDER, \
+			files={'file': open(TXT_FILENAME_SUBFOLDER, 'rb'), "token": token, "user": USER_SIMPLE["user"]})
+
+		# Busco por extension txt
+		r = requests.get(METADATA, data={"user": USER_SIMPLE["user"], "token": token, "extension": "txt"})
+		self.assertEquals(r.status_code, SUCCESS)
+		resultado = r.json().get("busqueda")
+		esperado = { USER_SIMPLE["user"] +"/"+ TXT_FILENAME_ROOT : TXT_FILENAME_ROOT, \
+			USER_SIMPLE["user"] + "/" + TXT_FILENAME_SUBFOLDER : TXT_FILENAME_SUBFOLDER.split("/")[-1]}	# CMakeCache.txt y el log
+		self.assertDictEqual(resultado, esperado)
+
+		# Busco por nombre con g -> no busca sobre la extension, asi que no toma al jpg
+		s = requests.get(METADATA, data={"user": USER_SIMPLE["user"], "token": token, "nombre": "g"})
+		self.assertEquals(s.status_code, SUCCESS)
+		resultado = s.json().get("busqueda")
+		esperado = { USER_SIMPLE["user"] + "/" + TXT_FILENAME_SUBFOLDER : TXT_FILENAME_SUBFOLDER.split("/")[-1]} # el log
+		self.assertDictEqual(resultado, esperado)
+
+		# Busco por nombre con s -> no busca sobre el path (las carpetas), asi que no toma al log
+		t = requests.get(METADATA, data={"user": USER_SIMPLE["user"], "token": token, "nombre": "s"})
+		self.assertEquals(t.status_code, SUCCESS)
+		resultado = t.json().get("busqueda")
+		esperado = { } # ninguno
+		self.assertDictEqual(resultado, esperado)
+
+
 
 
 if __name__ == '__main__':

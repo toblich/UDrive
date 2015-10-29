@@ -90,6 +90,7 @@ void Server::pollServer (int milliseconds) {
 
 mg_result Server::requestHandler (mg_connection* connection) {
 	string uri = string(connection->uri);
+	Logger::logTrace("Se accedio a la URI: " + uri);
 	vector<string> uris = ParserURI::parsear(uri, '/');
 
 	if (uris.size() > 0) {
