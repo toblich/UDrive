@@ -65,9 +65,9 @@ bool Validador::verificarPermisos (string username, string path) {
 	return false;
 }
 
-string Validador::obtenerNumeroSecuencia(string pathFileSystem, string propietario, string pathSinUsernameConHash) {
+string Validador::obtenerNumeroSecuencia(string pathFileSystem, string propietario, string pathSinUsernameConReserved) {
 	string comando = "ls '" + pathFileSystem + "/" + propietario + "/" + TRASH + "' -1 | grep \"^" +
-			pathSinUsernameConHash + RESERVED_REGEX + "[0-9]\\+$\" | rev | cut -d " + RESERVED_REGEX +
+			pathSinUsernameConReserved + RESERVED_REGEX + "[0-9]\\+$\" | rev | cut -d " + RESERVED_REGEX +
 			" -f 1 | rev | sort -nr | head -n1";
 	string nuevoNroSecuencia;
 	FILE *fp;
