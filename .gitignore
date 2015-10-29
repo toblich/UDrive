@@ -47,3 +47,5 @@ fileSystem/
 passwords/
 perfiles/
 sesiones/
+*_build/
+docs/doxygen

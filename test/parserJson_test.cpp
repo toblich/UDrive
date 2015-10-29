@@ -216,7 +216,7 @@ TEST(ParserJsonTest, deberiaDeserializarBienUltimaUbicacionInexistenteMetadatoUs
 }
 
 TEST(ParserJsonTest, deberiaDeserializarBienUsernameCorrectoMetadatoSesion){
-	MetadatosSesion pruebaSes = ParserJson::deserializarMetadatoSesion(jsonSesOK);
+	MetadatoSesion pruebaSes = ParserJson::deserializarMetadatoSesion(jsonSesOK);
 	EXPECT_EQ("pancheitor", pruebaSes.username);
 }
 
@@ -225,7 +225,7 @@ TEST(ParserJsonTest, deberiaDeserializarBienUsernameInexistenteMetadatoSesion){
 			"\t\"password\" : \"pancho123\",\n"
 			"\t\"token\" : \"asg371ns812ssk\"\n"
 			"}";
-	MetadatosSesion pruebaSes = ParserJson::deserializarMetadatoSesion(jsonSes);
+	MetadatoSesion pruebaSes = ParserJson::deserializarMetadatoSesion(jsonSes);
 	EXPECT_EQ("", pruebaSes.username);
 }
 
@@ -280,14 +280,14 @@ TEST(ParserJsonTest, deberiaObtenerLoMismoAlSerializarYDeserializarMetadatoUsuar
 }
 
 TEST(ParserJsonTest, deberiaObtenerLoMismoAlSerializarYDeserializarMetadatoSesion){
-	MetadatosSesion original = {
+	MetadatoSesion original = {
 			"pancho",
 			"tallerdos",
 			"902430791097619746"
 	};
 
 	string json = ParserJson::serializarMetadatoSesion(original);
-	MetadatosSesion deserializado = ParserJson::deserializarMetadatoSesion(json);
+	MetadatoSesion deserializado = ParserJson::deserializarMetadatoSesion(json);
 
 	EXPECT_EQ(original.username, deserializado.username);
 	EXPECT_EQ(original.password, deserializado.password);

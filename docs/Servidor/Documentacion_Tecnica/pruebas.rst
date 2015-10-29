@@ -1,2 +1,2 @@
-Documentacion de las pruebas
+Pruebas
 ============================
