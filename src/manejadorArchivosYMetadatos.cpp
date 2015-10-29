@@ -1,15 +1,11 @@
 #include "manejadorArchivosYMetadatos.h"
 
-// TODO: LOGUEAR!!!!!
-// TODO: Ver lo de la actualizacion de metadatos (ultima modificacion, etc)
-// TODO: El username que se recibe en la mayoria de los metodos es el del que pide. Luego, el path tiene el path posta. Por ejemplo:
-//		 username: pablo		path: tobi/hola/asd.txt
-//		 Me deberia fijar si username es igual al primero del path. De ser asi, tiene los permisos seguro.
-//		 Sino, como en este caso, deberia fijarme si pablo tiene permisos para acceder a ese path mediante lo que habra en la DB
-//		 bajo la key '#permisos/pablo' y cuyo value sera algo del estilo 'pancho/datos/pepe.jpg#tobi/hola/asd.txt#santi/chau.txt'
-//		 lo cual habra que parsear y ver si esta o no.
-//
-//		 REVISAR Y TESTEAR!!!
+// 		El username que se recibe en la mayoria de los metodos es el del que pide. Luego, el path tiene el path posta. Por ejemplo:
+//		username: pablo		path: tobi/hola/asd.txt
+//		Me deberia fijar si username es igual al primero del path. De ser asi, tiene los permisos seguro.
+//		Sino, como en este caso, deberia fijarme si pablo tiene permisos para acceder a ese path mediante lo que habra en la DB
+//		bajo la key '#permisos/pablo' y cuyo value sera algo del estilo 'pancho/datos/pepe.jpg#tobi/hola/asd.txt#santi/chau.txt'
+//		lo cual habra que parsear y ver si esta o no.
 
 ManejadorArchivosYMetadatos::ManejadorArchivosYMetadatos (BD* dbMetadatos) :
 		ManejadorArchivosYMetadatos(dbMetadatos, DEFAULT_FS) {
@@ -495,7 +491,7 @@ bool ManejadorArchivosYMetadatos::mandarArchivoATrash(string username, string fi
 	vector<string> directorios = ParserURI::parsear(filepath, '/');
 	string jsonMetadatos = dbMetadatos->get(filepath);
 	MetadatoArchivo metadato = ParserJson::deserializarMetadatoArchivo(jsonMetadatos);
-	string pathSinUsernameConHash = ParserURI::join(directorios, RESERVED_CHAR, 1, directorios.size());
+	string pathSinUsernameConReserved = ParserURI::join(directorios, RESERVED_CHAR, 1, directorios.size());
 
 	if (metadato.propietario != directorios.front()) {	// DEBUG: no deberia suceder nunca
 		cout << "El propietario del metadato no coincide con la carpeta del FileSystem. EXIT." << endl;
@@ -503,8 +499,8 @@ bool ManejadorArchivosYMetadatos::mandarArchivoATrash(string username, string fi
 		exit(1);
 	}
 
-	string pathCompletoPapelera = metadato.propietario + "/" + TRASH + "/" + pathSinUsernameConHash;
-	string nroSecuencia = this->validador.obtenerNumeroSecuencia(this->pathFileSystem, metadato.propietario, pathSinUsernameConHash);
+	string pathCompletoPapelera = metadato.propietario + "/" + TRASH + "/" + pathSinUsernameConReserved;
+	string nroSecuencia = this->validador.obtenerNumeroSecuencia(this->pathFileSystem, metadato.propietario, pathSinUsernameConReserved);
 	pathCompletoPapelera += RESERVED_CHAR + nroSecuencia;
 	string pathCompletoPapeleraConFS = this->pathFileSystem + "/" + pathCompletoPapelera;
 
