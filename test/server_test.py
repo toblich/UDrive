@@ -83,8 +83,7 @@ class ServerTest(unittest.TestCase):
 
 
 	def tearDown(self):
-		requests.get(BASE + "close")
-		self.serverProcess.wait()
+		self.serverProcess.terminate()
 
 
 	def test_registroYLogueoValido(self):

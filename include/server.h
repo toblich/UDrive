@@ -24,6 +24,7 @@
 using namespace std;
 
 #define POLL_MILLISEC 1
+#define CANT_THREADS 10
 
 class Server {
 public:
@@ -34,9 +35,8 @@ public:
 	static int mgEventHandler(mg_connection *connection, mg_event event);
 	static void pollServer(mg_server* server);
 	static void* serv_func(void* server);
-//	const char* getListeningPort() { return mg_get_option(server, "listening_port"); }
 	bool isRunning() { return running; }
-	void close();
+	static void close(int signal) { running = false; };
 
 private:
 	static bool running;

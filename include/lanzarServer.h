@@ -5,12 +5,16 @@
 #include <string>
 #include "bd.h"
 #include "server.h"
+#include <csignal>
 
 using namespace std;
 
 void lanzarServer(BD* perfiles, BD* sesiones, BD* passwords, BD* metadatos) {
 	Logger logger;
 	logger.escribirHoraEnElLog();
+
+	signal(SIGTERM, Server::close);
+	signal(SIGINT, Server::close);
 
 	string puerto = "8080";
 	cout << "Lanzando servidor en el puerto " << puerto << endl;
@@ -22,7 +26,8 @@ void lanzarServer(BD* perfiles, BD* sesiones, BD* passwords, BD* metadatos) {
 
 	Logger::logDebug("Cerrando servidor");
 	cout << "Cerrando servidor" << endl;
-	server.close();
 }
+
+
 
 #endif /* LANZAR_SERVER */
