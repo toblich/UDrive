@@ -125,6 +125,11 @@ string ParserJson::serializarMapa(map<string, string>& mapa){
 		json[it->first] = it->second;
 	}
 
+	if (mapa.empty()) {
+		Logger::logWarn("Se quiso serializar un mapa vacio.");
+		return "{}";
+	}
+
 	string serializado = json.toStyledString();
 	return serializado;
 }
@@ -251,4 +256,10 @@ std::map<std::string, std::string> ParserJson::deserializarMapa(std::string json
 		logger.loggear(error, WARN);
 	}
 	return mapa;
+}
+
+string ParserJson::estructurasMerge(map<string, string> estructuraPermisos, string jsonEstructuraFileSystem) {
+	map<string, string> estructuraFileSystem = ParserJson::deserializarMapa(jsonEstructuraFileSystem);
+	estructuraFileSystem.insert(estructuraPermisos.begin(), estructuraPermisos.end());
+	return ParserJson::serializarMapa(estructuraFileSystem);
 }

@@ -143,3 +143,14 @@ TEST_F(ManejadorDeUsuariosTest, noDeberiaCrearUsuariosConEmailsInvalidos) {
 	}
 }
 
+TEST_F(ManejadorDeUsuariosTest, deberiaObtenerTodosLosUsuariosQueContienenSubstring) {
+	manejador->registrarUsuario("dos", password, perfil);	//"tobi" ya esta registrado
+	manejador->registrarUsuario("tres", password, perfil);
+
+	string jsonUsuariosConO = manejador->buscarUsuariosCon("o");
+	string users = ParserJson::deserializarMapa(jsonUsuariosConO).at("usuarios");
+	vector<string> usuarios = ParserURI::parsear(users, RESERVED_CHAR);
+	EXPECT_EQ(2, usuarios.size());
+	EXPECT_EQ("tobi", usuarios.at(0));
+	EXPECT_EQ("dos", usuarios.at(1));
+}

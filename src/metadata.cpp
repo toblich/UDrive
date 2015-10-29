@@ -12,7 +12,7 @@ void Metadata::GETMetadatos(mg_connection* connection, vector<string> uris, stri
 	string filepath = getFilepathFrom(uris);
 	string metadatosArch = manejadorArchYMet->consultarMetadatosArchivo(user, filepath);
 	if (metadatosArch != "") {
-		this->logInfo("Se enviaron los metadatos del archivo: " + filepath + " correctamente.");
+		Logger::logInfo("Se enviaron los metadatos del archivo: " + filepath + " correctamente.");
 		mg_send_status(connection, CODESTATUS_SUCCESS);
 		mg_send_header(connection, contentType.c_str(), jsonType.c_str());
 		printfData(connection, "{\"metadatos\": %s}", metadatosArch.c_str());
@@ -22,45 +22,63 @@ void Metadata::GETMetadatos(mg_connection* connection, vector<string> uris, stri
 	}
 }
 
-void Metadata::GETBusquedas(mg_connection* connection, vector<string> uris, string query) {
-	string path = getFilepathFrom(uris);
-	//TODO: queda esto para que haga algo pero falta implementar bien
+void Metadata::busquedaEtiqueta(mg_connection* connection, string user, string etiqueta) {
+	//TODO: queda la version para buscar de a una etiqueta por vez
+	//despues si termina siendo una lista hay que ver como cambiarlo.
+	string resultado = manejadorArchYMet->buscarPorEtiqueta(user, etiqueta);
+	responderBusqueda(connection, resultado);
+}
+
+void Metadata::busquedaExtension(mg_connection* connection, string user, string extension) {
+	string resultado = manejadorArchYMet->buscarPorExtension(user, extension);
+	responderBusqueda(connection, resultado);
+}
+
+void Metadata::busquedaNombre(mg_connection* connection, string user, string nombre) {
+	string resultado = manejadorArchYMet->buscarPorNombre(user, nombre);
+	responderBusqueda(connection, resultado);
+}
+
+void Metadata::busquedaPropietario(mg_connection* connection, string user, string propietario) {
+	string resultado = manejadorArchYMet->buscarPorPropietario(user, propietario);
+	responderBusqueda(connection, resultado);
+}
+
+void Metadata::responderBusqueda(mg_connection* connection, string resultado) {
+	Logger::logInfo("Se envio el resultado de la busqueda correctamente.");
 	mg_send_status(connection, CODESTATUS_SUCCESS);
 	mg_send_header(connection, contentType.c_str(), jsonType.c_str());
-	printfData(connection, "{\"success\": %s}", query.c_str());
-	//TODO: Ver a que funcion del manejar de archivos y metadatos llamar
-//	string busqueda = manejadorArchYMet->buscarArchivos(user, filepath, query);
-//	if (metadatosArch != "") {
-//		this->logInfo("Se enviaron los metadatos del archivo: " + filepath + " correctamente.");
-//		mg_send_status(connection, CODESTATUS_SUCCES);
-//		mg_send_header(connection, contentType.c_str(), jsonType.c_str());
-//		printfData(connection, "{\"metadatos\": %s}", metadatosArch.c_str());
-//	} else {
-//		string mensaje = "No se encontraron los metadatos del archivo: " + filepath;
-//		this->responderResourceNotFound(connection, mensaje);
-//	}
+	printfData(connection, "{\"busqueda\": %s}", resultado.c_str());
 }
 
 mg_result Metadata::GETHandler (mg_connection* connection) {
 	string uri = string(connection->uri);
 	vector<string> uris = ParserURI::parsear(uri, '/');
-	this->logInfo("Se parseó la uri correctamente.");
+	Logger::logInfo("Se parseó la uri correctamente.");
 	string token = getVar(connection, "token");
-	this->logInfo("Se obtuvo la variable token con valor: " + token);
+	Logger::logInfo("Se obtuvo la variable token con valor: " + token);
 	string user = getVar(connection, "user");
-	this->logInfo("Se obtuvo la variable user con valor: " + user);
+	Logger::logInfo("Se obtuvo la variable user con valor: " + user);
 
 	if (manejadorUs->autenticarToken(token, user)) {
-		this->logInfo("Se autenticó la sesión correctamente.");
+		Logger::logInfo("Se autenticó la sesión correctamente.");
 
-		if (connection->query_string != NULL){
-			string query = string(connection->query_string);
-			this->logInfo("Se obtuvo la query correctamente.");
-			this->GETBusquedas(connection, uris, query);
-		} else {
-			this->GETMetadatos(connection, uris, user);
-		}
+		string etiqueta = getVar(connection, "etiqueta");
+		Logger::logInfo("Se obtuvo la variable etiqueta con valor: " + etiqueta);
+		string extension = getVar(connection, "extension");
+		Logger::logInfo("Se obtuvo la variable extension con valor: " + extension);
+		string nombre = getVar(connection, "nombre");
+		Logger::logInfo("Se obtuvo la variable nombre con valor: " + nombre);
+		string propietario = getVar(connection, "propietario");
+		Logger::logInfo("Se obtuvo la variable propietario con valor: " + propietario);
 
+		//Solo se puede realizar de a una busqueda por vez.
+		if 		(etiqueta != "") 	busquedaEtiqueta(connection, user, etiqueta);
+		else if (extension != "") 	busquedaExtension(connection, user, extension);
+		else if (nombre != "") 		busquedaNombre(connection, user, nombre);
+		else if (propietario != "") busquedaPropietario(connection, user, propietario);
+		//Si no es ninguna de las busquedas estoy pidiendo los metadatos de algun archivo.
+		else 						GETMetadatos(connection, uris, user);
 	} else {
 		this->responderAutenticacionFallida(connection);
 	}
@@ -70,16 +88,16 @@ mg_result Metadata::GETHandler (mg_connection* connection) {
 mg_result Metadata::PUTHandler (mg_connection* connection) {
 	string uri = string(connection->uri);
 	vector<string> uris = ParserURI::parsear(uri, '/');
-	this->logInfo("Se parseó la uri correctamente.");
+	Logger::logInfo("Se parseó la uri correctamente.");
 	string token = getVar(connection, "token");
-	this->logInfo("Se obtuvo la variable token con valor: " + token);
+	Logger::logInfo("Se obtuvo la variable token con valor: " + token);
 	string user = getVar(connection, "user");
-	this->logInfo("Se obtuvo la variable user con valor: " + user);
+	Logger::logInfo("Se obtuvo la variable user con valor: " + user);
 	string nuevosMetadatos = getVar(connection, "metadatos");
-	this->logInfo("Se obtuvo la variable con los nuevos metadatos.");
+	Logger::logInfo("Se obtuvo la variable con los nuevos metadatos.");
 
 	if (manejadorUs->autenticarToken(token, user)) {
-		this->logInfo("Se autenticó la sesión correctamente.");
+		Logger::logInfo("Se autenticó la sesión correctamente.");
 		string filepath = getFilepathFrom(uris);
 		if (manejadorArchYMet->actualizarMetadatos(user, filepath, nuevosMetadatos)) {
 			string mensaje = "Se actualizaron los metadatos del archivo: " + filepath + " correctamente.";

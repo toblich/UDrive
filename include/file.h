@@ -21,6 +21,7 @@ private:
 	MetadatoArchivo extractMetadataFrom(const vector<string>& nombreYExtension,
 			const string& user, const vector<string>& uris);
 	void subirArchivo (const vector<string>& uris, const DatosArchivo& datosArch, const string& user, mg_connection* connection);
+	void actualizarUltimaUbicacion(string user, string latitud, string longitud);
 };
 
 #endif /* FILE_H_ */

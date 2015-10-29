@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include <regex>
 #include "bd.h"
+#include "parserURI.h"
 #include "parserJson.h"
 
 using std::string;
@@ -31,6 +32,7 @@ public:
 	string getPerfil(string username);
 	bool modifyPerfil(string username, string perfil);
 	bool esPerfilValido(const string& perfil);
+	string buscarUsuariosCon(const string& substring);
 
 private:
 	BD* perfiles;
@@ -40,8 +42,10 @@ private:
 	bool esCaracterInvalido(char c);
 	bool esUsernameValido(const string& username);
 	bool esPasswordValida(const string& password);
+	string usuariosConSubstring(const string& substring);
 
 	const string CHARS_INVALIDOS = "/ ~#?=&" + RESERVED_STR;
+	const string USERLIST = RESERVED_STR + "users";
 	const regex REGEX_NOMBRE = regex("^[ [:alpha:]]+$", std::regex_constants::ECMAScript);	 //TODO: ver si requiere aceptar tildes
 	const regex REGEX_EMAIL = regex("^[-_[:alnum:]]+@[[:alpha:]]+\\.([.[:alpha:]]+)+$");
 };

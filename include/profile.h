@@ -15,6 +15,10 @@ protected:
 	ManejadorDeUsuarios* manejadorUs;
 	ManejadorArchivosYMetadatos* manejadorAyM;
 
+
+	void enviarUsuariosCon(mg_connection* connection, string nombre);
+	void enviarFotoPerfil(mg_connection* connection, string filePath, string user);
+	void enviarPerfil(mg_connection* connection, string userPerfil);
 	mg_result GETHandler(mg_connection* connection);
 	mg_result PUTHandler(mg_connection* connection);
 	mg_result POSTHandler(mg_connection* connection);

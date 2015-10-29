@@ -9,11 +9,18 @@ from ast import literal_eval
 
 
 def definirConstantesGlobales():
+
+	global RESERVED_STR
+	RESERVED_STR = "!"
+
 	global FOLDER_TYPE
-	FOLDER_TYPE = "^folder"
+	FOLDER_TYPE = RESERVED_STR + "folder"
 
 	global TRASH_TYPE
-	TRASH_TYPE = "^trash/"
+	TRASH_TYPE = RESERVED_STR + "trash/"
+
+	global FOTOS_TYPE
+	FOTOS_TYPE = RESERVED_STR + "fotos/"
 
 	global BASE 
 	BASE = "http://localhost:8080/"
@@ -79,7 +86,7 @@ class ServerTest(unittest.TestCase):
 		if exists("FileSystem"):
 			rmtree("FileSystem")
 		self.serverProcess = Popen(["./udrive", "&"])
-		sleep(0.1)
+		sleep(0.01)
 
 
 	def tearDown(self):
@@ -132,11 +139,12 @@ class ServerTest(unittest.TestCase):
 		self.assertEquals(w.status_code, SUCCESS)
 
 
-	def test_perfilSubidoYActualizado(self):
+	def test_perfilSubidoYActualizadoConFotoDePerfil(self):
 		username = "hola"
 		password = "masdeocholetras"
 		token = registrarYLoguear(username, password, PERFIL)
 		perfilOriginal = json.loads(PERFIL)
+		FOTO = "default.jpg"
 
 		r = requests.get(PROFILE + username, data={"token": token, "user": username})	# obtener perfil
 		self.assertEquals(r.status_code, SUCCESS)
@@ -145,7 +153,7 @@ class ServerTest(unittest.TestCase):
 		self.assertEquals(perfilObtenido.get("email"), perfilOriginal.get("email"))
 
 		s = requests.put(PROFILE + username, files={"nombre": "otroNombre", "email": "otro@e.mail",
-			"token": token}) # actualizar perfil
+			"token": token, 'picture': open(FOTO, 'rb')}) # actualizar perfil con foto
 		self.assertEquals(s.status_code, SUCCESS)
 		
 		t = requests.get(PROFILE + username, data={"token": token, "user": username})	# obtener nuevo perfil
@@ -154,13 +162,23 @@ class ServerTest(unittest.TestCase):
 		self.assertEquals(nuevoPerfilObtenido.get("nombre"), "otroNombre")
 		self.assertEquals(nuevoPerfilObtenido.get("email"), "otro@e.mail")
 
+		pathFoto = nuevoPerfilObtenido.get("path foto de perfil") #Veo si es la misma foto que subi
+		uriAFoto = PROFILE + pathFoto
+		uriRealAFoto = PROFILE + FOTOS_TYPE + username + ".jpg"
+		self.assertEquals(uriAFoto, uriRealAFoto)
 
-	def test_subirBajarYBorrarArchivoTexto(self):
+		u = requests.get(uriAFoto, data={"token": token, "user": username})
+		contenido = open(FOTO, 'rb').read()	# compara el archivo bajado con el original
+		self.assertEquals(u.content, contenido)
+
+
+	def test_subirBajarYBorrarArchivoTextoActualizandoUltimaUbicacion(self):
 		token = registrarYLoguearUser(USER_SIMPLE)
 		FILENAME = "Makefile"
 
 		uri = FILE + USER_SIMPLE["user"] + "/" + FILENAME
-		r = requests.put(uri, files={'file': open(FILENAME, 'rb'), "token": token, "user": USER_SIMPLE["user"]})	# lo sube
+		r = requests.put(uri, files={'file': open(FILENAME, 'rb'), "token": token, "user": USER_SIMPLE["user"], 
+							"latitud": "10.5", "longitud":"20.0"})	# lo sube pasandole la ubicacion para que la actualice
 		self.assertEquals(r.status_code, RESOURCE_CREATED)
 
 		s = requests.get(uri, data={"user": USER_SIMPLE["user"], "token": token})	# lo baja
@@ -177,6 +195,13 @@ class ServerTest(unittest.TestCase):
 
 		v = requests.get(uri, data={"user": USER_SIMPLE["user"], "token": token})	# trata de bajarlo
 		self.assertEquals(v.status_code, NOT_FOUND)
+
+		w = requests.get(PROFILE + USER_SIMPLE["user"], data={"token": token, "user": USER_SIMPLE["user"]})
+		self.assertEquals(w.status_code, SUCCESS)
+		perfilObtenido = w.json().get("perfil")
+		ultimaUbicacion = perfilObtenido.get("ultima ubicacion")
+		self.assertEquals(ultimaUbicacion.get("latitud"), 10.5)
+		self.assertEquals(ultimaUbicacion.get("longitud"), 20.0)
 
 
 	def test_obtenerYActualizarMetadatos(self):
@@ -313,7 +338,7 @@ class ServerTest(unittest.TestCase):
 		s = requests.delete(uri, data={"user": USER_SIMPLE["user"], "token": token}) # lo borra
 		self.assertEquals(s.status_code, SUCCESS)
 
-		uri = FILE + USER_SIMPLE["user"] + "/" + TRASH_TYPE + FILENAME + "^0"
+		uri = FILE + USER_SIMPLE["user"] + "/" + TRASH_TYPE + FILENAME + RESERVED_STR + "0"
 		t = requests.delete(uri, data={"user": USER_SIMPLE["user"], "token": token, "restore": "true"}) # lo restaura
 		self.assertEquals(t.status_code, SUCCESS)
 
@@ -329,9 +354,97 @@ class ServerTest(unittest.TestCase):
 		s = requests.delete(uri, data={"user": USER_SIMPLE["user"], "token": token}) # lo borra
 		self.assertEquals(s.status_code, SUCCESS)
 
-		uri = FILE + USER_SIMPLE["user"] + "/" + TRASH_TYPE + FILENAME + "^0"
+		uri = FILE + USER_SIMPLE["user"] + "/" + TRASH_TYPE + FILENAME + RESERVED_STR + "0"
 		t = requests.delete(uri, data={"user": USER_SIMPLE["user"], "token": token, "restore": "false"}) # lo borra de la papelera
 		self.assertEquals(t.status_code, SUCCESS)
+
+
+	def test_DeberiaDarErrorAlQuererActualizarElPerfilYQueSeaInvalido(self):
+		username = "hola"
+		password = "masdeocholetras"
+		token = registrarYLoguear(username, password, PERFIL)
+
+		r = requests.put(PROFILE + username, files={"nombre": "otroNombre", "email": "otro@email",
+			"token": token}) # actualizar perfil con email invalido
+		self.assertEquals(r.status_code, BAD_REQUEST)
+
+
+	def test_DeberiaFiltrarBienLosUsuariosDadoUnString(self):
+		#Primero registro tres usuarios
+		username1 = "hola"
+		password = "masdeocholetras"
+		token = registrarYLoguear(username1, password, PERFIL)
+		username2 = "como"
+		registrarYLoguear(username2, password, PERFIL)
+		username3 = "estas"
+		registrarYLoguear(username3, password, PERFIL)
+		username4 = "COmi"
+		registrarYLoguear(username4, password, PERFIL)
+
+		#Busco usuario que tengan la letra o
+		t = requests.get(PROFILE, data={"user": username1, "token": token, "busqueda": "o"})
+		self.assertEquals(t.status_code, SUCCESS)
+		resultado = t.json().get("busqueda")
+		usuariosMacheados = resultado.get("usuarios").split(RESERVED_STR)
+		self.assertEquals(usuariosMacheados[0], username1)
+		self.assertEquals(usuariosMacheados[1], username2)
+		self.assertEquals(usuariosMacheados[2], username4)
+
+		#Busco usuario que tengan la letra u
+		u = requests.get(PROFILE, data={"user": username1, "token": token, "busqueda": "u"})
+		self.assertEquals(u.status_code, SUCCESS)
+		resultado = u.json().get("busqueda")
+		usuariosMacheados = resultado.get("usuarios").split(RESERVED_STR)
+		self.assertEquals(usuariosMacheados, [''])
+
+		#Busco usuario que tengan com
+		s = requests.get(PROFILE, data={"user": username1, "token": token, "busqueda": "com"})
+		self.assertEquals(s.status_code, SUCCESS)
+		resultado = s.json().get("busqueda")
+		usuariosMacheados = resultado.get("usuarios").split(RESERVED_STR)
+		self.assertEquals(usuariosMacheados[0], username2)
+		self.assertEquals(usuariosMacheados[1], username4)
+
+		#Trato de buscar usuarios que tengan string vacio
+		r = requests.get(PROFILE, data={"user": username1, "token": token, "busqueda": ""})
+		self.assertEquals(r.status_code, BAD_REQUEST)
+
+
+	def test_deberiaBuscarBienArchivosPorExtensionYNombre(self):
+		token = registrarYLoguearUser(USER_SIMPLE)
+		
+		TXT_FILENAME_ROOT = 'CMakeCache.txt'
+		JPG_FILENAME_ROOT = 'default.jpg'
+		TXT_FILENAME_SUBFOLDER = 'files/log.txt'
+
+		requests.put(FILE + USER_SIMPLE["user"] + "/" + TXT_FILENAME_ROOT, \
+			files={'file': open(TXT_FILENAME_ROOT, 'rb'), "token": token, "user": USER_SIMPLE["user"]})
+		requests.put(FILE + USER_SIMPLE["user"] + "/" + JPG_FILENAME_ROOT, \
+			files={'file': open(JPG_FILENAME_ROOT, 'rb'), "token": token, "user": USER_SIMPLE["user"]})
+		requests.put(FILE + USER_SIMPLE["user"] + "/" + TXT_FILENAME_SUBFOLDER, \
+			files={'file': open(TXT_FILENAME_SUBFOLDER, 'rb'), "token": token, "user": USER_SIMPLE["user"]})
+
+		# Busco por extension txt
+		r = requests.get(METADATA, data={"user": USER_SIMPLE["user"], "token": token, "extension": "txt"})
+		self.assertEquals(r.status_code, SUCCESS)
+		resultado = r.json().get("busqueda")
+		esperado = { USER_SIMPLE["user"] +"/"+ TXT_FILENAME_ROOT : TXT_FILENAME_ROOT, \
+			USER_SIMPLE["user"] + "/" + TXT_FILENAME_SUBFOLDER : TXT_FILENAME_SUBFOLDER.split("/")[-1]}	# CMakeCache.txt y el log
+		self.assertDictEqual(resultado, esperado)
+
+		# Busco por nombre con g -> no busca sobre la extension, asi que no toma al jpg
+		s = requests.get(METADATA, data={"user": USER_SIMPLE["user"], "token": token, "nombre": "g"})
+		self.assertEquals(s.status_code, SUCCESS)
+		resultado = s.json().get("busqueda")
+		esperado = { USER_SIMPLE["user"] + "/" + TXT_FILENAME_SUBFOLDER : TXT_FILENAME_SUBFOLDER.split("/")[-1]} # el log
+		self.assertDictEqual(resultado, esperado)
+
+		# Busco por nombre con s -> no busca sobre el path (las carpetas), asi que no toma al log
+		t = requests.get(METADATA, data={"user": USER_SIMPLE["user"], "token": token, "nombre": "s"})
+		self.assertEquals(t.status_code, SUCCESS)
+		resultado = t.json().get("busqueda")
+		esperado = { } # ninguno
+		self.assertDictEqual(resultado, esperado)
 
 
 

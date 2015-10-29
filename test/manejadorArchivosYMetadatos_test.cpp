@@ -510,12 +510,18 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaObtenerEstructuraCorrectaDePermis
 	manejador->subirArchivo("pablo", filepath2, "hola panch", 10, jsonArchOK2, 2048);
 	manejador->actualizarMetadatos("pablo", filepath2, jsonConJuanHabilitado2);
 
-	string jsonEstructura = manejador->obtenerEstructuraCarpeta("^permisos/juan");
+	string jsonEstructura = manejador->obtenerEstructuraCarpeta(RESERVED_STR + "permisos/juan");
 
 	map<string, string> mapa = ParserJson::deserializarMapa(jsonEstructura);
 
 	EXPECT_EQ(mapa.at(filepath1), "saludo.txt");
 	EXPECT_EQ(mapa.at(filepath2), "saludo2.txt");
+}
+
+TEST_F(ManejadorArchivosYMetadatosTest, deberiaNoPermitirSubirArchivoPorExcesoDeCuota) {
+	manejador->crearUsuario("pablo");
+	string path = "pablo/como estas/bien/saludo.txt";
+	EXPECT_FALSE( manejador->subirArchivo("pablo", path, "hola pablo", 10, jsonArchOK, 0) );
 }
 
 TEST_F(ManejadorArchivosYMetadatosTest, deberiaBorrarElFileSystem) {
@@ -863,4 +869,396 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaCambiarElPathDeLosArchivosConPerm
 	string compartidosConJuan = manejador->obtenerEstructuraCarpeta(PERMISOS + "/juan");
 	EXPECT_EQ(string::npos, compartidosConJuan.find(filepath));		// no tiene el archivo con el nombre viejo
 	EXPECT_NE(string::npos, compartidosConJuan.find(nuevoFilepath));// si tiene el archivo con el nombre nuevo
+}
+
+// TESTS DE BUSQUEDAS
+
+void subirArchivoYAgregarPermiso(ManejadorArchivosYMetadatos* manejador, string propietario, string filepath, string nombreArch, string extensionArch,
+		string permiso, string texto, list<string> etiquetas){
+	MetadatoArchivo metadato = ParserJson::deserializarMetadatoArchivo(jsonArchOK);
+
+	MetadatoArchivo metadatoNuevo = metadato;
+	metadatoNuevo.extension = extensionArch;
+	metadatoNuevo.nombre = nombreArch;
+	metadatoNuevo.propietario = propietario;
+	metadatoNuevo.etiquetas = etiquetas;
+	string jsonArchOKNuevo = ParserJson::serializarMetadatoArchivo(metadatoNuevo);
+	manejador->subirArchivo(propietario, filepath, texto.c_str(), texto.size(), jsonArchOKNuevo, 2048);
+	if ( permiso != "" ) manejador->agregarPermiso(propietario, filepath, permiso);
+}
+
+string myStrings[] = {"hola", "true", "10"};
+list<string> ETIQUETAS (&myStrings[0], &myStrings[2]);
+
+TEST_F(ManejadorArchivosYMetadatosTest, deberiaBuscarBienPorExtensionEnArchivosConPermisos) {
+	string filepath = "pablo/archivos/saludo.txt";
+	inic(manejador, filepath);
+	MetadatoArchivo metadato = ParserJson::deserializarMetadatoArchivo(jsonArchOK);
+
+	string filepath2 = "pablo/archivos/saludo2.png";
+	subirArchivoYAgregarPermiso(manejador, "pablo", filepath2, "saludo2", "png", "juan", "hola panch", ETIQUETAS);
+
+	string filepath3 = "pablo/archivos/hola/saludo3.txt";
+	subirArchivoYAgregarPermiso(manejador, "pablo", filepath3, "saludo3", "txt", "juan", "hola tobis", ETIQUETAS);
+
+	string jsonEstructura = manejador->buscarPorExtension("juan", "txt");
+	map<string, string> busquedaExtension = ParserJson::deserializarMapa(jsonEstructura);
+
+	EXPECT_EQ(busquedaExtension.at(filepath), "saludo.txt");
+	EXPECT_FALSE(busquedaExtension.count(filepath2) > 0); // no existe en el mapa
+	EXPECT_EQ(busquedaExtension.at(filepath3), "saludo3.txt");
+}
+
+TEST_F(ManejadorArchivosYMetadatosTest, deberiaBuscarBienPorNombreEnArchivosConPermisos) {
+	string filepath = "pablo/archivos/saludo.txt";
+	inic(manejador, filepath);
+	MetadatoArchivo metadato = ParserJson::deserializarMetadatoArchivo(jsonArchOK);
+
+	string filepath2 = "pablo/archivos/saludo2.png";
+	subirArchivoYAgregarPermiso(manejador, "pablo", filepath2, "saludo2", "png", "juan", "hola panch", ETIQUETAS);
+
+	string filepath3 = "pablo/archivos/hola/saludo3.txt";
+	subirArchivoYAgregarPermiso(manejador, "pablo", filepath3, "saludo3", "txt", "juan", "hola tobis", ETIQUETAS);
+
+	string filepath4 = "pablo/archivos/hola.txt";
+	subirArchivoYAgregarPermiso(manejador, "pablo", filepath4, "hola", "txt", "juan", "hola santi", ETIQUETAS);
+
+	string jsonEstructura = manejador->buscarPorNombre("juan", "saludo");
+	map<string, string> busquedaNombre = ParserJson::deserializarMapa(jsonEstructura);
+
+	EXPECT_EQ(busquedaNombre.at(filepath), "saludo.txt");
+	EXPECT_EQ(busquedaNombre.at(filepath2), "saludo2.png");
+	EXPECT_EQ(busquedaNombre.at(filepath3), "saludo3.txt");
+	EXPECT_FALSE(busquedaNombre.count(filepath4) > 0); // no existe en el mapa
+}
+
+TEST_F(ManejadorArchivosYMetadatosTest, deberiaBuscarBienPorPropietarioEnArchivosConPermisos) {
+	manejador->crearUsuario("pepe");
+
+	string filepath = "pablo/archivos/saludo.txt";
+	inic(manejador, filepath);
+	MetadatoArchivo metadato = ParserJson::deserializarMetadatoArchivo(jsonArchOK);
+
+	string filepath2 = "pablo/archivos/saludo2.png";
+	subirArchivoYAgregarPermiso(manejador, "pablo", filepath2, "saludo2", "png", "juan", "hola panch", ETIQUETAS);
+
+	string filepath3 = "pepe/archivos/hola/saludo3.txt";
+	subirArchivoYAgregarPermiso(manejador, "pepe", filepath3, "saludo3", "txt", "juan", "hola tobis", ETIQUETAS);
+
+	string jsonEstructura = manejador->buscarPorPropietario("juan", "pablo");
+	map<string, string> busquedaNombre = ParserJson::deserializarMapa(jsonEstructura);
+
+	EXPECT_EQ(busquedaNombre.at(filepath), "saludo.txt");
+	EXPECT_EQ(busquedaNombre.at(filepath2), "saludo2.png");
+	EXPECT_FALSE(busquedaNombre.count(filepath3) > 0); // no existe en el mapa
+}
+
+TEST_F(ManejadorArchivosYMetadatosTest, deberiaBuscarBienPorEtiquetasEnArchivosConPermisos) {
+	manejador->crearUsuario("pepe");
+
+	string filepath = "pablo/archivos/saludo.txt";
+	inic(manejador, filepath);
+	MetadatoArchivo metadato = ParserJson::deserializarMetadatoArchivo(jsonArchOK);
+
+	string myStrings2[] = {"chau", "false", "01"};
+	list<string> etiquetas2 (&myStrings2[0], &myStrings2[2]);
+	string filepath2 = "pablo/archivos/saludo2.png";
+	subirArchivoYAgregarPermiso(manejador, "pablo", filepath2, "saludo2", "png", "juan", "hola panch", etiquetas2);
+
+	string myStrings3[] = {"pepe", "perro", "chauchi", "juan"};
+	list<string> etiquetas3 (&myStrings3[0], &myStrings3[3]);
+	string filepath3 = "pepe/archivos/hola/saludo3.txt";
+	subirArchivoYAgregarPermiso(manejador, "pepe", filepath3, "saludo3", "txt", "juan", "hola tobis", etiquetas3);
+
+	string myStrings4[] = {"chauchi", "hola", "tobi"};
+	list<string> etiquetas4 (&myStrings4[0], &myStrings4[2]);
+	string filepath4 = "pablo/archivos/saludo4.txt";
+	subirArchivoYAgregarPermiso(manejador, "pablo", filepath4, "saludo4", "txt", "juan", "hola santi", etiquetas4);
+
+	string jsonEstructura = manejador->buscarPorEtiqueta("juan", "chauchi");
+	map<string, string> busquedaEtiqueta = ParserJson::deserializarMapa(jsonEstructura);
+
+	EXPECT_FALSE(busquedaEtiqueta.count(filepath) > 0); // no existe en el mapa
+	EXPECT_FALSE(busquedaEtiqueta.count(filepath2) > 0); // no existe en el mapa
+	EXPECT_EQ(busquedaEtiqueta.at(filepath3), "saludo3.txt");
+	EXPECT_EQ(busquedaEtiqueta.at(filepath4), "saludo4.txt");
+
+	string jsonEstructura2 = manejador->buscarPorEtiqueta("juan", "hola");
+	map<string, string> busquedaEtiqueta2 = ParserJson::deserializarMapa(jsonEstructura2);
+
+	EXPECT_EQ(busquedaEtiqueta2.at(filepath), "saludo.txt");
+	EXPECT_FALSE(busquedaEtiqueta2.count(filepath2) > 0); // no existe en el mapa
+	EXPECT_FALSE(busquedaEtiqueta2.count(filepath3) > 0); // no existe en el mapa
+	EXPECT_EQ(busquedaEtiqueta2.at(filepath4), "saludo4.txt");
+}
+
+TEST_F(ManejadorArchivosYMetadatosTest, deberiaBuscarBienPorExtensionEnArchivosDelFileSystem) {
+	manejador->crearUsuario("pablo");
+
+	string filepath = "pablo/archivos/saludo.txt";
+	manejador->subirArchivo("pablo", filepath, "hola pablo", 10, jsonArchOK, 2048);
+	MetadatoArchivo metadato = ParserJson::deserializarMetadatoArchivo(jsonArchOK);
+
+	string filepath2 = "pablo/archivos/saludo2.png";
+	subirArchivoYAgregarPermiso(manejador, "pablo", filepath2, "saludo2", "png", "", "hola panch", ETIQUETAS);
+
+	string filepath3 = "pablo/archivos/hola/saludo3.txt";
+	subirArchivoYAgregarPermiso(manejador, "pablo", filepath3, "saludo3", "txt", "", "hola tobis", ETIQUETAS);
+
+	string jsonEstructura = manejador->buscarPorExtension("pablo", "txt");
+	map<string, string> busquedaExtension = ParserJson::deserializarMapa(jsonEstructura);
+
+	EXPECT_EQ(busquedaExtension.at(filepath), "saludo.txt");
+	EXPECT_FALSE(busquedaExtension.count(filepath2) > 0); // no existe en el mapa
+	EXPECT_EQ(busquedaExtension.at(filepath3), "saludo3.txt");
+}
+
+TEST_F(ManejadorArchivosYMetadatosTest, deberiaBuscarBienPorPropietarioEnArchivosDelFileSystem) {
+	manejador->crearUsuario("pablo");
+
+	string filepath = "pablo/archivos/saludo.txt";
+	manejador->subirArchivo("pablo", filepath, "hola pablo", 10, jsonArchOK, 2048);
+	MetadatoArchivo metadato = ParserJson::deserializarMetadatoArchivo(jsonArchOK);
+
+	string filepath2 = "pablo/archivos/saludo2.png";
+	subirArchivoYAgregarPermiso(manejador, "pablo", filepath2, "saludo2", "png", "", "hola panch", ETIQUETAS);
+
+	string filepath3 = "pablo/archivos/hola/saludo3.txt";
+	subirArchivoYAgregarPermiso(manejador, "pablo", filepath3, "saludo3", "txt", "", "hola tobis", ETIQUETAS);
+
+	string jsonEstructura = manejador->buscarPorPropietario("pablo", "pablo");
+	map<string, string> busquedaPropietario = ParserJson::deserializarMapa(jsonEstructura);
+
+	EXPECT_EQ(busquedaPropietario.at(filepath), "saludo.txt");
+	EXPECT_EQ(busquedaPropietario.at(filepath2), "saludo2.png"); // no existe en el mapa
+	EXPECT_EQ(busquedaPropietario.at(filepath3), "saludo3.txt");
+}
+
+TEST_F(ManejadorArchivosYMetadatosTest, deberiaBuscarBienPorNombreEnArchivosDelFileSystem) {
+	string filepath = "pablo/archivos/saludo.txt";
+	inic(manejador, filepath);
+	MetadatoArchivo metadato = ParserJson::deserializarMetadatoArchivo(jsonArchOK);
+
+	string filepath2 = "pablo/archivos/saludo2.png";
+	subirArchivoYAgregarPermiso(manejador, "pablo", filepath2, "saludo2", "png", "juan", "hola panch", ETIQUETAS);
+
+	string filepath3 = "pablo/archivos/hola/saludo3.txt";
+	subirArchivoYAgregarPermiso(manejador, "pablo", filepath3, "saludo3", "txt", "juan", "hola tobis", ETIQUETAS);
+
+	string filepath4 = "pablo/archivos/hola.txt";
+	subirArchivoYAgregarPermiso(manejador, "pablo", filepath4, "hola", "txt", "juan", "hola santi", ETIQUETAS);
+
+	string jsonEstructura = manejador->buscarPorNombre("pablo", "saludo");
+	map<string, string> busquedaNombre = ParserJson::deserializarMapa(jsonEstructura);
+
+	EXPECT_EQ(busquedaNombre.at(filepath), "saludo.txt");
+	EXPECT_EQ(busquedaNombre.at(filepath2), "saludo2.png");
+	EXPECT_EQ(busquedaNombre.at(filepath3), "saludo3.txt");
+	EXPECT_FALSE(busquedaNombre.count(filepath4) > 0); // no existe en el mapa
+}
+
+TEST_F(ManejadorArchivosYMetadatosTest, deberiaBuscarBienPorEtiquetasEnArchivosDelFileSystem) {
+	string filepath = "pablo/archivos/saludo.txt";
+	inic(manejador, filepath);
+	MetadatoArchivo metadato = ParserJson::deserializarMetadatoArchivo(jsonArchOK);
+
+	string myStrings2[] = {"chau", "false", "01"};
+	list<string> etiquetas2 (&myStrings2[0], &myStrings2[2]);
+	string filepath2 = "pablo/archivos/saludo2.png";
+	subirArchivoYAgregarPermiso(manejador, "pablo", filepath2, "saludo2", "png", "juan", "hola panch", etiquetas2);
+
+	string myStrings3[] = {"pepe", "perro", "chauchi", "juan"};
+	list<string> etiquetas3 (&myStrings3[0], &myStrings3[3]);
+	string filepath3 = "pablo/archivos/hola/saludo3.txt";
+	subirArchivoYAgregarPermiso(manejador, "pablo", filepath3, "saludo3", "txt", "juan", "hola tobis", etiquetas3);
+
+	string myStrings4[] = {"chauchi", "hola", "tobi"};
+	list<string> etiquetas4 (&myStrings4[0], &myStrings4[2]);
+	string filepath4 = "pablo/archivos/saludo4.txt";
+	subirArchivoYAgregarPermiso(manejador, "pablo", filepath4, "saludo4", "txt", "juan", "hola santi", etiquetas4);
+
+	string jsonEstructura = manejador->buscarPorEtiqueta("pablo", "chauchi");
+	map<string, string> busquedaEtiqueta = ParserJson::deserializarMapa(jsonEstructura);
+
+	EXPECT_FALSE(busquedaEtiqueta.count(filepath) > 0); // no existe en el mapa
+	EXPECT_FALSE(busquedaEtiqueta.count(filepath2) > 0); // no existe en el mapa
+	EXPECT_EQ(busquedaEtiqueta.at(filepath3), "saludo3.txt");
+	EXPECT_EQ(busquedaEtiqueta.at(filepath4), "saludo4.txt");
+
+	string jsonEstructura2 = manejador->buscarPorEtiqueta("pablo", "hola");
+	map<string, string> busquedaEtiqueta2 = ParserJson::deserializarMapa(jsonEstructura2);
+
+	EXPECT_EQ(busquedaEtiqueta2.at(filepath), "saludo.txt");
+	EXPECT_FALSE(busquedaEtiqueta2.count(filepath2) > 0); // no existe en el mapa
+	EXPECT_FALSE(busquedaEtiqueta2.count(filepath3) > 0); // no existe en el mapa
+	EXPECT_EQ(busquedaEtiqueta2.at(filepath4), "saludo4.txt");
+}
+
+TEST_F(ManejadorArchivosYMetadatosTest, deberiaBuscarBienPorExtensionEnPermisosYArchivosDelFileSystem) {
+	string filepath = "pablo/archivos/saludo.txt";
+	inic(manejador, filepath);
+	MetadatoArchivo metadato = ParserJson::deserializarMetadatoArchivo(jsonArchOK);
+	manejador->crearUsuario("pepe");
+
+	string filepath2 = "pablo/archivos/saludo2.png";
+	subirArchivoYAgregarPermiso(manejador, "pablo", filepath2, "saludo2", "png", "juan", "hola panch", ETIQUETAS);
+
+	string filepath3 = "pablo/archivos/hola/saludo3.txt";
+	subirArchivoYAgregarPermiso(manejador, "pablo", filepath3, "saludo3", "txt", "juan", "hola tobis", ETIQUETAS);
+
+	string filepath4 = "juan/saludo4.txt";
+	subirArchivoYAgregarPermiso(manejador, "juan", filepath4, "saludo4", "txt", "juan", "hola santi", ETIQUETAS);
+
+	string filepath5 = "juan/archivos/saludo5.txt";
+	subirArchivoYAgregarPermiso(manejador, "juan", filepath5, "saludo5", "txt", "juan", "hola panch", ETIQUETAS);
+
+	string filepath6 = "juan/archivos/saludo6.jpg";
+	subirArchivoYAgregarPermiso(manejador, "juan", filepath6, "saludo6", "jpg", "juan", "hola pablo", ETIQUETAS);
+
+	string jsonEstructura = manejador->buscarPorExtension("juan", "txt");
+	map<string, string> busquedaExtension = ParserJson::deserializarMapa(jsonEstructura);
+
+	EXPECT_EQ(busquedaExtension.at(filepath), "saludo.txt");
+	EXPECT_FALSE(busquedaExtension.count(filepath2) > 0); // no existe en el mapa
+	EXPECT_EQ(busquedaExtension.at(filepath3), "saludo3.txt");
+	EXPECT_EQ(busquedaExtension.at(filepath4), "saludo4.txt");
+	EXPECT_EQ(busquedaExtension.at(filepath5), "saludo5.txt");
+	EXPECT_FALSE(busquedaExtension.count(filepath6) > 0); // no existe en el mapa
+}
+
+TEST_F(ManejadorArchivosYMetadatosTest, deberiaBuscarBienPorPropietarioEnPermisosYArchivosDelFileSystem) {
+	string filepath = "pablo/archivos/saludo.txt";
+	inic(manejador, filepath);
+	MetadatoArchivo metadato = ParserJson::deserializarMetadatoArchivo(jsonArchOK);
+	manejador->crearUsuario("pepe");
+
+	string filepath2 = "pablo/archivos/saludo2.png";
+	subirArchivoYAgregarPermiso(manejador, "pablo", filepath2, "saludo2", "png", "juan", "hola panch", ETIQUETAS);
+
+	string filepath3 = "pablo/archivos/hola/saludo3.txt";
+	subirArchivoYAgregarPermiso(manejador, "pablo", filepath3, "saludo3", "txt", "juan", "hola tobis", ETIQUETAS);
+
+	string filepath4 = "juan/saludo4.txt";
+	subirArchivoYAgregarPermiso(manejador, "juan", filepath4, "saludo4", "txt", "juan", "hola santi", ETIQUETAS);
+
+	string filepath5 = "juan/archivos/saludo5.txt";
+	subirArchivoYAgregarPermiso(manejador, "juan", filepath5, "saludo5", "txt", "juan", "hola panch", ETIQUETAS);
+
+	string filepath6 = "juan/archivos/saludo6.jpg";
+	subirArchivoYAgregarPermiso(manejador, "juan", filepath6, "saludo6", "jpg", "juan", "hola pablo", ETIQUETAS);
+
+	string jsonEstructuraPablo = manejador->buscarPorPropietario("juan", "pablo");
+	map<string, string> busquedaPropietarioPablo = ParserJson::deserializarMapa(jsonEstructuraPablo);
+
+	EXPECT_EQ(busquedaPropietarioPablo.at(filepath), "saludo.txt");
+	EXPECT_EQ(busquedaPropietarioPablo.at(filepath2), "saludo2.png");
+	EXPECT_EQ(busquedaPropietarioPablo.at(filepath3), "saludo3.txt");
+	EXPECT_FALSE(busquedaPropietarioPablo.count(filepath4) > 0); // no existe en el mapa
+	EXPECT_FALSE(busquedaPropietarioPablo.count(filepath5) > 0); // no existe en el mapa
+	EXPECT_FALSE(busquedaPropietarioPablo.count(filepath6) > 0); // no existe en el mapa
+
+	string jsonEstructuraJuan = manejador->buscarPorPropietario("juan", "juan");
+	map<string, string> busquedaPropietarioJuan = ParserJson::deserializarMapa(jsonEstructuraJuan);
+
+	EXPECT_FALSE(busquedaPropietarioJuan.count(filepath) > 0); // no existe en el mapa
+	EXPECT_FALSE(busquedaPropietarioJuan.count(filepath2) > 0); // no existe en el mapa
+	EXPECT_FALSE(busquedaPropietarioJuan.count(filepath3) > 0); // no existe en el mapa
+	EXPECT_EQ(busquedaPropietarioJuan.at(filepath4), "saludo4.txt");
+	EXPECT_EQ(busquedaPropietarioJuan.at(filepath5), "saludo5.txt");
+	EXPECT_EQ(busquedaPropietarioJuan.at(filepath6), "saludo6.jpg");
+}
+
+TEST_F(ManejadorArchivosYMetadatosTest, deberiaBuscarBienPorNombreEnPermisosYArchivosDelFileSystem) {
+	string filepath = "pablo/archivos/saludo.txt";
+	inic(manejador, filepath);
+	MetadatoArchivo metadato = ParserJson::deserializarMetadatoArchivo(jsonArchOK);
+
+	string filepath2 = "pablo/archivos/saludo2.png";
+	subirArchivoYAgregarPermiso(manejador, "pablo", filepath2, "saludo2", "png", "juan", "hola panch", ETIQUETAS);
+
+	string filepath3 = "pablo/archivos/hola/saludo3.txt";
+	subirArchivoYAgregarPermiso(manejador, "pablo", filepath3, "saludo3", "txt", "juan", "hola tobis", ETIQUETAS);
+
+	string filepath4 = "pablo/archivos/hola.txt";
+	subirArchivoYAgregarPermiso(manejador, "pablo", filepath4, "hola", "txt", "juan", "hola santi", ETIQUETAS);
+
+	string filepath5 = "juan/hola_saludo5.txt";
+	subirArchivoYAgregarPermiso(manejador, "juan", filepath5, "hola_saludo5", "txt", "juan", "hola santi", ETIQUETAS);
+
+	string filepath6 = "juan/archivos/chau.txt";
+	subirArchivoYAgregarPermiso(manejador, "juan", filepath6, "chau", "txt", "juan", "hola panch", ETIQUETAS);
+
+	string filepath7 = "juan/archivos/saludo_panch7.jpg";
+	subirArchivoYAgregarPermiso(manejador, "juan", filepath7, "saludo_panch7", "jpg", "juan", "hola panch", ETIQUETAS);
+
+	string jsonEstructura = manejador->buscarPorNombre("juan", "saludo");
+	map<string, string> busquedaNombre = ParserJson::deserializarMapa(jsonEstructura);
+
+	EXPECT_EQ(busquedaNombre.at(filepath), "saludo.txt");
+	EXPECT_EQ(busquedaNombre.at(filepath2), "saludo2.png");
+	EXPECT_EQ(busquedaNombre.at(filepath3), "saludo3.txt");
+	EXPECT_FALSE(busquedaNombre.count(filepath4) > 0); // no existe en el mapa
+	EXPECT_EQ(busquedaNombre.at(filepath5), "hola_saludo5.txt");
+	EXPECT_FALSE(busquedaNombre.count(filepath6) > 0); // no existe en el mapa
+	EXPECT_EQ(busquedaNombre.at(filepath7), "saludo_panch7.jpg");
+}
+
+TEST_F(ManejadorArchivosYMetadatosTest, deberiaBuscarBienPorEtiquetasEnPermisosYArchivosDelFileSystem) {
+	manejador->crearUsuario("pepe");
+
+	string filepath = "pablo/archivos/saludo.txt";
+	inic(manejador, filepath);
+	MetadatoArchivo metadato = ParserJson::deserializarMetadatoArchivo(jsonArchOK);
+
+	string myStrings2[] = {"chau", "false", "01"};
+	list<string> etiquetas2 (&myStrings2[0], &myStrings2[2]);
+	string filepath2 = "pablo/archivos/saludo2.png";
+	subirArchivoYAgregarPermiso(manejador, "pablo", filepath2, "saludo2", "png", "juan", "hola panch", etiquetas2);
+
+	string myStrings3[] = {"pepe", "perro", "chauchi", "juan"};
+	list<string> etiquetas3 (&myStrings3[0], &myStrings3[3]);
+	string filepath3 = "pepe/archivos/hola/saludo3.txt";
+	subirArchivoYAgregarPermiso(manejador, "pepe", filepath3, "saludo3", "txt", "juan", "hola tobis", etiquetas3);
+
+	string myStrings4[] = {"chauchi", "hola", "tobi"};
+	list<string> etiquetas4 (&myStrings4[0], &myStrings4[2]);
+	string filepath4 = "pablo/archivos/saludo4.txt";
+	subirArchivoYAgregarPermiso(manejador, "pablo", filepath4, "saludo4", "txt", "juan", "hola santi", etiquetas4);
+
+	string myStrings5[] = {"chauchi", "hola", "tobi"};
+	list<string> etiquetas5 (&myStrings5[0], &myStrings5[2]);
+	string filepath5 = "juan/hola_saludo5.txt";
+	subirArchivoYAgregarPermiso(manejador, "juan", filepath5, "hola_saludo5", "txt", "juan", "hola santi", etiquetas5);
+
+	string myStrings6[] = {"pepe", "hola", "tobi"};
+	list<string> etiquetas6 (&myStrings6[0], &myStrings6[2]);
+	string filepath6 = "juan/archivos/chau.txt";
+	subirArchivoYAgregarPermiso(manejador, "juan", filepath6, "chau", "txt", "juan", "hola panch", etiquetas6);
+
+	string myStrings7[] = {"chauchi", "juan", "tobi"};
+	list<string> etiquetas7 (&myStrings7[0], &myStrings7[2]);
+	string filepath7 = "juan/archivos/saludo_panch7.jpg";
+	subirArchivoYAgregarPermiso(manejador, "juan", filepath7, "saludo_panch7", "jpg", "juan", "hola panch", etiquetas7);
+
+	string jsonEstructura = manejador->buscarPorEtiqueta("juan", "chauchi");
+	map<string, string> busquedaEtiqueta = ParserJson::deserializarMapa(jsonEstructura);
+
+	EXPECT_FALSE(busquedaEtiqueta.count(filepath) > 0); // no existe en el mapa
+	EXPECT_FALSE(busquedaEtiqueta.count(filepath2) > 0); // no existe en el mapa
+	EXPECT_EQ(busquedaEtiqueta.at(filepath3), "saludo3.txt");
+	EXPECT_EQ(busquedaEtiqueta.at(filepath4), "saludo4.txt");
+	EXPECT_EQ(busquedaEtiqueta.at(filepath5), "hola_saludo5.txt");
+	EXPECT_FALSE(busquedaEtiqueta.count(filepath6) > 0); // no existe en el mapa
+	EXPECT_EQ(busquedaEtiqueta.at(filepath7), "saludo_panch7.jpg");
+
+	string jsonEstructura2 = manejador->buscarPorEtiqueta("juan", "hola");
+	map<string, string> busquedaEtiqueta2 = ParserJson::deserializarMapa(jsonEstructura2);
+
+	EXPECT_EQ(busquedaEtiqueta2.at(filepath), "saludo.txt");
+	EXPECT_FALSE(busquedaEtiqueta2.count(filepath2) > 0); // no existe en el mapa
+	EXPECT_FALSE(busquedaEtiqueta2.count(filepath3) > 0); // no existe en el mapa
+	EXPECT_EQ(busquedaEtiqueta2.at(filepath4), "saludo4.txt");
+	EXPECT_EQ(busquedaEtiqueta2.at(filepath5), "hola_saludo5.txt");
+	EXPECT_EQ(busquedaEtiqueta2.at(filepath6), "chau.txt");
+	EXPECT_FALSE(busquedaEtiqueta2.count(filepath7) > 0); // no existe en el mapa
 }

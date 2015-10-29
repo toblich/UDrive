@@ -26,14 +26,14 @@ void File::enviarArchivo (const string& completePath, mg_connection* connection)
 mg_result File::GETHandler (mg_connection* connection) {
 	string uri = string(connection->uri);
 	vector<string> uris = ParserURI::parsear(uri, '/');
-	this->logInfo("Se parseó la uri correctamente.");
+	Logger::logInfo("Se parseó la uri correctamente.");
 	string token = getVar(connection, "token");
-	this->logInfo("Se obtuvo la variable token con valor: " + token);
+	Logger::logInfo("Se obtuvo la variable token con valor: " + token);
 	string user = getVar(connection, "user");
-	this->logInfo("Se obtuvo la variable user con valor: " + user);
+	Logger::logInfo("Se obtuvo la variable user con valor: " + user);
 
 	if (manejadorUs->autenticarToken(token, user)) {
-		this->logInfo("Se autenticó la sesión correctamente.");
+		Logger::logInfo("Se autenticó la sesión correctamente.");
 		string filepath = getFilepathFrom(uris);
 		string completePath = manejadorArchYMet->descargarArchivo(user, filepath);
 		enviarArchivo(completePath, connection);
@@ -74,16 +74,39 @@ MetadatoArchivo File::extractMetadataFrom (const vector<string>& nombreYExtensio
 	return metArch;
 }
 
+void File::actualizarUltimaUbicacion(string user, string latitud, string longitud) {
+	//Se obtiene el perfil del usuario que subio el archivo y se deserializa
+	MetadatoUsuario perfilUsuario = ParserJson::deserializarMetadatoUsuario(manejadorUs->getPerfil(user));
+
+	//Se actualiza la longitud y latitud
+	perfilUsuario.ultimaUbicacion.latitud = stod(latitud);
+	perfilUsuario.ultimaUbicacion.longitud = stod(longitud);
+
+	//Vuelvo a serializar el perfil
+	string perfilActualizado = ParserJson::serializarMetadatoUsuario(perfilUsuario);
+
+	//Lo actualizo en la BD
+	manejadorUs->modifyPerfil(user, perfilActualizado);
+}
+
 void File::subirArchivo (const vector<string>& uris, const DatosArchivo& datosArch, const string& user, mg_connection* connection) {
 	string filepath = getFilepathFrom(uris);
 	vector<string> nombreYExtension = ParserURI::parsear(datosArch.fileName, '.');
-	this->logInfo("Se parseó el nombre del archivo correctamente.");
+	Logger::logInfo("Se parseó el nombre del archivo correctamente.");
 	MetadatoArchivo metArch = extractMetadataFrom(nombreYExtension, user, uris);
 	string jsonMetadata = ParserJson::serializarMetadatoArchivo(metArch);
-	this->logInfo("Se serializaron los metadatos del archivo correctamente.");
+	Logger::logInfo("Se serializaron los metadatos del archivo correctamente.");
 	int cuotaUsuario = ParserJson::deserializarMetadatoUsuario(manejadorUs->getPerfil(user)).cuota;
 
 	if (manejadorArchYMet->subirArchivo(user, filepath, datosArch.fileData, datosArch.dataLength, jsonMetadata, cuotaUsuario)) {
+		//Como el usuario subio un archivo se actualiza su ultima ubicacion
+		string latitud = datosArch.latitud;
+		Logger::logInfo("Se obtuvo la variable latitud con valor: " + latitud);
+		string longitud = datosArch.longitud;
+		Logger::logInfo("Se obtuvo la variable longitiud con valor: " + longitud);
+		//Si se reciben ambos, se actualiza
+		if (latitud != "" and longitud != "") actualizarUltimaUbicacion(user, latitud, longitud);
+
 		string mensaje = "Se subió el archivo: " + filepath + " correctamente.";
 		this->responderResourceCreated(connection, mensaje);
 	} else {
@@ -95,17 +118,17 @@ void File::subirArchivo (const vector<string>& uris, const DatosArchivo& datosAr
 mg_result File::PUTHandler (mg_connection* connection) {
 	string uri = string(connection->uri);
 	vector<string> uris = ParserURI::parsear(uri, '/');
-	this->logInfo("Se parseó la uri correctamente.");
+	Logger::logInfo("Se parseó la uri correctamente.");
 
 	string varFile = "file";
 	DatosArchivo datosArch = getMultipartData(connection, varFile);
 	string token = datosArch.token;
-	this->logInfo("Se obtuvo la variable token con valor: " + token);
+	Logger::logInfo("Se obtuvo la variable token con valor: " + token);
 	string user = datosArch.user;
-	this->logInfo("Se obtuvo la variable user con valor: " + user);
+	Logger::logInfo("Se obtuvo la variable user con valor: " + user);
 
 	if (manejadorUs->autenticarToken(token, user)) {
-		this->logInfo("Se autenticó la sesión correctamente.");
+		Logger::logInfo("Se autenticó la sesión correctamente.");
 		subirArchivo(uris, datosArch, user, connection);
 	} else {
 		this->responderAutenticacionFallida(connection);
@@ -117,16 +140,16 @@ mg_result File::PUTHandler (mg_connection* connection) {
 mg_result File::DELETEHandler (mg_connection* connection) {
 	string uri = string(connection->uri);
 	vector<string> uris = ParserURI::parsear(uri, '/');
-	this->logInfo("Se parseó la uri correctamente.");
+	Logger::logInfo("Se parseó la uri correctamente.");
 	string token = getVar(connection, "token");
-	this->logInfo("Se obtuvo la variable token con valor: " + token);
+	Logger::logInfo("Se obtuvo la variable token con valor: " + token);
 	string user = getVar(connection, "user");
-	this->logInfo("Se obtuvo la variable user con valor: " + user);
+	Logger::logInfo("Se obtuvo la variable user con valor: " + user);
 	string restore = getVar(connection, "restore");
-	this->logInfo("Se obtuvo la variable restore con valor: " + restore);
+	Logger::logInfo("Se obtuvo la variable restore con valor: " + restore);
 
 	if (manejadorUs->autenticarToken(token, user)) {
-		this->logInfo("Se autenticó la sesión correctamente.");
+		Logger::logInfo("Se autenticó la sesión correctamente.");
 		string filepath = getFilepathFrom(uris);
 		if (restore == "true"){
 			if (manejadorArchYMet->restaurar(user, filepath)){
