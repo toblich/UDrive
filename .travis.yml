@@ -46,6 +46,10 @@ before_script:
   - mkdir build
   - cp "default.jpg" "build"
   - cd build
+  - mkdir files
 
 script:
   - cmake -Dtest=ON -Drocksdb=OFF ../ && make unitTest && ./unitTest && make udrive && python ../test/server_test.py
+
+after_failure:
+  - echo LOG; cat files/log.txt
