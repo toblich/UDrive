@@ -1,2 +1,2 @@
-Documentacion del ambiente de desarrollo
+Ambiente de desarrollo
 ========================================

@@ -104,7 +104,7 @@ string ParserJson::serializarMetadatoUsuario(MetadatoUsuario metadato) {
 	return serializado;
 }
 
-string ParserJson::serializarMetadatoSesion(MetadatosSesion metadato){
+string ParserJson::serializarMetadatoSesion(MetadatoSesion metadato){
 	Value archivo;
 
 	//TODO: Habría que verificar que no esten vacios, o se podria asumir
@@ -218,11 +218,11 @@ MetadatoUsuario ParserJson::deserializarMetadatoUsuario(string json) {
 	return metadatos;
 }
 
-MetadatosSesion ParserJson::deserializarMetadatoSesion(std::string json){
+MetadatoSesion ParserJson::deserializarMetadatoSesion(std::string json){
 	Value raiz;
 	Features f = Features::strictMode();
 	Reader reader(f);
-	MetadatosSesion metadatos;
+	MetadatoSesion metadatos;
 	bool parseadoExitoso = reader.parse(json, raiz);
 	if (parseadoExitoso){
 		metadatos.username = ParserJson::verificarString("username", raiz);

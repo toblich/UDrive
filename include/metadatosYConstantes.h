@@ -44,6 +44,6 @@ typedef struct{
 	std::string username;
 	std::string password;
 	std::string token;
-}MetadatosSesion;
+}MetadatoSesion;
 
 #endif /* INCLUDE_METADATOSYCONSTANTES_H_ */

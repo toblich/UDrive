@@ -1,3 +1,3 @@
-Documentacion de las clases
+Clases
 ===========================
 
