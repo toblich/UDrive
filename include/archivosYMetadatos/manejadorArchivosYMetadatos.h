@@ -27,19 +27,15 @@ private:
 	bool crearCarpeta(string username, string path);
 	bool eliminarCarpeta(string username, string path);
 	bool deleteCarpeta(string path);
-	bool eliminarArchivo(string username, string filepath);
-	void eliminarArchivoDefinitivamente(string filepath);
-	bool mandarArchivoATrash(string username, string filepath);
-	bool guardarArchivo (const string& filepath, const string& username, const char* data, int dataLen);
+	bool eliminarArchivo(string username, string filepath); //*
+	void eliminarArchivoDefinitivamente(string filepath); //*
+	bool mandarArchivoATrash(string username, string filepath); //*
+	bool guardarArchivo (const string& filepath, const string& username, const char* data, int dataLen); //*
+	bool renombrarArchivo (const string& pathInterno, const string& nuevoFilename);
 
 	// Buscador
 	string obtenerEstructuraCarpeta(string path, bool esRecursivo, function<bool(MetadatoArchivo&)> predicate);
 	string obtenerEstructuraCompartidos(string path);
-
-	// Indefinidos
-	bool renombrar(const string& pathInterno, const string& nuevoFilename);
-	string pathConNuevoFilename (const string& pathInterno, const string& nuevoFilename);
-
 
 	// Metadatos
 	string actualizarUsuarioFechaModificacion(string jsonMetadatos, string usernameModificacion);
@@ -56,9 +52,6 @@ private:
 									   const string& username, const string& filepath, const string& jsonNuevosMetadatos);
 	void actualizarPermisosPathArchivo(const string& filepath, const string& nuevoFilepath,
 			const list<string>& usuariosHabilitados);
-
-
-
 
 public:
 	ManejadorArchivosYMetadatos(BD* dbMetadatos);

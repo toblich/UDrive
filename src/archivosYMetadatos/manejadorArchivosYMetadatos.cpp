@@ -216,32 +216,8 @@ string ManejadorArchivosYMetadatos::consultarMetadatosArchivo (string username, 
 	return dbMetadatos->get(filepath);
 }
 
-string ManejadorArchivosYMetadatos::pathConNuevoFilename (const string& pathInterno, const string& nuevoFilename) {
-	vector<string> partes = ParserURI::parsear(pathInterno, '/');
-	partes.pop_back();
-	partes.push_back(nuevoFilename);
-	string nuevoPathInterno = ParserURI::join(partes, '/');
-	return nuevoPathInterno;
-}
-
-bool ManejadorArchivosYMetadatos::renombrar(const string& pathInterno, const string& nuevoFilename) {
-	string nuevoPathInterno = pathConNuevoFilename(pathInterno, nuevoFilename);
-	string pathConFS = pathFileSystem + "/" + pathInterno;
-	string nuevoPathConFS = pathFileSystem + "/" + nuevoPathInterno;
-
-	if (validador.existeArchivo(nuevoPathConFS) or dbMetadatos->contains(nuevoPathInterno)) {
-		Logger::logWarn("No se renombro el archivo " + pathInterno + " a " + nuevoFilename
-				+ " porque ya existe un archivo allí con ese nombre en el FileSystem o la base de datos.");
-		return false;
-	}
-
-	if (rename(pathConFS.c_str(), nuevoPathConFS.c_str())) {
-		Logger::logError("Fallo el renombrado del archivo " + pathInterno + " a " + nuevoFilename);
-		return false;
-	}
-
-	Logger::logInfo("Se renombro correctamente " + pathInterno + " a " + nuevoFilename);
-	return true;
+bool ManejadorArchivosYMetadatos::renombrarArchivo(const string& pathInterno, const string& nuevoFilename) {
+	return manejadorArchivos.renombrarArchivo(pathInterno, nuevoFilename);
 }
 
 string ManejadorArchivosYMetadatos::actualizarPermisosMetadato (const MetadatoArchivo& metadatosViejos,
@@ -267,12 +243,12 @@ bool ManejadorArchivosYMetadatos::actualizarMetadatosChequeados (const string& f
 	}
 
 	string nuevoFilename = metadatosNuevos.nombre + "." + metadatosNuevos.extension;
-	if (not renombrar(filepath, nuevoFilename)) {
+	if (not renombrarArchivo(filepath, nuevoFilename)) {
 		Logger::logError("Metadatos que pinchan el renombrado: \nViejos: "
 				+ jsonMetadatosViejos +  "\nNuevos: " + jsonNuevosMetadatos);
 		return false;
 	}
-	string nuevoFilepath = pathConNuevoFilename(filepath, nuevoFilename);
+	string nuevoFilepath = ParserURI::pathConNuevoFilename(filepath, nuevoFilename);
 	list<string> usuariosHabilitados = (metadatosNuevos.usuariosHabilitados.empty()) ?
 			metadatosViejos.usuariosHabilitados : metadatosNuevos.usuariosHabilitados;
 	actualizarPermisosPathArchivo(filepath, nuevoFilepath, usuariosHabilitados);	// actualiza el path del archivo en quienes tienen permiso

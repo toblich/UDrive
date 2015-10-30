@@ -92,6 +92,14 @@ public:
 		}
 		return str;
 	}
+
+	static string pathConNuevoFilename (const string& pathInterno, const string& nuevoFilename) {
+		vector<string> partes = ParserURI::parsear(pathInterno, '/');
+		partes.pop_back();
+		partes.push_back(nuevoFilename);
+		string nuevoPathInterno = ParserURI::join(partes, '/');
+		return nuevoPathInterno;
+	}
 };
 
 #endif /* PARSERURI_H_ */
