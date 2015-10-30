@@ -12,7 +12,7 @@ ManejadorArchivosYMetadatos::ManejadorArchivosYMetadatos (BD* dbMetadatos) :
 }
 
 ManejadorArchivosYMetadatos::ManejadorArchivosYMetadatos (BD* dbMetadatos, string path) :
-		validador(dbMetadatos), buscador(dbMetadatos, path) {
+		validador(dbMetadatos), buscador(dbMetadatos, path), manejadorArchivos(path, &validador), manejadorMetadatos(dbMetadatos, &validador) {
 	this->dbMetadatos = dbMetadatos;
 	this->pathFileSystem = path;
 	getcwd(homeDirectory, sizeof(homeDirectory));
@@ -79,35 +79,36 @@ bool ManejadorArchivosYMetadatos::restaurar(string username, string pathEnPapele
 // El path recibido no debe contener el nombre de un archivo.
 // En caso de que sea asi, se debera modificar este metodo.
 bool ManejadorArchivosYMetadatos::crearCarpeta (string username, string path) {
-	bool tienePermisos = validador.verificarPermisos(username, path);
-	// Agrego el FileSystem para que sea la "raiz"
-	string pathCompletoConFS = this->pathFileSystem + "/" + path;
-	vector<string> directorios = ParserURI::parsear(pathCompletoConFS, '/');
-	string directorioAcumulado = "";
-	const int SIZE = directorios.size();
-
-	for (int i = 0; i < SIZE; i++) {
-		string directorio = directorios[i];
-		string directorioPadre = directorioAcumulado;
-		directorioAcumulado += (directorio + "/");
-
-		if ( not validador.existeCarpeta(directorioAcumulado) ) { // Me fijo si existe la carpeta, sino la creo
-			if (not tienePermisos)
-				return false; // Si no existia la carpeta y no tiene permisos para crear
-
-			mkdir(directorioAcumulado.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-			Logger::logInfo("La carpeta " + directorio + " no existe dentro de " + directorioPadre
-								+ " por lo que ha sido creada.");
-		}
-	}
-	string directorioFotos = this->pathFileSystem + "/" + FOTOS;
-	if (not validador.existeCarpeta(directorioFotos)) {
-		mkdir(directorioFotos.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-		Logger::logInfo("La carpeta " + FOTOS + " no existe dentro de " + this->pathFileSystem
-							+ " por lo que ha sido creada.");
-	}
-
-	return true;
+//	bool tienePermisos = validador.verificarPermisos(username, path);
+//	// Agrego el FileSystem para que sea la "raiz"
+//	string pathCompletoConFS = this->pathFileSystem + "/" + path;
+//	vector<string> directorios = ParserURI::parsear(pathCompletoConFS, '/');
+//	string directorioAcumulado = "";
+//	const int SIZE = directorios.size();
+//
+//	for (int i = 0; i < SIZE; i++) {
+//		string directorio = directorios[i];
+//		string directorioPadre = directorioAcumulado;
+//		directorioAcumulado += (directorio + "/");
+//
+//		if ( not validador.existeCarpeta(directorioAcumulado) ) { // Me fijo si existe la carpeta, sino la creo
+//			if (not tienePermisos)
+//				return false; // Si no existia la carpeta y no tiene permisos para crear
+//
+//			mkdir(directorioAcumulado.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+//			Logger::logInfo("La carpeta " + directorio + " no existe dentro de " + directorioPadre
+//								+ " por lo que ha sido creada.");
+//		}
+//	}
+//	string directorioFotos = this->pathFileSystem + "/" + FOTOS;
+//	if (not validador.existeCarpeta(directorioFotos)) {
+//		mkdir(directorioFotos.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+//		Logger::logInfo("La carpeta " + FOTOS + " no existe dentro de " + this->pathFileSystem
+//							+ " por lo que ha sido creada.");
+//	}
+//
+//	return true;
+	return manejadorArchivos.crearCarpeta(username, path);
 }
 
 bool ManejadorArchivosYMetadatos::crearCarpetaSegura (string username, string path) {
@@ -161,6 +162,7 @@ bool ManejadorArchivosYMetadatos::eliminarCarpeta (string username, string path)
 		return this->deleteCarpeta(pathConFS);
 	else
 		return false;
+//	return manejadorArchivos.eliminarCarpeta(username, path);
 }
 
 bool ManejadorArchivosYMetadatos::actualizarFotoPerfil(string filepathViejo, string filepathNuevo, const char* data, int dataLen) {
@@ -548,63 +550,24 @@ string ManejadorArchivosYMetadatos::descargarArchivo (string username, string fi
 }
 
 bool ManejadorArchivosYMetadatos::deleteCarpeta (string path) {
-	if (not validador.existeCarpeta(path)) {
-		Logger::logWarn("No se ha podido eliminar la carpeta " + path + " porque no existe.");
-		return false;
-	}
-	string command = "exec rm -r '" + path + "'";
-	system(command.c_str());
-	Logger::logTrace("Se elimino permanentemente la carpeta " + path + ".");
-	return true;
+//	if (not validador.existeCarpeta(path)) {
+//		Logger::logWarn("No se ha podido eliminar la carpeta " + path + " porque no existe.");
+//		return false;
+//	}
+//	string command = "exec rm -r '" + path + "'";
+//	system(command.c_str());
+//	Logger::logTrace("Se elimino permanentemente la carpeta " + path + ".");
+//	return true;
+	return manejadorArchivos.deleteCarpeta(path);
 }
 
 bool ManejadorArchivosYMetadatos::tamanioCarpeta (string path, unsigned long int & size) {
-	string pathConFS = this->pathFileSystem + "/" + path;
-	DIR* dir;
-	struct dirent* ent;
-	if ((dir = opendir(pathConFS.c_str())) == NULL) {
-		Logger::logWarn("No existe el directorio " + path);
-		return false;
-	}
-
-	while ((ent = readdir(dir)) != NULL) {
-		string dirName(ent->d_name);
-		if (dirName == "." or dirName == "..")
-			continue;
-
-		string pathInterno = path + "/" + ent->d_name;
-		string pathInternoConFS = this->pathFileSystem + "/" + pathInterno;
-		if (validador.existeCarpeta(pathInternoConFS))
-			this->tamanioCarpeta(pathInterno, size);
-		else {
-			struct stat buffer;
-			if (stat(pathInternoConFS.c_str(), &buffer) == 0)
-				size += buffer.st_size;
-			else
-				Logger::logWarn("No se pudo encontrar el archivo " + pathInterno);
-		}
-	}
-	closedir(dir);
-	return true;
+	return manejadorArchivos.tamanioCarpeta(path, size);
 }
 
 string ManejadorArchivosYMetadatos::actualizarUsuarioFechaModificacion (string jsonMetadatos,
 		string usernameModificacion) {
-
-	MetadatoArchivo metadato = ParserJson::deserializarMetadatoArchivo(jsonMetadatos);
-	metadato.usuarioUltimaModificacion = usernameModificacion;
-
-	struct tm *tiempo;
-	time_t fecha_sistema;
-	time(&fecha_sistema);
-	tiempo = localtime(&fecha_sistema);
-	int anio = tiempo->tm_year + 1900;
-	int mes = tiempo->tm_mon + 1;
-	int dia = tiempo->tm_mday;
-	string fecha = to_string(dia) + "/" + to_string(mes) + "/" + to_string(anio);
-	metadato.fechaUltimaModificacion = fecha;
-	string nuevosMetadatos = ParserJson::serializarMetadatoArchivo(metadato);
-	return nuevosMetadatos;
+	return manejadorMetadatos.actualizarUsuarioFechaModificacion(jsonMetadatos, usernameModificacion);
 }
 
 void ManejadorArchivosYMetadatos::eliminarArchivoDefinitivamente (string filepath) {
@@ -653,9 +616,4 @@ string ManejadorArchivosYMetadatos::buscarPorNombre(string username, string nomb
 
 string ManejadorArchivosYMetadatos::buscarPorPropietario(string username, string propietario) {
 	return buscador.buscarPorPropietario(username, propietario);
-}
-
-// Tiene sentido buscar en los archivos propios del user?
-map<string, string> ManejadorArchivosYMetadatos::buscar(string username, function<bool(MetadatoArchivo&)> predicate) {
-	return buscador.buscar(username, predicate);
 }

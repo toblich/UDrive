@@ -1,9 +1,22 @@
 #ifndef UDRIVE_MANEJADORARCHIVOS_H
 #define UDRIVE_MANEJADORARCHIVOS_H
 
+#include "validador.h"
 
-class manejadorArchivos {
+class ManejadorArchivos {
 
+public:
+	ManejadorArchivos(string pathFileSystem, Validador* validador);
+	virtual ~ManejadorArchivos();
+
+	bool tamanioCarpeta(string path, unsigned long int & size);
+	bool crearCarpeta(string username, string path);
+	bool eliminarCarpeta(string username, string path);
+	bool deleteCarpeta(string path);
+
+private:
+	string pathFileSystem;
+	Validador* validador;
 };
 
 

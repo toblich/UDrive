@@ -3,6 +3,8 @@
 
 //#include "validador.h"
 #include "buscador.h"
+#include "manejadorArchivos.h"
+#include "manejadorMetadatos.h"
 #include <functional>
 
 using std::string;
@@ -16,6 +18,8 @@ private:
 	string pathFileSystem;
 	Validador validador;
 	Buscador buscador;
+	ManejadorArchivos manejadorArchivos;
+	ManejadorMetadatos manejadorMetadatos;
 
 
 	// Archivos y Carpetas
@@ -31,7 +35,6 @@ private:
 	// Buscador
 	string obtenerEstructuraCarpeta(string path, bool esRecursivo, function<bool(MetadatoArchivo&)> predicate);
 	string obtenerEstructuraCompartidos(string path);
-	map<string, string> buscar(string username, function<bool(MetadatoArchivo&)> predicate);
 
 	// Indefinidos
 	bool renombrar(const string& pathInterno, const string& nuevoFilename);
