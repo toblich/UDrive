@@ -123,6 +123,12 @@ mg_result File::PUTHandler (mg_connection* connection) {
 	string user = datosArch.user;
 	Logger::logInfo("Se obtuvo la variable user con valor: " + user);
 
+	if (datosArch.dataLength == 0){
+		string mensaje = "Error, no se paso ningun archivo para subir por parametro.";
+		this->responderBadRequest(connection, mensaje);
+		return MG_TRUE;
+	}
+
 	if (manejadorUs->autenticarToken(token, user)) {
 		Logger::logInfo("Se autenticó la sesión correctamente.");
 		subirArchivo(uris, datosArch, user, connection);

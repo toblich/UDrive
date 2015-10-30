@@ -2,7 +2,6 @@
 
 using namespace std;
 
-
 bool Server::running = true;
 
 Server::Server (string listeningPort, BD* perfiles, BD* sesiones, BD* passwords, BD* metadatos) {
@@ -69,6 +68,7 @@ Server::~Server () {
 	delete mapaURI.at("file");
 	delete mapaURI.at("metadata");
 	delete mapaURI.at("folder");
+
 	Logger::logDebug("Se cerro el servidor");
 }
 

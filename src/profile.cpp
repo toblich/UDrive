@@ -142,8 +142,7 @@ mg_result Profile::PUTHandler (mg_connection* connection) {
 			string pathFotoNuevo = FOTOS + "/" + user + "." + nombreYExtension[nombreYExtension.size() - 1];
 
 			//Si se cambio el path de la foto, la actualizo en el perfil del usuario. Sino queda como antes.
-			if (manejadorAyM->actualizarFotoPerfil(pathFotoViejo, pathFotoNuevo, datosArch.fileData,
-					datosArch.dataLength)) {
+			if (manejadorAyM->actualizarFotoPerfil(pathFotoViejo, pathFotoNuevo, datosArch.fileData, datosArch.dataLength)) {
 				Logger::logInfo("Se actualizo la foto de perfil y cambio el path.");
 				viejoPerfil.pathFotoPerfil = pathFotoNuevo;
 			}
