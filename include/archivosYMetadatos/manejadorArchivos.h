@@ -17,6 +17,8 @@ public:
 	bool renombrarArchivo (const string& pathInterno, const string& nuevoFilename);
 	void eliminarArchivoDefinitivamente (const string& filepath);
 
+	bool eliminar(string username, string path); //Sirve para carpetas y archivos // BAJAR
+
 private:
 	string pathFileSystem;
 	Validador* validador;

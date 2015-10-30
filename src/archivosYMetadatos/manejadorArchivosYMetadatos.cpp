@@ -22,6 +22,7 @@ ManejadorArchivosYMetadatos::~ManejadorArchivosYMetadatos () {
 }
 
 bool ManejadorArchivosYMetadatos::eliminar (string username, string path) {
+	//return manejadorArchivos.eliminar(username, path);
 	if (not validador.verificarPermisos(username, path))
 		return false;
 
@@ -125,8 +126,7 @@ bool ManejadorArchivosYMetadatos::actualizarFotoPerfil(string filepathViejo, str
 	outFile.write(data, dataLen);
 	outFile.close();
 
-	if ( filepathViejo != filepathNuevo ) return true;
-	return false;
+	return ( filepathViejo != filepathNuevo );
 }
 
 // En la base de datos se guarda el path sin la carpeta del FS
@@ -201,6 +201,7 @@ string ManejadorArchivosYMetadatos::consultarMetadatosArchivo (string username, 
 
 bool ManejadorArchivosYMetadatos::actualizarMetadatosChequeados (const string& filepath,
 		const string& jsonNuevosMetadatos, const string& username) {
+
 	string nuevoJson;
 	bool deboRenombrar = manejadorMetadatos.actualizarPermisos(filepath, jsonNuevosMetadatos, username, nuevoJson);
 	if (not deboRenombrar) return true;
@@ -232,9 +233,6 @@ bool ManejadorArchivosYMetadatos::actualizarMetadatos (string username, string f
 	return actualizarMetadatosChequeados(filepath, jsonNuevosMetadatos, username);
 }
 
-bool ManejadorArchivosYMetadatos::agregarPermiso (string usernameOrigen, string filepath, string usernameDestino) {
-	return manejadorMetadatos.agregarPermiso(usernameOrigen, filepath, usernameDestino);
-}
 
 // Lo que se hace es moverlo a la papelera y cambiar el key de los metadatos por ese
 // Manda el archivo a la papelera del propietario y borra todos los permisos de todos, salvo el del propietario
@@ -315,15 +313,6 @@ string ManejadorArchivosYMetadatos::descargarArchivo (string username, string fi
 	string pathADevolver(this->homeDirectory);
 	pathADevolver += "/" + filepathCompleto;
 	return pathADevolver;
-}
-
-bool ManejadorArchivosYMetadatos::tamanioCarpeta (string path, unsigned long int & size) {
-	return manejadorArchivos.tamanioCarpeta(path, size);
-}
-
-string ManejadorArchivosYMetadatos::actualizarUsuarioFechaModificacion (string jsonMetadatos,
-		string usernameModificacion) {
-	return manejadorMetadatos.actualizarUsuarioFechaModificacion(jsonMetadatos, usernameModificacion);
 }
 
 bool ManejadorArchivosYMetadatos::deleteFileSystem () {

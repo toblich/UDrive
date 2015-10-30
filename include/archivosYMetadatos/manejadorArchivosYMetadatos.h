@@ -23,48 +23,41 @@ private:
 
 
 	// Archivos y Carpetas
-	bool tamanioCarpeta(string path, unsigned long int & size);
-
-	bool eliminarArchivo(string username, string filepath); //* Queda
-	bool eliminarCarpeta(string username, string path);
-	bool mandarArchivoATrash(string username, string filepath); //*
-	bool guardarArchivo (const string& filepath, const string& username, const char* data, int dataLen); //*
-
-	// Metadatos
-	string actualizarUsuarioFechaModificacion(string jsonMetadatos, string usernameModificacion);
-	bool agregarPermiso(string usernameOrigen, string filepath, string usernameDestino);
+	bool eliminarArchivo(string username, string filepath); //*
+	bool eliminarCarpeta(string username, string path);	//*
+	bool mandarArchivoATrash(string username, string filepath); //* jodido, parte y parte
+	bool guardarArchivo (const string& filepath, const string& username, const char* data, int dataLen); //* jodido, parte y parte
 
 
-	bool actualizarMetadatosChequeados (const string& filepath, const string& jsonNuevosMetadatos, const string& username); //*
+	bool actualizarMetadatosChequeados (const string& filepath, const string& jsonNuevosMetadatos, const string& username); // Queda
 
 public:
 	ManejadorArchivosYMetadatos(BD* dbMetadatos);
 	ManejadorArchivosYMetadatos(BD* dbMetadatos, string path);
 	virtual ~ManejadorArchivosYMetadatos();
 
-	bool crearUsuario(string username);
+	bool crearUsuario(string username);	// bajar copia de foto
 	bool crearCarpetaSegura(string username, string path);
 	string obtenerEstructuraCarpeta(string path);
 
 	bool eliminar(string username, string path); //Sirve para carpetas y archivos
-	bool restaurar(string username, string path);
+	bool restaurar(string username, string path); // bajar al menos un cacho
 
-	bool subirArchivo(string username, string filepath, const char* data, int dataLen, string jsonMetadatos, int cuota);
+	bool subirArchivo(string username, string filepath, const char* data, int dataLen, string jsonMetadatos, int cuota); // dbMetadatos->put
 	string descargarArchivo(string username, string filepath);
 	bool actualizarArchivo(string username, string filepath, const char* data, int dataLen, int cuota);
-	bool actualizarFotoPerfil(string filepathViejo, string filepathNuevo, const char* data, int dataLen);
+	bool actualizarFotoPerfil(string filepathViejo, string filepathNuevo, const char* data, int dataLen); // a manejadorArchivos
 
 	string consultarMetadatosArchivo(string username, string filename);
 	bool actualizarMetadatos(string username, string filepath, string jsonNuevosMetadatos);
 
 	bool deleteFileSystem();
 
-	//busquedas
+	// Busquedas
 	string buscarPorExtension(string username, string extension);
 	string buscarPorEtiqueta(string username, string etiqueta);
 	string buscarPorNombre(string username, string nombre);
-	//Esta busqueda implica mostrar todos los archivos que me compartio ese propietario
-	string buscarPorPropietario(string username, string propietario);
+	string buscarPorPropietario(string username, string propietario); // Da los archivos que me compartio ese propietario
 };
 
 #endif /* MANEJADORARCHIVOSYMETADATOS_H_ */
