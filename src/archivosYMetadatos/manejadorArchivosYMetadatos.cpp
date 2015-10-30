@@ -71,38 +71,7 @@ bool ManejadorArchivosYMetadatos::restaurar(string username, string pathEnPapele
 	return false;
 }
 
-// El path recibido no debe contener el nombre de un archivo.
-// En caso de que sea asi, se debera modificar este metodo.
 bool ManejadorArchivosYMetadatos::crearCarpeta (string username, string path) {
-//	bool tienePermisos = validador.verificarPermisos(username, path);
-//	// Agrego el FileSystem para que sea la "raiz"
-//	string pathCompletoConFS = this->pathFileSystem + "/" + path;
-//	vector<string> directorios = ParserURI::parsear(pathCompletoConFS, '/');
-//	string directorioAcumulado = "";
-//	const int SIZE = directorios.size();
-//
-//	for (int i = 0; i < SIZE; i++) {
-//		string directorio = directorios[i];
-//		string directorioPadre = directorioAcumulado;
-//		directorioAcumulado += (directorio + "/");
-//
-//		if ( not validador.existeCarpeta(directorioAcumulado) ) { // Me fijo si existe la carpeta, sino la creo
-//			if (not tienePermisos)
-//				return false; // Si no existia la carpeta y no tiene permisos para crear
-//
-//			mkdir(directorioAcumulado.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-//			Logger::logInfo("La carpeta " + directorio + " no existe dentro de " + directorioPadre
-//								+ " por lo que ha sido creada.");
-//		}
-//	}
-//	string directorioFotos = this->pathFileSystem + "/" + FOTOS;
-//	if (not validador.existeCarpeta(directorioFotos)) {
-//		mkdir(directorioFotos.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-//		Logger::logInfo("La carpeta " + FOTOS + " no existe dentro de " + this->pathFileSystem
-//							+ " por lo que ha sido creada.");
-//	}
-//
-//	return true;
 	return manejadorArchivos.crearCarpeta(username, path);
 }
 
@@ -122,7 +91,6 @@ bool ManejadorArchivosYMetadatos::crearUsuario (string username) {
 	bool agregoPermisos = this->agregarPermisosABD(username);
 	if (not agregoPermisos) return false;
 	bool creoCarpeta = this->crearCarpeta(username, pathTrash);
-//	return (agregoPermisos and this->crearCarpeta(username, pathTrash));
 	string filepathConFS = this->pathFileSystem + "/" + FOTOS + "/" + username + ".jpg";
 	string command = "exec cp '" + PATH_DEFAULT_FOTO_PERFIL + "' '" + filepathConFS + "'";
 	system(command.c_str());
@@ -320,7 +288,6 @@ bool ManejadorArchivosYMetadatos::actualizarMetadatosChequeados (const string& f
 // - Vacio significa que no se modificaron los usuarios
 // - Lleno significa que esos son los nuevos usuarios habilitados -> En este caso me tengo que fijar los que ya habia comparados con los nuevos
 //																	 a ver cual es el/los nuevo/s usuarios a dar permisos.
-// Por ahora no se pueden borrar permisos.
 bool ManejadorArchivosYMetadatos::actualizarMetadatos (string username, string filepath, string jsonNuevosMetadatos) {
 	if (not validador.verificarPermisos(username, filepath))
 		return false;
@@ -440,14 +407,6 @@ string ManejadorArchivosYMetadatos::descargarArchivo (string username, string fi
 }
 
 bool ManejadorArchivosYMetadatos::deleteCarpeta (string path) {
-//	if (not validador.existeCarpeta(path)) {
-//		Logger::logWarn("No se ha podido eliminar la carpeta " + path + " porque no existe.");
-//		return false;
-//	}
-//	string command = "exec rm -r '" + path + "'";
-//	system(command.c_str());
-//	Logger::logTrace("Se elimino permanentemente la carpeta " + path + ".");
-//	return true;
 	return manejadorArchivos.deleteCarpeta(path);
 }
 

@@ -38,6 +38,8 @@ bool ManejadorArchivos::tamanioCarpeta (string path, unsigned long int& size) {
 	return true;
 }
 
+// El path recibido no debe contener el nombre de un archivo.
+// En caso de que sea asi, se debera modificar este metodo.
 bool ManejadorArchivos::crearCarpeta (string username, string path) {
 	bool tienePermisos = validador->verificarPermisos(username, path);
 	// Agrego el FileSystem para que sea la "raiz"
