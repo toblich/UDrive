@@ -148,14 +148,3 @@ void RealizadorDeEventos::responderResourceCreated(mg_connection* connection, st
 	mg_send_header(connection, contentType.c_str(), jsonType.c_str());
 	printfData(connection, "{\"success\": \"%s\"}", msg.c_str());
 }
-
-string RealizadorDeEventos::getFilepathFrom(const vector<string>& uris) {
-	string filepath = "";
-	for (int i = 1; i <= uris.size() - 1; i++) {
-		filepath += uris[i];
-		if (i != uris.size() - 1) {
-			filepath += "/";
-		}
-	}
-	return filepath;
-}

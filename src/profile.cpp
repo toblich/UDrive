@@ -76,7 +76,7 @@ mg_result Profile::GETHandler (mg_connection* connection) {
 
 		//Si uris[1] == ^fotos se quiere descargar una foto de perfil
 		else if (uris[1] == FOTOS) {
-			string filePath = getFilepathFrom(uris);
+			string filePath = ParserURI::join(uris, '/', 1, uris.size());
 			enviarFotoPerfil(connection, filePath, user);
 
 		} else { //Si no se quiere descargar el perfil de un usuario
@@ -86,7 +86,6 @@ mg_result Profile::GETHandler (mg_connection* connection) {
 	} else {
 		this->responderAutenticacionFallida(connection);
 	}
-	Logger::logDebug("HECHO");
 	return MG_TRUE;
 }
 

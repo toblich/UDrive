@@ -9,7 +9,7 @@ Metadata::~Metadata () {
 }
 
 void Metadata::GETMetadatos(mg_connection* connection, vector<string> uris, string user) {
-	string filepath = getFilepathFrom(uris);
+	string filepath = ParserURI::join(uris, '/', 1, uris.size());
 	string metadatosArch = manejadorArchYMet->consultarMetadatosArchivo(user, filepath);
 	if (metadatosArch != "") {
 		Logger::logInfo("Se enviaron los metadatos del archivo: " + filepath + " correctamente.");
@@ -98,7 +98,7 @@ mg_result Metadata::PUTHandler (mg_connection* connection) {
 
 	if (manejadorUs->autenticarToken(token, user)) {
 		Logger::logInfo("Se autenticó la sesión correctamente.");
-		string filepath = getFilepathFrom(uris);
+		string filepath = ParserURI::join(uris, '/', 1, uris.size());
 		if (manejadorArchYMet->actualizarMetadatos(user, filepath, nuevosMetadatos)) {
 			string mensaje = "Se actualizaron los metadatos del archivo: " + filepath + " correctamente.";
 			this->responderSucces(connection, mensaje);

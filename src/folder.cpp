@@ -19,7 +19,7 @@ mg_result Folder::GETHandler (mg_connection* connection) {
 
 	if (manejadorUs->autenticarToken(token, user)) {
 		Logger::logInfo("Se autenticó la sesión correctamente.");
-		string filepath = getFilepathFrom(uris);
+		string filepath = ParserURI::join(uris, '/', 1, uris.size());
 		string estructura = manejadorArchYMet->obtenerEstructuraCarpeta(filepath);
 		if (estructura != "") {
 			Logger::logInfo("Se envió la estructura de la carpeta: " + filepath + " correctamente.");
@@ -47,7 +47,7 @@ mg_result Folder::PUTHandler (mg_connection* connection) {
 
 	if (manejadorUs->autenticarToken(token, user)) {
 		Logger::logInfo("Se autenticó la sesión correctamente.");
-		string filepath = getFilepathFrom(uris);
+		string filepath = ParserURI::join(uris, '/', 1, uris.size());
 		if (manejadorArchYMet->crearCarpetaSegura(user, filepath)) {
 			string mensaje = "Se creo la carpeta: " + filepath + " correctamente.";
 			this->responderResourceCreated(connection, mensaje);
@@ -72,7 +72,7 @@ mg_result Folder::DELETEHandler (mg_connection* connection) {
 
 	if (manejadorUs->autenticarToken(token, user)) {
 		Logger::logInfo("Se autenticó la sesión correctamente.");
-		string filepath = getFilepathFrom(uris);
+		string filepath = ParserURI::join(uris, '/', 1, uris.size());
 		if (manejadorArchYMet->eliminar(user, filepath)) {
 			string mensaje = "Se eliminó la carpeta: " + filepath + " correctamente.";
 			this->responderSucces(connection, mensaje);

@@ -34,7 +34,7 @@ mg_result File::GETHandler (mg_connection* connection) {
 
 	if (manejadorUs->autenticarToken(token, user)) {
 		Logger::logInfo("Se autenticó la sesión correctamente.");
-		string filepath = getFilepathFrom(uris);
+		string filepath = ParserURI::join(uris, '/', 1, uris.size());
 		string completePath = manejadorArchYMet->descargarArchivo(user, filepath);
 		enviarArchivo(completePath, connection);
 	} else {
@@ -90,7 +90,7 @@ void File::actualizarUltimaUbicacion(string user, string latitud, string longitu
 }
 
 void File::subirArchivo (const vector<string>& uris, const DatosArchivo& datosArch, const string& user, mg_connection* connection) {
-	string filepath = getFilepathFrom(uris);
+	string filepath = ParserURI::join(uris, '/', 1, uris.size());
 	vector<string> nombreYExtension = ParserURI::parsear(datosArch.fileName, '.');
 	Logger::logInfo("Se parseó el nombre del archivo correctamente.");
 	MetadatoArchivo metArch = extractMetadataFrom(nombreYExtension, user, uris);
@@ -150,7 +150,7 @@ mg_result File::DELETEHandler (mg_connection* connection) {
 
 	if (manejadorUs->autenticarToken(token, user)) {
 		Logger::logInfo("Se autenticó la sesión correctamente.");
-		string filepath = getFilepathFrom(uris);
+		string filepath = ParserURI::join(uris, '/', 1, uris.size());
 		if (restore == "true"){
 			if (manejadorArchYMet->restaurar(user, filepath)){
 				string mensaje = "Se restauró el archivo: " + filepath + " correctamente.";
