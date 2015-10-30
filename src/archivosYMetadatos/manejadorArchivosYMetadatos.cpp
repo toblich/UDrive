@@ -11,7 +11,8 @@ ManejadorArchivosYMetadatos::ManejadorArchivosYMetadatos (BD* dbMetadatos) :
 		ManejadorArchivosYMetadatos(dbMetadatos, DEFAULT_FS) {
 }
 
-ManejadorArchivosYMetadatos::ManejadorArchivosYMetadatos (BD* dbMetadatos, string path) : validador(dbMetadatos) {
+ManejadorArchivosYMetadatos::ManejadorArchivosYMetadatos (BD* dbMetadatos, string path) :
+		validador(dbMetadatos), buscador(dbMetadatos, path) {
 	this->dbMetadatos = dbMetadatos;
 	this->pathFileSystem = path;
 	getcwd(homeDirectory, sizeof(homeDirectory));
@@ -520,75 +521,11 @@ bool ManejadorArchivosYMetadatos::mandarArchivoATrash(string username, string fi
 }
 
 string ManejadorArchivosYMetadatos::obtenerEstructuraCompartidos(string path) {
-	if ( not dbMetadatos->contains(path) )
-		return "";
-	string compartidosConUsuario = dbMetadatos->get(path);
-	Logger::logDebug("Compartidos con " + path + " " + compartidosConUsuario + " al obtener estructura de Compartidos");
-	vector<string> archivosCompartidos = ParserURI::parsear(compartidosConUsuario, RESERVED_CHAR);
-	map<string, string> mapa;
-	vector<string>::iterator it = archivosCompartidos.begin();
-	for ( ; it != archivosCompartidos.end(); it++) {
-		string archivoCompartido = (*it);
-		if (not dbMetadatos->contains(archivoCompartido)) {	// debug
-			Logger::logError("En la base de datos no esta el archivo compartido " + archivoCompartido);
-		}
-		string jsonMetadatoArchivoCompartido = dbMetadatos->get(archivoCompartido);
-		MetadatoArchivo metadatoArchivoCompartido = ParserJson::deserializarMetadatoArchivo(jsonMetadatoArchivoCompartido);
-		string nombre = metadatoArchivoCompartido.nombre;
-		if (metadatoArchivoCompartido.extension != "none")
-			nombre += "." + metadatoArchivoCompartido.extension;
-		mapa.insert(pair<string, string>(archivoCompartido, nombre));
-	}
-	string json = ParserJson::serializarMapa(mapa);
-	return json;
+	return buscador.obtenerEstructuraCompartidos(path);
 }
 
 string ManejadorArchivosYMetadatos::obtenerEstructuraCarpeta (string path, bool esRecursivo, function<bool(MetadatoArchivo&)> predicate) {
-	if ( path.find(RESERVED_STR + "permisos") != string::npos )
-		return this->obtenerEstructuraCompartidos(path);
-	string pathCompleto = this->pathFileSystem + "/" + path;
-	DIR* dir;
-	if ((dir = opendir(pathCompleto.c_str())) != NULL) {
-		map<string, string> mapa;
-		struct dirent* ent;
-		while ((ent = readdir(dir)) != NULL) {
-			string dirName(ent->d_name);
-			if (dirName == "." or dirName == "..")
-				continue;
-
-			string pathInterno = path + "/" + ent->d_name;
-			string pathInternoConFS = this->pathFileSystem + "/" + pathInterno;
-			if (validador.existeCarpeta(pathInternoConFS)) {
-				if (esRecursivo) {
-					string jsonEstructura = obtenerEstructuraCarpeta(pathInterno, true, predicate);
-					mapa = ParserJson::deserializarMapa( ParserJson::estructurasMerge( mapa, jsonEstructura ) );
-				} else {
-					vector<string> directorios = ParserURI::parsear(pathInterno, '/');
-					int size = directorios.size();
-					string foldername = directorios[size - 1];
-					mapa.insert(pair<string, string>(pathInterno, foldername + "." + FOLDER));
-				}
-			} else { //Es un archivo
-				if (not dbMetadatos->contains(pathInterno)) {
-					Logger::logWarn("Se quiso obtener los metadatos del archivo " + path + " pero este no existe.");
-					return "";
-				}
-				string jsonMetadatos = this->dbMetadatos->get(pathInterno);
-				MetadatoArchivo metadato = ParserJson::deserializarMetadatoArchivo(jsonMetadatos);
-				string nombre = metadato.nombre;
-				if (metadato.extension != "none")
-					nombre += "." + metadato.extension;
-				if ( predicate(metadato) ) {
-					mapa.insert(pair<string, string>(pathInterno, nombre));
-				}
-			}
-		}
-		closedir(dir);
-		string json = ParserJson::serializarMapa(mapa);
-		return json;
-	} else
-		Logger::logWarn("No existe el directorio " + path);
-	return "";
+	return buscador.obtenerEstructuraCarpeta(path, esRecursivo, predicate);
 }
 
 string ManejadorArchivosYMetadatos::obtenerEstructuraCarpeta (string path) {
@@ -703,64 +640,22 @@ bool ManejadorArchivosYMetadatos::deleteFileSystem () {
 }
 
 string ManejadorArchivosYMetadatos::buscarPorExtension(string username, string extension) {
-	auto predicate = [&] (MetadatoArchivo& metadato) -> bool {return metadato.extension == extension;};
-	map<string, string> estructuraPermisos = buscar(username, predicate);
-	string jsonEstructuraFileSystem = obtenerEstructuraCarpeta(username, true, predicate);
-	return ParserJson::estructurasMerge(estructuraPermisos, jsonEstructuraFileSystem);
+	return buscador.buscarPorExtension(username, extension);
 }
 
 string ManejadorArchivosYMetadatos::buscarPorEtiqueta(string username, string etiqueta) {
-	auto predicate = [&] (MetadatoArchivo& metadato) -> bool {
-		bool contieneEtiqueta = false;
-		list<string> etiquetas = metadato.etiquetas;
-		list<string>::iterator it = etiquetas.begin();
-		for ( ; it != etiquetas.end() ; it++ ) {
-			string etiquetaArchivo = (*it);
-			if ( etiquetaArchivo == etiqueta ) {
-				contieneEtiqueta = true;
-				break;
-			}
-		}
-		return contieneEtiqueta;
-	};
-	map<string, string> estructuraPermisos = buscar(username, predicate);
-	string jsonEstructuraFileSystem = obtenerEstructuraCarpeta(username, true, predicate);
-	return ParserJson::estructurasMerge(estructuraPermisos, jsonEstructuraFileSystem);
+	return buscador.buscarPorEtiqueta(username, etiqueta);
 }
 
 string ManejadorArchivosYMetadatos::buscarPorNombre(string username, string nombre) {
-	auto predicate = [&] (MetadatoArchivo& metadato) -> bool {return (metadato.nombre.find(nombre) != string::npos);};
-	map<string, string> estructuraPermisos = buscar(username, predicate);
-	string jsonEstructuraFileSystem = obtenerEstructuraCarpeta(username, true, predicate);
-	return ParserJson::estructurasMerge(estructuraPermisos, jsonEstructuraFileSystem);
+	return buscador.buscarPorNombre(username, nombre);
 }
 
 string ManejadorArchivosYMetadatos::buscarPorPropietario(string username, string propietario) {
-	auto predicate = [&] (MetadatoArchivo& metadato) -> bool {return metadato.propietario == propietario;};
-	if ( username != propietario ) {
-		map<string, string> estructuraPermisos = buscar(username, predicate);
-		return ParserJson::serializarMapa(estructuraPermisos);
-	}
-	return obtenerEstructuraCarpeta(username, true, predicate);
+	return buscador.buscarPorPropietario(username, propietario);
 }
 
 // Tiene sentido buscar en los archivos propios del user?
 map<string, string> ManejadorArchivosYMetadatos::buscar(string username, function<bool(MetadatoArchivo&)> predicate) {
-	string permisos = PERMISOS + "/" + username;
-	string archivosPermitidos = dbMetadatos->get(permisos);
-	vector<string> archivos = ParserURI::parsear(archivosPermitidos, RESERVED_CHAR);
-	map<string, string> estructura;
-	vector<string>::iterator it = archivos.begin();
-	for ( ; it != archivos.end(); it++){
-		string archivoCompartido = (*it);
-		string jsonMetadato = dbMetadatos->get(archivoCompartido);
-		MetadatoArchivo metadatoArchivoCompartido = ParserJson::deserializarMetadatoArchivo(jsonMetadato);
-		if ( predicate(metadatoArchivoCompartido) ) {
-			string nombre = metadatoArchivoCompartido.nombre;
-			if (metadatoArchivoCompartido.extension != "none")
-				nombre += "." + metadatoArchivoCompartido.extension;
-			estructura.insert(pair<string, string>(archivoCompartido, nombre));
-		}
-	}
-	return estructura;
+	return buscador.buscar(username, predicate);
 }

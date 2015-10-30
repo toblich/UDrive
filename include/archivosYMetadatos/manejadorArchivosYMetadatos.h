@@ -1,7 +1,8 @@
 #ifndef MANEJADORARCHIVOSYMETADATOS_H_
 #define MANEJADORARCHIVOSYMETADATOS_H_
 
-#include "validador.h"
+//#include "validador.h"
+#include "buscador.h"
 #include <functional>
 
 using std::string;
@@ -14,37 +15,47 @@ private:
 	char homeDirectory[1024];
 	string pathFileSystem;
 	Validador validador;
+	Buscador buscador;
 
+
+	// Archivos y Carpetas
 	bool tamanioCarpeta(string path, unsigned long int & size);
 	bool crearCarpeta(string username, string path);
 	bool eliminarCarpeta(string username, string path);
 	bool deleteCarpeta(string path);
-
-	string actualizarUsuarioFechaModificacion(string jsonMetadatos, string usernameModificacion);
-
-	bool agregarPermisosABD(string username);
 	bool eliminarArchivo(string username, string filepath);
-	bool mandarArchivoATrash(string username, string filepath);
 	void eliminarArchivoDefinitivamente(string filepath);
+	bool mandarArchivoATrash(string username, string filepath);
+	bool guardarArchivo (const string& filepath, const string& username, const char* data, int dataLen);
+
+	// Buscador
+	string obtenerEstructuraCarpeta(string path, bool esRecursivo, function<bool(MetadatoArchivo&)> predicate);
+	string obtenerEstructuraCompartidos(string path);
+	map<string, string> buscar(string username, function<bool(MetadatoArchivo&)> predicate);
+
+	// Indefinidos
+	bool renombrar(const string& pathInterno, const string& nuevoFilename);
+	string pathConNuevoFilename (const string& pathInterno, const string& nuevoFilename);
+
+
+	// Metadatos
+	string actualizarUsuarioFechaModificacion(string jsonMetadatos, string usernameModificacion);
+	bool agregarPermisosABD(string username);
 	bool agregarPermiso(string usernameOrigen, string filepath, string usernameDestino);
 	bool eliminarPermiso(string usernameOrigen, string filepath, string usernameDestino);
-	bool guardarArchivo (const string& filepath, const string& username, const char* data, int dataLen);
-	bool renombrar(const string& pathInterno, const string& nuevoFilename);
 	bool actualizarMetadatosChequeados (const string& filepath, const string& jsonNuevosMetadatos, const string& username);
 	Batch armarBatchEliminarArchivo (const string& jsonMetadatos, const string& username, const string& filepath,
-			const string& pathCompletoPapelera);
+									 const string& pathCompletoPapelera);
 	bool restaurarMetadatos (const string& pathEnPapeleraSinFS, const string& username, const string& pathRealSinFS);
 	string metadatosConPermisosDepurados (const string& filepath, const string& usernameDestino);
 	string jsonArchivosPermitidos (const string& pathPermisos, const string& filepath);
-	string obtenerEstructuraCompartidos(string path);
-	string pathConNuevoFilename (const string& pathInterno, const string& nuevoFilename);
 	string actualizarPermisosMetadato (const MetadatoArchivo& metadatosViejos, MetadatoArchivo metadatosNuevos,
-			const string& username, const string& filepath, const string& jsonNuevosMetadatos);
+									   const string& username, const string& filepath, const string& jsonNuevosMetadatos);
 	void actualizarPermisosPathArchivo(const string& filepath, const string& nuevoFilepath,
 			const list<string>& usuariosHabilitados);
 
-	map<string, string> buscar(string username, function<bool(MetadatoArchivo&)> predicate);
-	string obtenerEstructuraCarpeta(string path, bool esRecursivo, function<bool(MetadatoArchivo&)> predicate);
+
+
 
 public:
 	ManejadorArchivosYMetadatos(BD* dbMetadatos);
