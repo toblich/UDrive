@@ -36,11 +36,6 @@ bool ManejadorArchivosYMetadatos::eliminar (string username, string path) {
 	return false;
 }
 
-bool ManejadorArchivosYMetadatos::restaurarMetadatos (const string& pathEnPapeleraSinFS, const string& username,
-		const string& pathRealSinFS) {
-	return manejadorMetadatos.restaurarMetadatos(pathEnPapeleraSinFS, username, pathRealSinFS);
-}
-
 bool ManejadorArchivosYMetadatos::restaurar(string username, string pathEnPapeleraSinFS) {
 	if (not validador.verificarPermisos(username, pathEnPapeleraSinFS))	// username igual a la primera parte de la URI
 		return false;
@@ -62,7 +57,7 @@ bool ManejadorArchivosYMetadatos::restaurar(string username, string pathEnPapele
 
 	Logger::logInfo("La restauracion del archivo " + pathEnPapeleraSinFS + " fue correcta.");
 
-	if (restaurarMetadatos(pathEnPapeleraSinFS, username, pathRealSinFS))
+	if (manejadorMetadatos.restaurarMetadatos(pathEnPapeleraSinFS, username, pathRealSinFS))
 		return true;
 
 	rename(pathRealConFS.c_str(), pathEnPapeleraConFS.c_str());	// deshace la eliminacion
@@ -71,26 +66,18 @@ bool ManejadorArchivosYMetadatos::restaurar(string username, string pathEnPapele
 	return false;
 }
 
-bool ManejadorArchivosYMetadatos::crearCarpeta (string username, string path) {
-	return manejadorArchivos.crearCarpeta(username, path);
-}
-
 bool ManejadorArchivosYMetadatos::crearCarpetaSegura (string username, string path) {
 	if (validador.esPathValido(path))
-		return this->crearCarpeta(username, path);
+		return manejadorArchivos.crearCarpeta(username, path);
 	return false;
-}
-
-bool ManejadorArchivosYMetadatos::agregarPermisosABD (string username) {
-	return manejadorMetadatos.agregarPermisosABD(username);
 }
 
 bool ManejadorArchivosYMetadatos::crearUsuario (string username) {
 	//Creo tanto la carpeta del username como su papelera y su foto de perfil por default
 	string pathTrash = username + "/" + TRASH;
-	bool agregoPermisos = this->agregarPermisosABD(username);
+	bool agregoPermisos = manejadorMetadatos.agregarPermisosABD(username);
 	if (not agregoPermisos) return false;
-	bool creoCarpeta = this->crearCarpeta(username, pathTrash);
+	bool creoCarpeta = manejadorArchivos.crearCarpeta(username, pathTrash);
 	string filepathConFS = this->pathFileSystem + "/" + FOTOS + "/" + username + ".jpg";
 	string command = "exec cp '" + PATH_DEFAULT_FOTO_PERFIL + "' '" + filepathConFS + "'";
 	system(command.c_str());
@@ -121,7 +108,7 @@ bool ManejadorArchivosYMetadatos::eliminarCarpeta (string username, string path)
 	closedir(dir);
 
 	if (validador.carpetaVacia(pathConFS))
-		return this->deleteCarpeta(pathConFS);
+		return manejadorArchivos.deleteCarpeta(pathConFS);
 	else
 		return false;
 //	return manejadorArchivos.eliminarCarpeta(username, path);
@@ -175,7 +162,7 @@ bool ManejadorArchivosYMetadatos::guardarArchivo (const string& filepath, const 
 	if (validador.existeMetadato(filepath)) {
 		//Significa que no fui llamado desde el subirArchivo, por lo que la actualizacion se hará ahí
 		string metadatos = dbMetadatos->get(filepath);
-		string nuevosMetadatos = this->actualizarUsuarioFechaModificacion(metadatos, username);
+		string nuevosMetadatos = manejadorMetadatos.actualizarUsuarioFechaModificacion(metadatos, username);
 		dbMetadatos->modify(filepath, nuevosMetadatos);
 		//					Logger::logWarn("Se quiso consultar los metadatos del archivo " + filepath + " pero este no existe.");
 		//					return false;
@@ -259,24 +246,6 @@ bool ManejadorArchivosYMetadatos::agregarPermiso (string usernameOrigen, string 
 	return manejadorMetadatos.agregarPermiso(usernameOrigen, filepath, usernameDestino);
 }
 
-string ManejadorArchivosYMetadatos::metadatosConPermisosDepurados (const string& filepath, const string& usernameDestino) {
-	return manejadorMetadatos.metadatosConPermisosDepurados(filepath, usernameDestino);
-}
-
-// Como este metodo se llama directamente desde actualizarMetadatos, ya la fecha viene modificada
-string ManejadorArchivosYMetadatos::jsonArchivosPermitidos (const string& pathPermisos, const string& filepath) {
-	return manejadorMetadatos.jsonArchivosPermitidos(pathPermisos, filepath);
-}
-
-bool ManejadorArchivosYMetadatos::eliminarPermiso(string usernameOrigen, string filepath, string usernameDestino) {
-	return manejadorMetadatos.eliminarPermiso(usernameOrigen, filepath, usernameDestino);
-}
-
-Batch ManejadorArchivosYMetadatos::armarBatchEliminarArchivo (const string& jsonMetadatos, const string& username,
-		const string& filepath, const string& pathCompletoPapelera) {
-	return manejadorMetadatos.armarBatchEliminarArchivo(jsonMetadatos, username, filepath, pathCompletoPapelera);
-}
-
 // Lo que se hace es moverlo a la papelera y cambiar el key de los metadatos por ese
 // Manda el archivo a la papelera del propietario y borra todos los permisos de todos, salvo el del propietario
 bool ManejadorArchivosYMetadatos::eliminarArchivo (string username, string filepath) {
@@ -326,7 +295,7 @@ bool ManejadorArchivosYMetadatos::mandarArchivoATrash(string username, string fi
 	}
 	Logger::logInfo("La eliminacion del archivo " + filepath + " fue correcta.");
 
-	Batch batch = armarBatchEliminarArchivo(jsonMetadatos, username, filepath, pathCompletoPapelera);
+	Batch batch = manejadorMetadatos.armarBatchEliminarArchivo(jsonMetadatos, username, filepath, pathCompletoPapelera);
 
 	if (this->dbMetadatos->writeBatch(batch))
 		return true;
@@ -362,10 +331,6 @@ string ManejadorArchivosYMetadatos::descargarArchivo (string username, string fi
 	return pathADevolver;
 }
 
-bool ManejadorArchivosYMetadatos::deleteCarpeta (string path) {
-	return manejadorArchivos.deleteCarpeta(path);
-}
-
 bool ManejadorArchivosYMetadatos::tamanioCarpeta (string path, unsigned long int & size) {
 	return manejadorArchivos.tamanioCarpeta(path, size);
 }
@@ -385,13 +350,8 @@ void ManejadorArchivosYMetadatos::eliminarArchivoDefinitivamente (string filepat
 	Logger::logInfo("Se borro definitivamente el archivo " + filepath);
 }
 
-void ManejadorArchivosYMetadatos::actualizarPermisosPathArchivo (const string& filepath, const string& nuevoFilepath,
-		const list<string>& usuariosHabilitados) {
-	manejadorMetadatos.actualizarPermisosPathArchivo(filepath, nuevoFilepath, usuariosHabilitados);
-}
-
 bool ManejadorArchivosYMetadatos::deleteFileSystem () {
-	return this->deleteCarpeta(this->pathFileSystem);
+	return manejadorArchivos.deleteCarpeta(this->pathFileSystem);
 }
 
 string ManejadorArchivosYMetadatos::buscarPorExtension(string username, string extension) {
