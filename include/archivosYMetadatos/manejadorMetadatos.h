@@ -30,6 +30,8 @@ public:
 
 	string getJsonMetadatos(const string& filepath);
 
+	void eliminarDefinitivamente(const string& filepath);
+
 private:
 	BD* dbMetadatos;
 	Validador* validador;

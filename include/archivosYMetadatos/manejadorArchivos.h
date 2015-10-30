@@ -13,7 +13,9 @@ public:
 	bool crearCarpeta(string username, string path);
 	bool eliminarCarpeta(string username, string path); //*
 	bool deleteCarpeta(string path);
+
 	bool renombrarArchivo (const string& pathInterno, const string& nuevoFilename);
+	void eliminarArchivoDefinitivamente (const string& filepath);
 
 private:
 	string pathFileSystem;

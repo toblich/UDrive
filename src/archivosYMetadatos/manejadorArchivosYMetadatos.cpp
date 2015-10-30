@@ -180,7 +180,7 @@ bool ManejadorArchivosYMetadatos::actualizarArchivo (string username, string fil
 		return false;
 
 	unsigned long int folderSize = 0;
-	if (tamanioCarpeta(username, folderSize)) {
+	if (manejadorArchivos.tamanioCarpeta(username, folderSize)) {
 		int cuotaBytes = cuota * 1024 * 1024;
 		if (folderSize + dataLen <= cuotaBytes) { //TODO: Restar el tamanio del archivo viejo
 			return guardarArchivo(filepath, username, data, dataLen);
@@ -199,16 +199,6 @@ string ManejadorArchivosYMetadatos::consultarMetadatosArchivo (string username, 
 	return manejadorMetadatos.getJsonMetadatos(filepath);
 }
 
-bool ManejadorArchivosYMetadatos::renombrarArchivo(const string& pathInterno, const string& nuevoFilename) {
-	return manejadorArchivos.renombrarArchivo(pathInterno, nuevoFilename);
-}
-
-//string ManejadorArchivosYMetadatos::actualizarPermisosMetadato (const MetadatoArchivo& metadatosViejos,
-//		MetadatoArchivo metadatosNuevos, const string& username, const string& filepath,
-//		const string& jsonNuevosMetadatos) {
-//	return manejadorMetadatos.actualizarPermisosMetadato(metadatosViejos, metadatosNuevos, username, filepath, jsonNuevosMetadatos);
-//}
-
 bool ManejadorArchivosYMetadatos::actualizarMetadatosChequeados (const string& filepath,
 		const string& jsonNuevosMetadatos, const string& username) {
 	string nuevoJson;
@@ -217,7 +207,7 @@ bool ManejadorArchivosYMetadatos::actualizarMetadatosChequeados (const string& f
 
 	MetadatoArchivo metadatosNuevos = ParserJson::deserializarMetadatoArchivo(nuevoJson);
 	string nuevoFilename = metadatosNuevos.nombre + "." + metadatosNuevos.extension;
-	if (not renombrarArchivo(filepath, nuevoFilename)) {
+	if (not manejadorArchivos.renombrarArchivo(filepath, nuevoFilename)) {
 		Logger::logError("Metadatos que pinchan el renombrado: " + jsonNuevosMetadatos);
 		return false;
 	}
@@ -263,8 +253,12 @@ bool ManejadorArchivosYMetadatos::eliminarArchivo (string username, string filep
 		return false;
 	}
 
-	if (TRASH == ParserURI::parsear(filepath, '/')[1]) {
-		this->eliminarArchivoDefinitivamente(filepath);
+	vector<string> partes = ParserURI::parsear(filepath, '/');
+	if (partes.size() <= 1)
+		return false;
+	if (TRASH == partes[1]) {
+		manejadorMetadatos.eliminarDefinitivamente(filepath);
+		manejadorArchivos.eliminarArchivoDefinitivamente(filepath);
 		return true;
 	} else {
 		return this->mandarArchivoATrash(username, filepath);
@@ -304,17 +298,9 @@ bool ManejadorArchivosYMetadatos::mandarArchivoATrash(string username, string fi
 	return false;
 }
 
-string ManejadorArchivosYMetadatos::obtenerEstructuraCompartidos(string path) {
-	return buscador.obtenerEstructuraCompartidos(path);
-}
-
-string ManejadorArchivosYMetadatos::obtenerEstructuraCarpeta (string path, bool esRecursivo, function<bool(MetadatoArchivo&)> predicate) {
-	return buscador.obtenerEstructuraCarpeta(path, esRecursivo, predicate);
-}
-
 string ManejadorArchivosYMetadatos::obtenerEstructuraCarpeta (string path) {
 	auto predicate = [&] (MetadatoArchivo& metadato) -> bool {return true;};
-	return this->obtenerEstructuraCarpeta(path, false, predicate);
+	return buscador.obtenerEstructuraCarpeta(path, false, predicate);
 }
 
 string ManejadorArchivosYMetadatos::descargarArchivo (string username, string filepath) {
@@ -338,16 +324,6 @@ bool ManejadorArchivosYMetadatos::tamanioCarpeta (string path, unsigned long int
 string ManejadorArchivosYMetadatos::actualizarUsuarioFechaModificacion (string jsonMetadatos,
 		string usernameModificacion) {
 	return manejadorMetadatos.actualizarUsuarioFechaModificacion(jsonMetadatos, usernameModificacion);
-}
-
-void ManejadorArchivosYMetadatos::eliminarArchivoDefinitivamente (string filepath) {
-	// Las validaciones de existencia se hacen antes de llamarlo
-	dbMetadatos->erase(filepath);
-	Logger::logInfo("Se borraron definitivamente los metadatos del archivo " + filepath);
-	string filepathConFS = this->pathFileSystem + "/" + filepath;
-	string command = "exec rm '" + filepathConFS + "'";
-	system(command.c_str());
-	Logger::logInfo("Se borro definitivamente el archivo " + filepath);
 }
 
 bool ManejadorArchivosYMetadatos::deleteFileSystem () {

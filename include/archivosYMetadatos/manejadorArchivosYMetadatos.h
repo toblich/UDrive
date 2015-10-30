@@ -24,20 +24,16 @@ private:
 
 	// Archivos y Carpetas
 	bool tamanioCarpeta(string path, unsigned long int & size);
+
+	bool eliminarArchivo(string username, string filepath); //* Queda
 	bool eliminarCarpeta(string username, string path);
-	bool eliminarArchivo(string username, string filepath); //*
-	void eliminarArchivoDefinitivamente(string filepath); //*
 	bool mandarArchivoATrash(string username, string filepath); //*
 	bool guardarArchivo (const string& filepath, const string& username, const char* data, int dataLen); //*
-	bool renombrarArchivo (const string& pathInterno, const string& nuevoFilename);
-
-	// Buscador
-	string obtenerEstructuraCarpeta(string path, bool esRecursivo, function<bool(MetadatoArchivo&)> predicate);
-	string obtenerEstructuraCompartidos(string path);
 
 	// Metadatos
 	string actualizarUsuarioFechaModificacion(string jsonMetadatos, string usernameModificacion);
 	bool agregarPermiso(string usernameOrigen, string filepath, string usernameDestino);
+
 
 	bool actualizarMetadatosChequeados (const string& filepath, const string& jsonNuevosMetadatos, const string& username); //*
 

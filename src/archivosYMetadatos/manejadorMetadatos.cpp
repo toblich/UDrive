@@ -221,3 +221,9 @@ string ManejadorMetadatos::getJsonMetadatos (const string& filepath) {
 	}
 	return dbMetadatos->get(filepath);
 }
+
+void ManejadorMetadatos::eliminarDefinitivamente (const string& filepath) {
+	// Las validaciones de existencia se hacen antes de llamarlo
+	dbMetadatos->erase(filepath);
+	Logger::logInfo("Se borraron definitivamente los metadatos del archivo " + filepath);
+}

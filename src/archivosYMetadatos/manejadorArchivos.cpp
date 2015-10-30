@@ -130,3 +130,10 @@ bool ManejadorArchivos::renombrarArchivo (const string& pathInterno, const strin
 	Logger::logInfo("Se renombro correctamente " + pathInterno + " a " + nuevoFilename);
 	return true;
 }
+
+void ManejadorArchivos::eliminarArchivoDefinitivamente (const string& filepath) {
+	string filepathConFS = this->pathFileSystem + "/" + filepath;
+	string command = "exec rm '" + filepathConFS + "'";
+	system(command.c_str());
+	Logger::logInfo("Se borro definitivamente el archivo " + filepath);
+}
