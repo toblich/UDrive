@@ -152,7 +152,7 @@ bool ManejadorArchivosYMetadatos::subirArchivo (string username, string filepath
 		// TODO: Versionado
 		return false;
 	}
-	if (dbMetadatos->contains(filepath)) {
+	if (validador.existeMetadato(filepath)) {
 		Logger::logWarn("Se quiso subir el archivo " + filepath + " pero este ya existe. Debe utilizar el metodo actualizarArchivo.");
 		return false;
 	}
@@ -172,7 +172,7 @@ bool ManejadorArchivosYMetadatos::guardarArchivo (const string& filepath, const 
 	}
 
 	string pathConFileSystem = this->pathFileSystem + "/" + filepath;
-	if (dbMetadatos->contains(filepath)) {
+	if (validador.existeMetadato(filepath)) {
 		//Significa que no fui llamado desde el subirArchivo, por lo que la actualizacion se hará ahí
 		string metadatos = dbMetadatos->get(filepath);
 		string nuevosMetadatos = this->actualizarUsuarioFechaModificacion(metadatos, username);
@@ -209,53 +209,33 @@ string ManejadorArchivosYMetadatos::consultarMetadatosArchivo (string username, 
 	if (filepath.find(TRASH) != string::npos)	// Los metadatos de la papelera son inaccesibles
 		return "";
 
-	if (not dbMetadatos->contains(filepath)) {
-		Logger::logWarn("Se quiso consultar los metadatos del archivo " + filepath + " pero este no existe.");
-		return "";
-	}
-	return dbMetadatos->get(filepath);
+	return manejadorMetadatos.getJsonMetadatos(filepath);
 }
 
 bool ManejadorArchivosYMetadatos::renombrarArchivo(const string& pathInterno, const string& nuevoFilename) {
 	return manejadorArchivos.renombrarArchivo(pathInterno, nuevoFilename);
 }
 
-string ManejadorArchivosYMetadatos::actualizarPermisosMetadato (const MetadatoArchivo& metadatosViejos,
-		MetadatoArchivo metadatosNuevos, const string& username, const string& filepath,
-		const string& jsonNuevosMetadatos) {
-	return manejadorMetadatos.actualizarPermisosMetadato(metadatosViejos, metadatosNuevos, username, filepath, jsonNuevosMetadatos);
-}
+//string ManejadorArchivosYMetadatos::actualizarPermisosMetadato (const MetadatoArchivo& metadatosViejos,
+//		MetadatoArchivo metadatosNuevos, const string& username, const string& filepath,
+//		const string& jsonNuevosMetadatos) {
+//	return manejadorMetadatos.actualizarPermisosMetadato(metadatosViejos, metadatosNuevos, username, filepath, jsonNuevosMetadatos);
+//}
 
 bool ManejadorArchivosYMetadatos::actualizarMetadatosChequeados (const string& filepath,
 		const string& jsonNuevosMetadatos, const string& username) {
+	string nuevoJson;
+	bool deboRenombrar = manejadorMetadatos.actualizarPermisos(filepath, jsonNuevosMetadatos, username, nuevoJson);
+	if (not deboRenombrar) return true;
 
-	string jsonMetadatosViejos = dbMetadatos->get(filepath);
-	MetadatoArchivo metadatosViejos = ParserJson::deserializarMetadatoArchivo(jsonMetadatosViejos);
-	MetadatoArchivo metadatosNuevos = ParserJson::deserializarMetadatoArchivo(jsonNuevosMetadatos);
-
-	string nuevoJson = actualizarPermisosMetadato(metadatosViejos, metadatosNuevos, username, filepath,
-			jsonNuevosMetadatos);	// actualiza quienes tienen permiso
-
-	bool deboRenombrar = metadatosViejos.nombre != metadatosNuevos.nombre or metadatosViejos.extension != metadatosNuevos.extension;
-	if (not deboRenombrar) {
-		dbMetadatos->modify(filepath, nuevoJson);
-		return true;
-	}
-
+	MetadatoArchivo metadatosNuevos = ParserJson::deserializarMetadatoArchivo(nuevoJson);
 	string nuevoFilename = metadatosNuevos.nombre + "." + metadatosNuevos.extension;
 	if (not renombrarArchivo(filepath, nuevoFilename)) {
-		Logger::logError("Metadatos que pinchan el renombrado: \nViejos: "
-				+ jsonMetadatosViejos +  "\nNuevos: " + jsonNuevosMetadatos);
+		Logger::logError("Metadatos que pinchan el renombrado: " + jsonNuevosMetadatos);
 		return false;
 	}
-	string nuevoFilepath = ParserURI::pathConNuevoFilename(filepath, nuevoFilename);
-	list<string> usuariosHabilitados = (metadatosNuevos.usuariosHabilitados.empty()) ?
-			metadatosViejos.usuariosHabilitados : metadatosNuevos.usuariosHabilitados;
-	actualizarPermisosPathArchivo(filepath, nuevoFilepath, usuariosHabilitados);	// actualiza el path del archivo en quienes tienen permiso
-	Batch batch;
-	batch.erase(filepath);
-	batch.put(nuevoFilepath, nuevoJson);
-	dbMetadatos->writeBatch(batch);
+
+	manejadorMetadatos.actualizarPermisosPorRenombrado(filepath, nuevoFilename, metadatosNuevos, nuevoJson);
 	return true;
 }
 
@@ -268,7 +248,7 @@ bool ManejadorArchivosYMetadatos::actualizarMetadatos (string username, string f
 	if (not validador.verificarPermisos(username, filepath))
 		return false;
 
-	if (not dbMetadatos->contains(filepath)) {
+	if (not validador.existeMetadato(filepath)) {
 		Logger::logWarn("Se quiso actualizar los metadatos del archivo " + filepath + " pero este no existe.");
 		return false;
 	}
@@ -309,7 +289,7 @@ bool ManejadorArchivosYMetadatos::eliminarArchivo (string username, string filep
 		Logger::logWarn("Se quiso eliminar el archivo " + filepath + " pero este no existe en el filesystem.");
 		return false;
 	}
-	if (not dbMetadatos->contains(filepath)) {
+	if (not validador.existeMetadato(filepath)) {
 		Logger::logWarn("Se quiso eliminar el archivo " + filepath + " pero este no existe en la base de datos.");
 		return false;
 	}

@@ -42,16 +42,15 @@ private:
 	bool agregarPermisosABD(string username);
 	bool agregarPermiso(string usernameOrigen, string filepath, string usernameDestino);
 	bool eliminarPermiso(string usernameOrigen, string filepath, string usernameDestino);
-	bool actualizarMetadatosChequeados (const string& filepath, const string& jsonNuevosMetadatos, const string& username); //*
 	Batch armarBatchEliminarArchivo (const string& jsonMetadatos, const string& username, const string& filepath,
 									 const string& pathCompletoPapelera);
 	bool restaurarMetadatos (const string& pathEnPapeleraSinFS, const string& username, const string& pathRealSinFS);
 	string metadatosConPermisosDepurados (const string& filepath, const string& usernameDestino);
 	string jsonArchivosPermitidos (const string& pathPermisos, const string& filepath);
-	string actualizarPermisosMetadato (const MetadatoArchivo& metadatosViejos, MetadatoArchivo metadatosNuevos,
-									   const string& username, const string& filepath, const string& jsonNuevosMetadatos);
 	void actualizarPermisosPathArchivo(const string& filepath, const string& nuevoFilepath,
 			const list<string>& usuariosHabilitados);
+
+	bool actualizarMetadatosChequeados (const string& filepath, const string& jsonNuevosMetadatos, const string& username); //*
 
 public:
 	ManejadorArchivosYMetadatos(BD* dbMetadatos);

@@ -139,16 +139,11 @@ string ManejadorMetadatos::jsonArchivosPermitidos (const string& pathPermisos, c
 	return ParserURI::join(vecArchivosPermitidos, RESERVED_CHAR);
 }
 
-string ManejadorMetadatos::actualizarPermisosMetadato (const MetadatoArchivo& metadatosViejos,
-		MetadatoArchivo metadatosNuevos, const string& username, const string& filepath,
-		const string& jsonNuevosMetadatos) {
+void ManejadorMetadatos::actualizarPermisosMetadato (const MetadatoArchivo& metadatosViejos,
+		MetadatoArchivo metadatosNuevos, const string& username, const string& filepath) {
 	list<string> usuariosViejos = metadatosViejos.usuariosHabilitados;
 	list<string> usuariosNuevos = metadatosNuevos.usuariosHabilitados;
 
-	if (usuariosNuevos.empty()) {
-		metadatosNuevos.usuariosHabilitados = usuariosViejos;
-		return ParserJson::serializarMetadatoArchivo(metadatosNuevos);
-	}
 	list<string>::iterator itUsuNuevos = usuariosNuevos.begin();
 	for (; itUsuNuevos != usuariosNuevos.end(); itUsuNuevos++) {
 		string nuevoUsuario = (*itUsuNuevos);
@@ -166,7 +161,6 @@ string ManejadorMetadatos::actualizarPermisosMetadato (const MetadatoArchivo& me
 			this->eliminarPermiso(username, filepath, viejoUsuario);
 		}
 	}
-	return jsonNuevosMetadatos;
 }
 
 void ManejadorMetadatos::actualizarPermisosPathArchivo (const string& filepath, const string& nuevoFilepath,
@@ -184,4 +178,46 @@ void ManejadorMetadatos::actualizarPermisosPathArchivo (const string& filepath, 
 		Logger::logDebug("nuevosArchivos de " + usuario + ": " + nuevosArchivos);
 		dbMetadatos->modify(PERMISOS + "/" + usuario, nuevosArchivos);
 	}
+}
+
+bool ManejadorMetadatos::actualizarPermisos (const string& filepath, const string& jsonNuevosMetadatos,
+		const string& username, string& nuevoJson) {
+	string jsonMetadatosViejos = dbMetadatos->get(filepath);
+	MetadatoArchivo metadatosViejos = ParserJson::deserializarMetadatoArchivo(jsonMetadatosViejos);
+	MetadatoArchivo metadatosNuevos = ParserJson::deserializarMetadatoArchivo(jsonNuevosMetadatos);
+
+	if (metadatosNuevos.usuariosHabilitados.empty()) {
+		metadatosNuevos.usuariosHabilitados = metadatosViejos.usuariosHabilitados;
+		nuevoJson = ParserJson::serializarMetadatoArchivo(metadatosNuevos);
+	} else {
+		actualizarPermisosMetadato(metadatosViejos, metadatosNuevos, username, filepath);	// actualiza quienes tienen permiso
+		nuevoJson = jsonNuevosMetadatos;
+	}
+
+	bool deboRenombrar = metadatosViejos.nombre != metadatosNuevos.nombre or metadatosViejos.extension != metadatosNuevos.extension;
+	if (not deboRenombrar) {
+		dbMetadatos->modify(filepath, nuevoJson);
+	}
+	return deboRenombrar;
+}
+
+void ManejadorMetadatos::actualizarPermisosPorRenombrado (const string& filepath, const string& nuevoFilename,
+		const MetadatoArchivo& metadatosNuevos, const string& nuevoJson) {
+	MetadatoArchivo metadatosViejos = ParserJson::deserializarMetadatoArchivo(dbMetadatos->get(filepath));
+	string nuevoFilepath = ParserURI::pathConNuevoFilename(filepath, nuevoFilename);
+	list<string> usuariosHabilitados = (metadatosNuevos.usuariosHabilitados.empty()) ?
+			metadatosViejos.usuariosHabilitados : metadatosNuevos.usuariosHabilitados;
+	actualizarPermisosPathArchivo(filepath, nuevoFilepath, usuariosHabilitados);	// actualiza el path del archivo en quienes tienen permiso
+	Batch batch;
+	batch.erase(filepath);
+	batch.put(nuevoFilepath, nuevoJson);
+	dbMetadatos->writeBatch(batch);
+}
+
+string ManejadorMetadatos::getJsonMetadatos (const string& filepath) {
+	if (not validador->existeMetadato(filepath)) {
+		Logger::logWarn("Se quiso consultar los metadatos del archivo " + filepath + " pero este no existe.");
+		return "";
+	}
+	return dbMetadatos->get(filepath);
 }
