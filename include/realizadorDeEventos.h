@@ -16,6 +16,8 @@
 using namespace std;
 
 #define MAX_LENGTH 1024
+#define URI_DELIM '/'
+#define NAME_DELIM '.'
 
 class RealizadorDeEventos {
 public:

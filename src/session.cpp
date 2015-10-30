@@ -29,7 +29,7 @@ mg_result Session::POSTHandler (mg_connection* connection) {
 
 mg_result Session::DELETEHandler (mg_connection* connection) {
 	string uri = string(connection->uri);
-	vector<string> uris = ParserURI::parsear(uri, '/');
+	vector<string> uris = ParserURI::parsear(uri, URI_DELIM);
 	Logger::logInfo("Se parseó la uri exitosamente.");
 	string username = getVar(connection, "user");
 	Logger::logInfo("Se obtuvo la variable user con valor: " + username);
