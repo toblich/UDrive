@@ -46,7 +46,7 @@ private:
 	bool agregarPermisosABD(string username);
 	bool agregarPermiso(string usernameOrigen, string filepath, string usernameDestino);
 	bool eliminarPermiso(string usernameOrigen, string filepath, string usernameDestino);
-	bool actualizarMetadatosChequeados (const string& filepath, const string& jsonNuevosMetadatos, const string& username);
+	bool actualizarMetadatosChequeados (const string& filepath, const string& jsonNuevosMetadatos, const string& username); //*
 	Batch armarBatchEliminarArchivo (const string& jsonMetadatos, const string& username, const string& filepath,
 									 const string& pathCompletoPapelera);
 	bool restaurarMetadatos (const string& pathEnPapeleraSinFS, const string& username, const string& pathRealSinFS);
