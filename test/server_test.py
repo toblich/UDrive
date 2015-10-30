@@ -78,6 +78,10 @@ def registrarYLoguear(username, password, profile):
 def registrarYLoguearUser(dictUser):
 	return registrarYLoguear(dictUser["user"], dictUser["pass"], dictUser["profile"])
 
+def logTest(testname):
+	with open('files/log.txt', 'a') as file:
+		file.write("TEST: " + testname + "\n")
+
 
 
 class ServerTest(unittest.TestCase):
@@ -94,6 +98,7 @@ class ServerTest(unittest.TestCase):
 
 
 	def test_registroYLogueoValido(self):
+		logTest("Registro y Logueo Valido")
 		r = requests.post(PROFILE, data=USER_SIMPLE)
 		self.assertEquals(r.status_code, RESOURCE_CREATED)
 		s = requests.post(SESSION, LOG_USER_SIMPLE)
@@ -101,6 +106,7 @@ class ServerTest(unittest.TestCase):
 
 
 	def test_registrarUsuarioConPasswordInvalida(self):
+		logTest("Registrar Usuario con Password Invalida")
 		userCroto = USER_SIMPLE.copy()
 		userCroto['pass'] = "corta"
 		r = requests.post(PROFILE, data=userCroto)
@@ -108,6 +114,7 @@ class ServerTest(unittest.TestCase):
 
 
 	def test_logueoInvalido(self):
+		logTest("Logueo Invalido")
 		requests.post(PROFILE, data=USER_SIMPLE) #registro
 		log_erroneo = LOG_USER_SIMPLE.copy()
 		log_erroneo["pass"] = "equivocada"
@@ -116,6 +123,7 @@ class ServerTest(unittest.TestCase):
 
 
 	def test_loguearYDesloguearMultiplesSesiones(self):
+		logTest("Loguear y Desloguear Multiples Sesiones")
 		r = requests.post(PROFILE, data=USER_SIMPLE)	# registro
 		self.assertEquals(r.status_code, RESOURCE_CREATED)
 
@@ -140,6 +148,7 @@ class ServerTest(unittest.TestCase):
 
 
 	def test_perfilSubidoYActualizadoConFotoDePerfil(self):
+		logTest("Perfil subido y actualizado con Foto de perfil")
 		username = "hola"
 		password = "masdeocholetras"
 		token = registrarYLoguear(username, password, PERFIL)
@@ -173,6 +182,7 @@ class ServerTest(unittest.TestCase):
 
 
 	def test_subirBajarYBorrarArchivoTextoActualizandoUltimaUbicacion(self):
+		logTest("Subir, Bajar y Borrar Archivo actualizando Ultima Ubicacion")
 		token = registrarYLoguearUser(USER_SIMPLE)
 		FILENAME = "Makefile"
 
@@ -205,6 +215,7 @@ class ServerTest(unittest.TestCase):
 
 
 	def test_obtenerYActualizarMetadatos(self):
+		logTest("Obtener y Actualizar Metadatos")
 		token = registrarYLoguearUser(USER_SIMPLE)
 		FILENAME = "../src/db/batch.cpp"
 
@@ -243,6 +254,7 @@ class ServerTest(unittest.TestCase):
 
 
 	def test_obtenerEstructuraDeCarpetaYBorrarCarperta(self):
+		logTest("Obtener Estructura de carpeta y Borrar carpeta")
 		token = registrarYLoguearUser(USER_SIMPLE)
 		FILENAME = "../src/db/batch.cpp"
 		BASE_FOLDER = FOLDER + USER_SIMPLE["user"] + "/src/"
@@ -272,6 +284,7 @@ class ServerTest(unittest.TestCase):
 
 
 	def test_DeberiaCambiarEstructuraCarpetaAlRenombrar(self):
+		logTest("Deberia cambiar la estructura de carpeta al renombrar")
 		token = registrarYLoguearUser(USER_SIMPLE)
 		FILENAME = "../src/db/batch.cpp"
 		internalUri = USER_SIMPLE["user"] + FILENAME[2:] # saca los '..'
@@ -298,7 +311,8 @@ class ServerTest(unittest.TestCase):
 		self.assertDictEqual(expected, estructuraRecibida)
 
 
-	def test_DeberiaDarErrorAlQuererIngresarAUnRecursoInexistente(self):
+	def test_DeberiaDarErrorAlIngresarAUnRecursoInexistente(self):
+		logTest("Deberia dar error al ingresar un recurso inexistente")
 		r = requests.get(BASE)
 		self.assertEquals(r.status_code, NOT_FOUND)
 
@@ -307,7 +321,8 @@ class ServerTest(unittest.TestCase):
 		self.assertEquals(s.status_code, NOT_FOUND)
 
 
-	def test_DeberiaDarErrorAlQuererUsarUnMetodoNoSoportado(self):
+	def test_DeberiaDarErrorAlUsarUnMetodoNoSoportado(self):
+		logTest("Deberia dar error al usar un metodo no soportado")
 		r = requests.get(SESSION)
 		self.assertEquals(r.status_code, UNSUPPORTED_METHOD)
 
@@ -322,12 +337,14 @@ class ServerTest(unittest.TestCase):
 
 
 	def test_DeberiaDarErrorAlAccederConTokenErroneo(self):
+		logTest("Deberia dar error al acceder con token erroneo")
 		token = registrarYLoguearUser(USER_SIMPLE)
 		r = requests.get(PROFILE + USER_SIMPLE["user"], data={"user": USER_SIMPLE["user"], "token": "123456789"})
 		self.assertEquals(r.status_code, UNAUTHORIZED)
 
 
 	def test_SubirBorrarYRestaurarUnArchivo(self):
+		logTest("Subir, Borrar y Restaurar Archivo")
 		token = registrarYLoguearUser(USER_SIMPLE)
 		FILENAME = "Makefile"
 
@@ -343,7 +360,8 @@ class ServerTest(unittest.TestCase):
 		self.assertEquals(t.status_code, SUCCESS)
 
 
-	def test_SubirBorrarYEliminarDefinitivamenteUnArchiv(self):	
+	def test_SubirBorrarYEliminarDefinitivamenteUnArchivo(self):	
+		logTest("Subir, Borrar y Eliminar Definitivamente un Archivo")
 		token = registrarYLoguearUser(USER_SIMPLE)
 		FILENAME = "Makefile"
 
@@ -359,7 +377,8 @@ class ServerTest(unittest.TestCase):
 		self.assertEquals(t.status_code, SUCCESS)
 
 
-	def test_DeberiaDarErrorAlQuererActualizarElPerfilYQueSeaInvalido(self):
+	def test_DeberiaDarErrorAlActualizarElPerfilYQueSeaInvalido(self):
+		logTest("Deberia dar error al actualizar perfil invalido")
 		username = "hola"
 		password = "masdeocholetras"
 		token = registrarYLoguear(username, password, PERFIL)
@@ -370,6 +389,7 @@ class ServerTest(unittest.TestCase):
 
 
 	def test_DeberiaFiltrarBienLosUsuariosDadoUnString(self):
+		logTest("Deberia filtrar bien los usuarios dado un string")
 		#Primero registro tres usuarios
 		username1 = "hola"
 		password = "masdeocholetras"
@@ -411,6 +431,7 @@ class ServerTest(unittest.TestCase):
 
 
 	def test_deberiaBuscarBienArchivosPorExtensionYNombre(self):
+		logTest("Deberia buscar bine archivos por extension y nombre")
 		token = registrarYLoguearUser(USER_SIMPLE)
 		
 		TXT_FILENAME_ROOT = 'CMakeCache.txt'
