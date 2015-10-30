@@ -35,7 +35,8 @@ mg_result Session::DELETEHandler (mg_connection* connection) {
 	Logger::logInfo("Se obtuvo la variable user con valor: " + username);
 
 	if (uris.size() == 2) {
-		if (manejadorUs->cerrarSesion(uris[1], username)) {
+		string token = uris[1];
+		if (manejadorUs->cerrarSesion(token, username)) {
 			string mensaje = "La sesion se cerró correctamente.";
 			this->responderSucces(connection, mensaje);
 		} else {

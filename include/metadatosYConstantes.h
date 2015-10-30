@@ -18,6 +18,10 @@ const std::string DEFAULT_FS = "FileSystem";
 
 const int CUOTA = 2048;
 
+/**
+ * @brief Struct para guardar los metadatos de un archivo
+ *
+ */
 typedef struct{
 	std::string nombre;
 	std::string extension;
@@ -28,10 +32,18 @@ typedef struct{
 	std::list<std::string> usuariosHabilitados; // Seria correcto que aca figurara el propietario tambien
 }MetadatoArchivo;
 
+/**
+ * @brief Struct para guardar la ultima ubicación de un usuario
+ *
+ */
 typedef struct{
 	double latitud, longitud;
 }Ubicacion;
 
+/**
+ * @brief Struct para guardar el perfil de un usuario
+ *
+ */
 typedef struct{
 	std::string nombre;
 	std::string email;
@@ -40,6 +52,10 @@ typedef struct{
 	Ubicacion ultimaUbicacion;
 }MetadatoUsuario;
 
+/**
+ * @brief Strutc para guardar los datos de la sesión de un usuario
+ *
+ */
 typedef struct{
 	std::string username;
 	std::string password;

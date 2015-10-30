@@ -1,8 +1,8 @@
 #include "profile.h"
 
-Profile::Profile (ManejadorDeUsuarios* manejadorUsuarios, ManejadorArchivosYMetadatos* manejarAyM) {
+Profile::Profile (ManejadorDeUsuarios* manejadorUsuarios, ManejadorArchivosYMetadatos* manejadorAyM) {
 	this->manejadorUs = manejadorUsuarios;
-	this->manejadorAyM = manejarAyM;
+	this->manejadorAyM = manejadorAyM;
 }
 
 Profile::~Profile () {
