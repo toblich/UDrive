@@ -52,10 +52,10 @@ RealizadorDeEventos::DatosArchivo RealizadorDeEventos::getMultipartData(mg_conne
 }
 
 bool RealizadorDeEventos::sendFile(mg_connection* connection, string filePath) {
-	char buf[1024];
+	char buf[MAX_LENGTH];
 	int n;
-	FILE *fp;
-	fp = fopen(filePath.c_str(), "rb");
+
+	FILE* fp = fopen(filePath.c_str(), "rb");
 	if (fp == NULL)	return false;
 
 	while ((n = fread(buf, 1, sizeof(buf), fp)) > 0) {
@@ -63,6 +63,7 @@ bool RealizadorDeEventos::sendFile(mg_connection* connection, string filePath) {
 	}
 	fclose(fp);
 	mg_send_data(connection,"",0);
+
 	return true;
 }
 

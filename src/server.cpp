@@ -108,7 +108,6 @@ void Server::pollServer (mg_server* server) {
 	}
 }
 
-
 mg_result Server::requestHandler (mg_connection* connection) {
 	string uri = string(connection->uri);
 	Logger::logTrace("Se accedio a la URI: " + uri);
