@@ -23,10 +23,10 @@ private:
 
 
 	// Archivos y Carpetas
-	bool eliminarArchivo(string username, string filepath); //*
-	bool eliminarCarpeta(string username, string path);	//*
-	bool mandarArchivoATrash(string username, string filepath); //* jodido, parte y parte
-	bool guardarArchivo (const string& filepath, const string& username, const char* data, int dataLen); //* jodido, parte y parte
+	bool eliminarArchivo(string username, string filepath); //* no se si puede
+	bool eliminarCarpeta(string username, string path);	//* no se si se puede
+	bool mandarArchivoATrash(string username, string filepath); //* jodido, parte y parte y queda un cacho
+	bool guardarArchivo (const string& filepath, const string& username, const char* data, int dataLen); // puede quedar
 
 
 	bool actualizarMetadatosChequeados (const string& filepath, const string& jsonNuevosMetadatos, const string& username); // Queda
@@ -43,10 +43,10 @@ public:
 	bool eliminar(string username, string path); //Sirve para carpetas y archivos
 	bool restaurar(string username, string path); // bajar al menos un cacho
 
-	bool subirArchivo(string username, string filepath, const char* data, int dataLen, string jsonMetadatos, int cuota); // dbMetadatos->put
+	bool subirArchivo(string username, string filepath, const char* data, int dataLen, string jsonMetadatos, int cuota);
 	string descargarArchivo(string username, string filepath);
 	bool actualizarArchivo(string username, string filepath, const char* data, int dataLen, int cuota);
-	bool actualizarFotoPerfil(string filepathViejo, string filepathNuevo, const char* data, int dataLen); // a manejadorArchivos
+	bool actualizarFotoPerfil(string filepathViejo, string filepathNuevo, const char* data, int dataLen);
 
 	string consultarMetadatosArchivo(string username, string filename);
 	bool actualizarMetadatos(string username, string filepath, string jsonNuevosMetadatos);

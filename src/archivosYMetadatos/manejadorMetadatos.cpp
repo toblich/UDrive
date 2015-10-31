@@ -88,21 +88,20 @@ Batch ManejadorMetadatos::armarBatchEliminarArchivo (const string& jsonMetadatos
 	Batch batch;
 	string jsonMetadatosConFechaModif = this->actualizarUsuarioFechaModificacion(jsonMetadatos, username);
 	MetadatoArchivo metadatoConFechaModif = ParserJson::deserializarMetadatoArchivo(jsonMetadatosConFechaModif);
-	list<string> usuariosHabilitados = metadatoConFechaModif.usuariosHabilitados;
-	list<string>::iterator itUsu = usuariosHabilitados.begin();
 
-	for (; itUsu != usuariosHabilitados.end(); itUsu++) {
-		string usuario = (*itUsu);
+	for (auto &usuario : metadatoConFechaModif.usuariosHabilitados) {
 		if (usuario == metadatoConFechaModif.propietario)
 			continue;
 
 		string permisosUsuario = PERMISOS + "/" + usuario;
-		if (dbMetadatos->contains(permisosUsuario)) {
+		if (validador->existeMetadato(permisosUsuario)) {
 			string archivosStr = dbMetadatos->get(permisosUsuario);
 			vector<string> archivos = ParserURI::parsear(archivosStr, RESERVED_CHAR);
 			archivos.erase(remove(archivos.begin(), archivos.end(), filepath), archivos.end());
 			string joined = ParserURI::join(archivos, RESERVED_CHAR);
 			batch.modify(permisosUsuario, joined);
+		} else {
+			Logger::logWarn("No existe en dbMetadatos " + permisosUsuario + " al armar batch de eliminar archivo");
 		}
 	}
 
@@ -144,18 +143,14 @@ void ManejadorMetadatos::actualizarPermisosMetadato (const MetadatoArchivo& meta
 	list<string> usuariosViejos = metadatosViejos.usuariosHabilitados;
 	list<string> usuariosNuevos = metadatosNuevos.usuariosHabilitados;
 
-	list<string>::iterator itUsuNuevos = usuariosNuevos.begin();
-	for (; itUsuNuevos != usuariosNuevos.end(); itUsuNuevos++) {
-		string nuevoUsuario = (*itUsuNuevos);
+	for (auto &nuevoUsuario: usuariosNuevos) {
 		// Si todavia no tenia permisos
 		if (find(usuariosViejos.begin(), usuariosViejos.end(), nuevoUsuario) == usuariosViejos.end()) {
 			this->agregarPermiso(username, filepath, nuevoUsuario);
 		}
 	}
 	// Si tenia permisos y ahora no los tiene, eliminarPermiso
-	list<string>::iterator itUsuViejos = usuariosViejos.begin();
-	for (; itUsuViejos != usuariosViejos.end(); itUsuViejos++) {
-		string viejoUsuario = (*itUsuViejos);
+	for (auto &viejoUsuario : usuariosViejos) {
 		// Si tenia permisos y ahora ya no
 		if (find(usuariosNuevos.begin(), usuariosNuevos.end(), viejoUsuario) == usuariosNuevos.end()) {
 			this->eliminarPermiso(username, filepath, viejoUsuario);
@@ -165,10 +160,8 @@ void ManejadorMetadatos::actualizarPermisosMetadato (const MetadatoArchivo& meta
 
 void ManejadorMetadatos::actualizarPermisosPathArchivo (const string& filepath, const string& nuevoFilepath,
 		const list<string>& usuariosHabilitados) {
-	list<string>::const_iterator it = usuariosHabilitados.cbegin();
-	const list<string>::const_iterator END = usuariosHabilitados.cend();
-	for (; it != END; it++) {
-		string usuario = *it;
+
+	for (auto &usuario : usuariosHabilitados) {
 		string archivos = dbMetadatos->get(PERMISOS + "/" + usuario);
 		Logger::logDebug("Archivos compartidos a " + usuario + ": " + archivos);
 		vector<string> partes = ParserURI::parsear(archivos, RESERVED_CHAR);
@@ -226,4 +219,14 @@ void ManejadorMetadatos::eliminarDefinitivamente (const string& filepath) {
 	// Las validaciones de existencia se hacen antes de llamarlo
 	dbMetadatos->erase(filepath);
 	Logger::logInfo("Se borraron definitivamente los metadatos del archivo " + filepath);
+}
+
+bool ManejadorMetadatos::cargarMetadato (const string& filepath, const string& jsonMetadatos) {
+	return dbMetadatos->put(filepath, jsonMetadatos);
+}
+
+void ManejadorMetadatos::actualizarMetadatosPorActualizacionArchivo (const string& filepath, const string& username) {
+	string metadatos = dbMetadatos->get(filepath);
+	string nuevosMetadatos = actualizarUsuarioFechaModificacion(metadatos, username);
+	dbMetadatos->modify(filepath, nuevosMetadatos);
 }

@@ -22,7 +22,7 @@ bool ManejadorArchivos::tamanioCarpeta (string path, unsigned long int& size) {
 		if (dirName == "." or dirName == "..")
 			continue;
 
-		string pathInterno = path + "/" + ent->d_name;
+		string pathInterno = path + "/" + dirName;
 		string pathInternoConFS = this->pathFileSystem + "/" + pathInterno;
 		if (validador->existeCarpeta(pathInternoConFS))
 			this->tamanioCarpeta(pathInterno, size);
@@ -46,10 +46,8 @@ bool ManejadorArchivos::crearCarpeta (string username, string path) {
 	string pathCompletoConFS = this->pathFileSystem + "/" + path;
 	vector<string> directorios = ParserURI::parsear(pathCompletoConFS, '/');
 	string directorioAcumulado = "";
-	const int SIZE = directorios.size();
 
-	for (int i = 0; i < SIZE; i++) {
-		string directorio = directorios[i];
+	for (auto &directorio : directorios) {
 		string directorioPadre = directorioAcumulado;
 		directorioAcumulado += (directorio + "/");
 
@@ -72,34 +70,6 @@ bool ManejadorArchivos::crearCarpeta (string username, string path) {
 	return true;
 }
 
-//bool ManejadorArchivos::eliminarCarpeta (string username, string path) {
-//	string pathConFS = this->pathFileSystem + "/" + path;
-//	DIR* dir;
-//	struct dirent* ent;
-//	if ((dir = opendir(pathConFS.c_str())) == NULL) {
-//		Logger::logWarn("No existe el directorio " + path);
-//		return false;
-//	}
-//
-//	while ((ent = readdir(dir)) != NULL) {
-//		string dirName(ent->d_name);
-//		if (dirName == "." or dirName == "..")
-//			continue;
-//
-//		string pathInterno = path + "/" + dirName;
-//		string pathInternoConFS = this->pathFileSystem + "/" + pathInterno;
-//
-//		this->eliminar(username, pathInterno);
-//	}
-//	closedir(dir);
-//
-//	if (validador->carpetaVacia(pathConFS))
-//		return this->deleteCarpeta(pathConFS);
-//	else
-//		return false;
-//}
-
-
 bool ManejadorArchivos::deleteCarpeta (string path) {
 	if (not validador->existeCarpeta(path)) {
 		Logger::logWarn("No se ha podido eliminar la carpeta " + path + " porque no existe.");
@@ -121,12 +91,10 @@ bool ManejadorArchivos::renombrarArchivo (const string& pathInterno, const strin
 				+ " porque ya existe un archivo allí con ese nombre en el FileSystem o la base de datos.");
 		return false;
 	}
-
 	if (rename(pathConFS.c_str(), nuevoPathConFS.c_str())) {
 		Logger::logError("Fallo el renombrado del archivo " + pathInterno + " a " + nuevoFilename);
 		return false;
 	}
-
 	Logger::logInfo("Se renombro correctamente " + pathInterno + " a " + nuevoFilename);
 	return true;
 }
@@ -137,3 +105,11 @@ void ManejadorArchivos::eliminarArchivoDefinitivamente (const string& filepath) 
 	system(command.c_str());
 	Logger::logInfo("Se borro definitivamente el archivo " + filepath);
 }
+
+void ManejadorArchivos::guardarArchivoEnFileSystem (const string& filepath, const char* data, int dataLen) {
+	string pathConFileSystem = this->pathFileSystem + "/" + filepath;
+	ofstream outFile(pathConFileSystem, ofstream::binary);
+	outFile.write(data, dataLen);
+	outFile.close();
+}
+

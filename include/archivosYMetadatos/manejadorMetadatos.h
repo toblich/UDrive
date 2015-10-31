@@ -32,6 +32,10 @@ public:
 
 	void eliminarDefinitivamente(const string& filepath);
 
+	bool cargarMetadato(const string& filepath, const string& jsonMetadatos);
+
+	void actualizarMetadatosPorActualizacionArchivo(const string& filepath, const string& username);
+
 private:
 	BD* dbMetadatos;
 	Validador* validador;

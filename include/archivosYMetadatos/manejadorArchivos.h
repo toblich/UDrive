@@ -11,13 +11,12 @@ public:
 
 	bool tamanioCarpeta(string path, unsigned long int & size);
 	bool crearCarpeta(string username, string path);
-	bool eliminarCarpeta(string username, string path); //*
 	bool deleteCarpeta(string path);
 
 	bool renombrarArchivo (const string& pathInterno, const string& nuevoFilename);
-	void eliminarArchivoDefinitivamente (const string& filepath);
 
-	bool eliminar(string username, string path); //Sirve para carpetas y archivos // BAJAR
+	void eliminarArchivoDefinitivamente (const string& filepath);
+	void guardarArchivoEnFileSystem(const string& filepath, const char* data, int dataLen);
 
 private:
 	string pathFileSystem;

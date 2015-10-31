@@ -13,7 +13,6 @@ public:
 
 	string obtenerEstructuraCarpeta(string path, bool esRecursivo, function<bool(MetadatoArchivo&)> predicate);
 	string obtenerEstructuraCompartidos(string path);
-	map<string, string> buscar(string username, function<bool(MetadatoArchivo&)> predicate);
 
 	string buscarPorExtension(string username, string extension);
 	string buscarPorEtiqueta(string username, string etiqueta);
@@ -23,6 +22,7 @@ public:
 
 private:
 
+	map<string, string> buscar(string username, function<bool(MetadatoArchivo&)> predicate);
 	BD* dbMetadatos;
 	Validador validador;
 	const string pathFileSystem;

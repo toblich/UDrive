@@ -116,16 +116,8 @@ bool ManejadorArchivosYMetadatos::eliminarCarpeta (string username, string path)
 }
 
 bool ManejadorArchivosYMetadatos::actualizarFotoPerfil(string filepathViejo, string filepathNuevo, const char* data, int dataLen) {
-	string filepathViejoConFS = this->pathFileSystem + "/" + filepathViejo;
-	string command = "exec rm '" + filepathViejoConFS + "'";
-	system(command.c_str());
-	Logger::logInfo("Se borro definitivamente el archivo " + filepathViejo);
-
-	string filepathNuevoConFS = this->pathFileSystem + "/" + filepathNuevo;
-	ofstream outFile(filepathNuevoConFS, ofstream::binary);
-	outFile.write(data, dataLen);
-	outFile.close();
-
+	manejadorArchivos.eliminarArchivoDefinitivamente(filepathViejo);
+	manejadorArchivos.guardarArchivoEnFileSystem(filepathNuevo, data, dataLen);
 	return ( filepathViejo != filepathNuevo );
 }
 
@@ -145,7 +137,7 @@ bool ManejadorArchivosYMetadatos::subirArchivo (string username, string filepath
 	}
 	if (not this->actualizarArchivo(username, filepath, data, dataLen, cuota))
 		return false;
-	return dbMetadatos->put(filepath, jsonMetadatos);
+	return manejadorMetadatos.cargarMetadato(filepath, jsonMetadatos);
 }
 
 bool ManejadorArchivosYMetadatos::guardarArchivo (const string& filepath, const string& username, const char* data, int dataLen) {
@@ -158,18 +150,12 @@ bool ManejadorArchivosYMetadatos::guardarArchivo (const string& filepath, const 
 		return false;
 	}
 
-	string pathConFileSystem = this->pathFileSystem + "/" + filepath;
 	if (validador.existeMetadato(filepath)) {
 		//Significa que no fui llamado desde el subirArchivo, por lo que la actualizacion se hará ahí
-		string metadatos = dbMetadatos->get(filepath);
-		string nuevosMetadatos = manejadorMetadatos.actualizarUsuarioFechaModificacion(metadatos, username);
-		dbMetadatos->modify(filepath, nuevosMetadatos);
-		//					Logger::logWarn("Se quiso consultar los metadatos del archivo " + filepath + " pero este no existe.");
-		//					return false;
+		manejadorMetadatos.actualizarMetadatosPorActualizacionArchivo(filepath, username);
 	}
-	ofstream outFile(pathConFileSystem, ofstream::binary);
-	outFile.write(data, dataLen);
-	outFile.close();
+
+	manejadorArchivos.guardarArchivoEnFileSystem(filepath, data, dataLen);
 	return true;
 }
 
