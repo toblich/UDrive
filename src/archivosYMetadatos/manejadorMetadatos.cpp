@@ -230,3 +230,14 @@ void ManejadorMetadatos::actualizarMetadatosPorActualizacionArchivo (const strin
 	string nuevosMetadatos = actualizarUsuarioFechaModificacion(metadatos, username);
 	dbMetadatos->modify(filepath, nuevosMetadatos);
 }
+
+bool ManejadorMetadatos::mandarATrash(const string& jsonMetadatos, const string& username,
+		const string& filepath, const string& pathCompletoPapelera) {
+	Batch batch = armarBatchEliminarArchivo(jsonMetadatos, username, filepath, pathCompletoPapelera);
+
+	if (this->dbMetadatos->writeBatch(batch))
+		return true;
+
+	Logger::logWarn("No se ha podido escribir el batch de eliminacion del archivo " + filepath + ".");
+	return false;
+}

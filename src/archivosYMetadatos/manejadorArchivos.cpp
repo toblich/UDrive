@@ -138,6 +138,18 @@ bool ManejadorArchivos::deleteFileSystem() {
 	return deleteCarpeta(this->pathFileSystem);
 }
 
+bool ManejadorArchivos::mandarArchivoATrash(const string& propietario, const string& filepath, const string& pathCompletoPapelera) {
+	string pathCompletoPapeleraConFS = this->pathFileSystem + "/" + pathCompletoPapelera;
+	string filepathCompleto = this->pathFileSystem + "/" + filepath;
+
+	if (rename(filepathCompleto.c_str(), pathCompletoPapeleraConFS.c_str())) {
+		Logger::logWarn("La eliminacion del archivo " + filepath + " no fue correcta.");
+		return false;
+	}
+	Logger::logInfo("La eliminacion del archivo " + filepath + " fue correcta.");
+	return true;
+}
+
 void ManejadorArchivos::crearFotoPerfilDefault(string username) {
 	string filepathConFS = this->pathFileSystem + "/" + FOTOS + "/" + username + ".jpg";
 	string command = "exec cp '" + PATH_DEFAULT_FOTO_PERFIL + "' '" + filepathConFS + "'";

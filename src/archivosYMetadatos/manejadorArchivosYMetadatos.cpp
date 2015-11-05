@@ -238,7 +238,6 @@ bool ManejadorArchivosYMetadatos::eliminarArchivo (string username, string filep
 }
 
 bool ManejadorArchivosYMetadatos::mandarArchivoATrash(string username, string filepath) {
-	string filepathCompleto = this->pathFileSystem + "/" + filepath;
 	vector<string> directorios = ParserURI::parsear(filepath, '/');
 	string jsonMetadatos = dbMetadatos->get(filepath);
 	MetadatoArchivo metadato = ParserJson::deserializarMetadatoArchivo(jsonMetadatos);
@@ -253,21 +252,14 @@ bool ManejadorArchivosYMetadatos::mandarArchivoATrash(string username, string fi
 	string pathCompletoPapelera = metadato.propietario + "/" + TRASH + "/" + pathSinUsernameConReserved;
 	string nroSecuencia = this->validador.obtenerNumeroSecuencia(this->pathFileSystem, metadato.propietario, pathSinUsernameConReserved);
 	pathCompletoPapelera += RESERVED_CHAR + nroSecuencia;
-	string pathCompletoPapeleraConFS = this->pathFileSystem + "/" + pathCompletoPapelera;
 
-	if (rename(filepathCompleto.c_str(), pathCompletoPapeleraConFS.c_str())) {
-		Logger::logWarn("La eliminacion del archivo " + filepath + " no fue correcta.");
+	//TODO: Creo que quedaria mejor que primero se fije de mandar los metadatos y despues el archivo en si
+	//		porque me parece que es mas probable que falle el de los metadatos que el del FS y como no
+	//		contemplamos una posible "restauracion", tal vez evitariamos algunos posibles errores.
+	if (not manejadorArchivos.mandarArchivoATrash(metadato.propietario, filepath, pathCompletoPapelera))
 		return false;
-	}
-	Logger::logInfo("La eliminacion del archivo " + filepath + " fue correcta.");
 
-	Batch batch = manejadorMetadatos.armarBatchEliminarArchivo(jsonMetadatos, username, filepath, pathCompletoPapelera);
-
-	if (this->dbMetadatos->writeBatch(batch))
-		return true;
-
-	Logger::logWarn("No se ha podido escribir el batch de eliminacion del archivo " + filepath + ".");
-	return false;
+	return manejadorMetadatos.mandarATrash(jsonMetadatos, username, filepath, pathCompletoPapelera);
 }
 
 string ManejadorArchivosYMetadatos::obtenerEstructuraCarpeta (string path) {
