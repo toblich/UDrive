@@ -14,9 +14,13 @@ public:
 	bool deleteCarpeta(string path);
 
 	bool renombrarArchivo (const string& pathInterno, const string& nuevoFilename);
+	bool restaurarArchivo (const string& pathRealSinFS, const string& pathEnPapeleraSinFS);
+	void deshacerRestaurado (const string& pathRealSinFS, const string& pathEnPapeleraSinFS);
 
 	void eliminarArchivoDefinitivamente (const string& filepath);
 	void guardarArchivoEnFileSystem(const string& filepath, const char* data, int dataLen);
+
+	void crearFotoPerfilDefault(string username);
 
 private:
 	string pathFileSystem;

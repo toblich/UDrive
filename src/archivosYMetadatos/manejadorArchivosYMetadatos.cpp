@@ -48,22 +48,13 @@ bool ManejadorArchivosYMetadatos::restaurar(string username, string pathEnPapele
 	if (not validador.puedoRestaurarA(pathEnPapeleraSinFS, pathRealSinFS, pathFileSystem))
 		return false;
 
-	string pathRealConFS = pathFileSystem + "/" + pathRealSinFS;
-	string pathEnPapeleraConFS = pathFileSystem + "/" + pathEnPapeleraSinFS;
-
-	if (rename(pathEnPapeleraConFS.c_str(), pathRealConFS.c_str()) != 0) {
-		Logger::logWarn("La restauracion del archivo " + pathEnPapeleraSinFS + " no fue correcta.");
+	if (not manejadorArchivos.restaurarArchivo(pathRealSinFS, pathEnPapeleraSinFS))
 		return false;
-	}
-
-	Logger::logInfo("La restauracion del archivo " + pathEnPapeleraSinFS + " fue correcta.");
 
 	if (manejadorMetadatos.restaurarMetadatos(pathEnPapeleraSinFS, username, pathRealSinFS))
 		return true;
 
-	rename(pathRealConFS.c_str(), pathEnPapeleraConFS.c_str());	// deshace la eliminacion
-	Logger::logWarn("No se ha podido escribir el batch de eliminacion del archivo "
-			+ pathEnPapeleraSinFS + ", por lo que no fue restaurado");
+	manejadorArchivos.deshacerRestaurado(pathRealSinFS, pathEnPapeleraSinFS);
 	return false;
 }
 
@@ -79,10 +70,7 @@ bool ManejadorArchivosYMetadatos::crearUsuario (string username) {
 	bool agregoPermisos = manejadorMetadatos.agregarPermisosABD(username);
 	if (not agregoPermisos) return false;
 	bool creoCarpeta = manejadorArchivos.crearCarpeta(username, pathTrash);
-	string filepathConFS = this->pathFileSystem + "/" + FOTOS + "/" + username + ".jpg";
-	string command = "exec cp '" + PATH_DEFAULT_FOTO_PERFIL + "' '" + filepathConFS + "'";
-	system(command.c_str());
-	Logger::logInfo("Se copio la imagen default para el usuario " + username);
+	manejadorArchivos.crearFotoPerfilDefault(username);
 	return creoCarpeta;
 }
 

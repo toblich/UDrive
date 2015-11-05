@@ -113,3 +113,30 @@ void ManejadorArchivos::guardarArchivoEnFileSystem (const string& filepath, cons
 	outFile.close();
 }
 
+bool ManejadorArchivos::restaurarArchivo(const string& pathRealSinFS, const string& pathEnPapeleraSinFS) {
+	string pathRealConFS = pathFileSystem + "/" + pathRealSinFS;
+	string pathEnPapeleraConFS = pathFileSystem + "/" + pathEnPapeleraSinFS;
+
+	if (rename(pathEnPapeleraConFS.c_str(), pathRealConFS.c_str()) != 0) {
+		Logger::logWarn("La restauracion del archivo " + pathEnPapeleraSinFS + " no fue correcta.");
+		return false;
+	}
+	Logger::logInfo("La restauracion del archivo " + pathEnPapeleraSinFS + " fue correcta.");
+	return true;
+}
+
+void ManejadorArchivos::deshacerRestaurado(const string& pathRealSinFS, const string& pathEnPapeleraSinFS) {
+	string pathRealConFS = pathFileSystem + "/" + pathRealSinFS;
+	string pathEnPapeleraConFS = pathFileSystem + "/" + pathEnPapeleraSinFS;
+
+	rename(pathRealConFS.c_str(), pathEnPapeleraConFS.c_str());	// deshace la eliminacion
+	Logger::logWarn("No se ha podido escribir el batch de eliminacion del archivo "
+			+ pathEnPapeleraSinFS + ", por lo que no fue restaurado");
+}
+
+void ManejadorArchivos::crearFotoPerfilDefault(string username) {
+	string filepathConFS = this->pathFileSystem + "/" + FOTOS + "/" + username + ".jpg";
+	string command = "exec cp '" + PATH_DEFAULT_FOTO_PERFIL + "' '" + filepathConFS + "'";
+	system(command.c_str());
+	Logger::logInfo("Se copio la imagen default para el usuario " + username);
+}

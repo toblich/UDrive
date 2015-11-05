@@ -36,12 +36,12 @@ public:
 	ManejadorArchivosYMetadatos(BD* dbMetadatos, string path);
 	virtual ~ManejadorArchivosYMetadatos();
 
-	bool crearUsuario(string username);	// bajar copia de foto
+	bool crearUsuario(string username);
 	bool crearCarpetaSegura(string username, string path);
 	string obtenerEstructuraCarpeta(string path);
 
 	bool eliminar(string username, string path); //Sirve para carpetas y archivos
-	bool restaurar(string username, string path); // bajar al menos un cacho
+	bool restaurar(string username, string path);
 
 	bool subirArchivo(string username, string filepath, const char* data, int dataLen, string jsonMetadatos, int cuota);
 	string descargarArchivo(string username, string filepath);
