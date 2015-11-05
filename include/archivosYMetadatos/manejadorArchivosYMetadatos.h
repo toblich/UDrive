@@ -51,8 +51,6 @@ public:
 	string consultarMetadatosArchivo(string username, string filename);
 	bool actualizarMetadatos(string username, string filepath, string jsonNuevosMetadatos);
 
-	bool deleteFileSystem();
-
 	// Busquedas
 	string buscarPorExtension(string username, string extension);
 	string buscarPorEtiqueta(string username, string etiqueta);

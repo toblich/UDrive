@@ -289,10 +289,6 @@ string ManejadorArchivosYMetadatos::descargarArchivo (string username, string fi
 	return pathADevolver;
 }
 
-bool ManejadorArchivosYMetadatos::deleteFileSystem () {
-	return manejadorArchivos.deleteCarpeta(this->pathFileSystem);
-}
-
 string ManejadorArchivosYMetadatos::buscarPorExtension(string username, string extension) {
 	return buscador.buscarPorExtension(username, extension);
 }

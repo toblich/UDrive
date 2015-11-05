@@ -12,6 +12,7 @@ public:
 	bool tamanioCarpeta(string path, unsigned long int & size);
 	bool crearCarpeta(string username, string path);
 	bool deleteCarpeta(string path);
+	bool deleteFileSystem();
 
 	bool renombrarArchivo (const string& pathInterno, const string& nuevoFilename);
 	bool restaurarArchivo (const string& pathRealSinFS, const string& pathEnPapeleraSinFS);

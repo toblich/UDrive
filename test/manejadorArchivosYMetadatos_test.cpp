@@ -18,7 +18,7 @@ class ManejadorArchivosYMetadatosTest : public ::testing::Test {
 		}
 
 		virtual void TearDown() {
-			manejador->deleteFileSystem();
+			manejador->manejadorArchivos.deleteFileSystem();
 			delete manejador;
 			delete validador;
 			db->deleteBD();
@@ -530,7 +530,7 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaBorrarElFileSystem) {
 	manejador->crearCarpetaSegura("pablo", path); //Creo una carpeta para asegurarme que exista el FS
 	//Me fijo si existe la carpeta del FS
 	EXPECT_TRUE(stat(pathFS.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode));
-	manejador->deleteFileSystem();
+	manejador->manejadorArchivos.deleteFileSystem();
 	//Ahora no deberia existir
 	EXPECT_FALSE(stat(pathFS.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode));
 }

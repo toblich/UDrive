@@ -134,6 +134,10 @@ void ManejadorArchivos::deshacerRestaurado(const string& pathRealSinFS, const st
 			+ pathEnPapeleraSinFS + ", por lo que no fue restaurado");
 }
 
+bool ManejadorArchivos::deleteFileSystem() {
+	return deleteCarpeta(this->pathFileSystem);
+}
+
 void ManejadorArchivos::crearFotoPerfilDefault(string username) {
 	string filepathConFS = this->pathFileSystem + "/" + FOTOS + "/" + username + ".jpg";
 	string command = "exec cp '" + PATH_DEFAULT_FOTO_PERFIL + "' '" + filepathConFS + "'";
