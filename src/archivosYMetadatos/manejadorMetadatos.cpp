@@ -222,6 +222,7 @@ void ManejadorMetadatos::eliminarDefinitivamente (const string& filepath) {
 }
 
 bool ManejadorMetadatos::cargarMetadato (const string& filepath, const string& jsonMetadatos) {
+	// Las validaciones de existencia se hacen antes de llamarlo
 	return dbMetadatos->put(filepath, jsonMetadatos);
 }
 
@@ -240,4 +241,9 @@ bool ManejadorMetadatos::mandarATrash(const string& jsonMetadatos, const string&
 
 	Logger::logWarn("No se ha podido escribir el batch de eliminacion del archivo " + filepath + ".");
 	return false;
+}
+
+string ManejadorMetadatos::obtenerMetadato(const string& filepath) {
+	// Las validaciones de existencia se hacen antes de llamarlo
+	return dbMetadatos->get(filepath);
 }

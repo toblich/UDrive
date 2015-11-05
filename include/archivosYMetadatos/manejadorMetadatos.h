@@ -22,6 +22,7 @@ public:
 			 	   const string& pathCompletoPapelera);
 
 	bool cargarMetadato(const string& filepath, const string& jsonMetadatos);
+	string obtenerMetadato(const string& filepath);
 
 	void actualizarMetadatosPorActualizacionArchivo(const string& filepath, const string& username);
 

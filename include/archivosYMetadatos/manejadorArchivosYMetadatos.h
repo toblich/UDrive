@@ -13,7 +13,6 @@ using std::string;
 class ManejadorArchivosYMetadatos {
 
 private:
-	BD* dbMetadatos;
 	char homeDirectory[1024];
 	string pathFileSystem;
 	Validador validador;
@@ -21,13 +20,11 @@ private:
 	ManejadorArchivos manejadorArchivos;
 	ManejadorMetadatos manejadorMetadatos;
 
-
 	// Archivos y Carpetas
 	bool eliminarArchivo(string username, string filepath); //* no se si puede
 	bool eliminarCarpeta(string username, string path);	//* no se si se puede
 	bool mandarArchivoATrash(string username, string filepath); //* jodido, parte y parte y queda un cacho
 	bool guardarArchivo (const string& filepath, const string& username, const char* data, int dataLen); // puede quedar
-
 
 	bool actualizarMetadatosChequeados (const string& filepath, const string& jsonNuevosMetadatos, const string& username); // Queda
 

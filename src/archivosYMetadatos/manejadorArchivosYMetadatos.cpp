@@ -13,7 +13,6 @@ ManejadorArchivosYMetadatos::ManejadorArchivosYMetadatos (BD* dbMetadatos) :
 
 ManejadorArchivosYMetadatos::ManejadorArchivosYMetadatos (BD* dbMetadatos, string path) :
 		validador(dbMetadatos), buscador(dbMetadatos, path), manejadorArchivos(path, &validador), manejadorMetadatos(dbMetadatos, &validador) {
-	this->dbMetadatos = dbMetadatos;
 	this->pathFileSystem = path;
 	getcwd(homeDirectory, sizeof(homeDirectory));
 }
@@ -239,7 +238,11 @@ bool ManejadorArchivosYMetadatos::eliminarArchivo (string username, string filep
 
 bool ManejadorArchivosYMetadatos::mandarArchivoATrash(string username, string filepath) {
 	vector<string> directorios = ParserURI::parsear(filepath, '/');
-	string jsonMetadatos = dbMetadatos->get(filepath);
+	if (not validador.existeMetadato(filepath)) {
+		Logger::logWarn("Se quiso mandar a la papelera el archivo " + filepath + " pero este no existe.");
+		return false;
+	}
+	string jsonMetadatos = manejadorMetadatos.obtenerMetadato(filepath);
 	MetadatoArchivo metadato = ParserJson::deserializarMetadatoArchivo(jsonMetadatos);
 	string pathSinUsernameConReserved = ParserURI::join(directorios, RESERVED_CHAR, 1, directorios.size());
 
