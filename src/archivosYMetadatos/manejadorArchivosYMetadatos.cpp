@@ -21,7 +21,6 @@ ManejadorArchivosYMetadatos::~ManejadorArchivosYMetadatos () {
 }
 
 bool ManejadorArchivosYMetadatos::eliminar (string username, string path) {
-	//return manejadorArchivos.eliminar(username, path);
 	if (not validador.verificarPermisos(username, path))
 		return false;
 
@@ -99,7 +98,6 @@ bool ManejadorArchivosYMetadatos::eliminarCarpeta (string username, string path)
 		return manejadorArchivos.deleteCarpeta(pathConFS);
 	else
 		return false;
-//	return manejadorArchivos.eliminarCarpeta(username, path);
 }
 
 bool ManejadorArchivosYMetadatos::actualizarFotoPerfil(string filepathViejo, string filepathNuevo, const char* data, int dataLen) {
@@ -256,13 +254,10 @@ bool ManejadorArchivosYMetadatos::mandarArchivoATrash(string username, string fi
 	string nroSecuencia = this->validador.obtenerNumeroSecuencia(this->pathFileSystem, metadato.propietario, pathSinUsernameConReserved);
 	pathCompletoPapelera += RESERVED_CHAR + nroSecuencia;
 
-	//TODO: Creo que quedaria mejor que primero se fije de mandar los metadatos y despues el archivo en si
-	//		porque me parece que es mas probable que falle el de los metadatos que el del FS y como no
-	//		contemplamos una posible "restauracion", tal vez evitariamos algunos posibles errores.
-	if (not manejadorArchivos.mandarArchivoATrash(metadato.propietario, filepath, pathCompletoPapelera))
+	if (not manejadorMetadatos.mandarATrash(jsonMetadatos, username, filepath, pathCompletoPapelera))
 		return false;
 
-	return manejadorMetadatos.mandarATrash(jsonMetadatos, username, filepath, pathCompletoPapelera);
+	return manejadorArchivos.mandarArchivoATrash(metadato.propietario, filepath, pathCompletoPapelera);
 }
 
 string ManejadorArchivosYMetadatos::obtenerEstructuraCarpeta (string path) {

@@ -21,12 +21,12 @@ private:
 	ManejadorMetadatos manejadorMetadatos;
 
 	// Archivos y Carpetas
-	bool eliminarArchivo(string username, string filepath); //* no se si puede
-	bool eliminarCarpeta(string username, string path);	//* no se si se puede
-	bool mandarArchivoATrash(string username, string filepath); //* jodido, parte y parte y queda un cacho
-	bool guardarArchivo (const string& filepath, const string& username, const char* data, int dataLen); // puede quedar
+	bool eliminarArchivo(string username, string filepath);
+	bool eliminarCarpeta(string username, string path);
+	bool mandarArchivoATrash(string username, string filepath);
+	bool guardarArchivo (const string& filepath, const string& username, const char* data, int dataLen);
 
-	bool actualizarMetadatosChequeados (const string& filepath, const string& jsonNuevosMetadatos, const string& username); // Queda
+	bool actualizarMetadatosChequeados (const string& filepath, const string& jsonNuevosMetadatos, const string& username);
 
 public:
 	ManejadorArchivosYMetadatos(BD* dbMetadatos);
