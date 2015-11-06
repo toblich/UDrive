@@ -8,9 +8,10 @@ Validador::~Validador () {
 }
 
 
-bool Validador::existeArchivo (string filepath) {
+bool Validador::existeArchivo (string filepath, int version) {
 	struct stat buffer;
-	return (stat(filepath.c_str(), &buffer) == 0);
+	string pathConFirst = filepath + RESERVED_STR + to_string(version);
+	return (stat(pathConFirst.c_str(), &buffer) == 0);
 }
 
 bool Validador::existeCarpeta (string path) {

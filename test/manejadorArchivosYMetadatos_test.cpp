@@ -14,9 +14,11 @@ class ManejadorArchivosYMetadatosTest : public ::testing::Test {
 	protected:
 		virtual void SetUp() {
 			db = new MapDB();
-			pathFS = pathFSBase + ::testing::UnitTest::GetInstance()->current_test_info()->name();
+			string testName = ::testing::UnitTest::GetInstance()->current_test_info()->name();
+			pathFS = pathFSBase + testName;
 			manejador = new ManejadorArchivosYMetadatos(db, pathFS);
 			validador = new Validador(db);
+			Logger::logTrace("\n===================== TEST " + testName + " =====================");
 		}
 
 		virtual void TearDown() {
@@ -289,7 +291,7 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaDevolverPathCompletoPorArchivoExi
 	string filepath = "pablo/archivos/saludo.txt";
 	manejador->crearUsuario("pablo");
 	manejador->crearCarpetaSegura("pablo", path);
-	manejador->subirArchivo("pablo", filepath, "hola pablo", 10, "un metadato", 2048);
+	manejador->subirArchivo("pablo", filepath, "hola pablo", 10, jsonArchOK, 2048);
 	string pathCompleto = manejador->descargarArchivo("pablo", filepath, LATEST);
 
 	char homeDirectory[1024];
@@ -1272,7 +1274,7 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaBuscarBienPorEtiquetasEnPermisosY
 TEST_F(ManejadorArchivosYMetadatosTest, deberiaSubirBienArchivoVacio) {
 	manejador->crearUsuario("pablo");
 	string filepath = "pablo/archivos/saludo.txt";
-	string filepathConFS = pathFS + "/" + filepath + RESERVED_FIRST;
+	string filepathConFS = pathFS + "/" + filepath;
 	ASSERT_TRUE( manejador->subirArchivo("pablo", filepath, "", 0, jsonArchOK, 2048) );
 	ASSERT_TRUE( manejador->validador.existeArchivo(filepathConFS) );
 	ASSERT_TRUE( manejador->validador.existeMetadato(filepath) );

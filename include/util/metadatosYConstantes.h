@@ -8,6 +8,13 @@
 const std::string RESERVED_STR = "!";
 const std::string RESERVED_REGEX = "\\!";
 
+#define FIRST 1
+#define FIRST_STR "1"
+#define RESERVED_FIRST (RESERVED_STR + FIRST_STR)
+#define LATEST -1
+#define LATEST_STR "-1"
+#define RESERVED_LATEST (RESERVED_STR + LATEST_STR)
+
 const std::string TRASH = RESERVED_STR + "trash";
 const std::string PERMISOS = RESERVED_STR + "permisos";
 const std::string FOLDER = RESERVED_STR + "folder";

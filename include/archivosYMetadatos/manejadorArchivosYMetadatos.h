@@ -9,13 +9,6 @@
 
 using std::string;
 
-#define FIRST 1
-#define FIRST_STR "1"
-#define RESERVED_FIRST (RESERVED_STR + FIRST_STR)
-#define LATEST -1
-#define LATEST_STR "-1"
-#define RESERVED_LATEST (RESERVED_STR + LATEST_STR)
-
 class ManejadorArchivosYMetadatos {
 
 private:
@@ -34,7 +27,7 @@ private:
 
 	bool actualizarMetadatosChequeados (const string& filepath, const string& jsonNuevosMetadatos, const string& username);
 
-	string getLatestVersion(const string& filepath);
+	int getLatestVersion(const string& filepath);
 
 public:
 	ManejadorArchivosYMetadatos(BD* dbMetadatos);

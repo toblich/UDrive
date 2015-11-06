@@ -34,15 +34,16 @@ public:
 	virtual ~Validador();
 
 	/**
-	 * @brief Verifica existencia de un archivo.
+	 * @brief Verifica existencia de una version de un archivo (por default, la primera).
 	 *
 	 * @param filepath			string con la ruta del archivo relativa a donde se ejecutó
 	 * (Es decir, que debe incluir el nombre del FileSystem en él).
+	 * @param version			numero de version a buscar
 	 *
 	 * @retval true				si existe el archivo.
 	 * @retval false			si no existe el archivo.
 	 */
-	bool existeArchivo(string filepath);
+	bool existeArchivo(string filepath, int version = FIRST);
 
 	/**
 	 * @brief Verifica existencia de una carpeta.

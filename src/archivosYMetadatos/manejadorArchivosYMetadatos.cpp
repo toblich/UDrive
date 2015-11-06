@@ -278,17 +278,22 @@ string ManejadorArchivosYMetadatos::obtenerEstructuraCarpeta (string path) {
 /* DEFAULT: version = LATEST */
 string ManejadorArchivosYMetadatos::descargarArchivo (string username, string filepath, int version) {
 	//OJO porque si no se corre desde la carpeta build como ./udrive esto va a pinchar seguramente (Ya que la carpeta del FileSystem no va a existir)
-	if (not validador.verificarPermisos(username, filepath))
-		return "";
-
-	string strVersion = RESERVED_STR + (version != LATEST ? to_string(version) : getLatestVersion(filepath));
-	string filepathCompleto = this->pathFileSystem + "/" + filepath + strVersion;
-	if (not validador.existeArchivo(filepathCompleto)) {
-		Logger::logWarn("Se ha querido descargar el archivo de path " + filepath + ", el cual no existe.");
+	string filepathCompleto = this->pathFileSystem + "/" + filepath;
+	if (not validador.verificarPermisos(username, filepath) or not validador.existeArchivo(filepathCompleto, FIRST) ) {
 		return "";
 	}
+
+	if (version == LATEST)
+		version = getLatestVersion(filepath);
+
+	if ( not validador.existeArchivo(filepathCompleto, version) ) {
+		Logger::logWarn("Se ha querido descargar el archivo de path " + filepath + " en la version "
+				+ to_string(version) + ", el cual no existe.");
+		return "";
+	}
+	string strVersion = RESERVED_STR + to_string(version);
 	string pathADevolver(this->homeDirectory);
-	pathADevolver += "/" + filepathCompleto;
+	pathADevolver += "/" + filepathCompleto + strVersion;
 	return pathADevolver;
 }
 
@@ -304,8 +309,13 @@ string ManejadorArchivosYMetadatos::buscarPorNombre(string username, string nomb
 	return buscador.buscarPorNombre(username, nombre);
 }
 
-string ManejadorArchivosYMetadatos::getLatestVersion (const string& filepath) {
-	return string(FIRST_STR); // TODO obtener de los metadatos (mandar a subclase)
+int ManejadorArchivosYMetadatos::getLatestVersion (const string& filepath) {
+	if (not validador.existeMetadato(filepath)) {
+		Logger::logError("No existe el metadato " + filepath + " al buscar su ultima version");
+		return -2;
+	}
+	string json = manejadorMetadatos.obtenerMetadato(filepath);
+	return ParserJson::deserializarMetadatoArchivo(json).ultimaVersion;
 }
 
 string ManejadorArchivosYMetadatos::buscarPorPropietario(string username, string propietario) {
