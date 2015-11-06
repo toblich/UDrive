@@ -6,19 +6,21 @@
 
 using namespace std;
 
-const string pathFS = "FileSystem_test";
+const string pathFSBase = "test_";
+string pathFS = "";
 
 class ManejadorArchivosYMetadatosTest : public ::testing::Test {
 
 	protected:
 		virtual void SetUp() {
 			db = new MapDB();
+			pathFS = pathFSBase + ::testing::UnitTest::GetInstance()->current_test_info()->name();
 			manejador = new ManejadorArchivosYMetadatos(db, pathFS);
 			validador = new Validador(db);
 		}
 
 		virtual void TearDown() {
-			manejador->manejadorArchivos.deleteFileSystem();
+//			manejador->manejadorArchivos.deleteFileSystem();
 			delete manejador;
 			delete validador;
 			db->deleteBD();
@@ -178,7 +180,7 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaSubirBienArchivoDeTexto) {
 	manejador->crearUsuario("pablo");
 	manejador->crearCarpetaSegura("pablo", path);
 	manejador->subirArchivo("pablo", filepath, "hola pablo", 10, "", 2048);
-	string pathCompleto = pathFS + "/" + filepath;
+	string pathCompleto = pathFS + "/" + filepath + RESERVED_FIRST;
 	ifstream archivo(pathCompleto.c_str());
 	string texto;
 	ASSERT_TRUE(archivo.is_open());
@@ -288,12 +290,12 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaDevolverPathCompletoPorArchivoExi
 	manejador->crearUsuario("pablo");
 	manejador->crearCarpetaSegura("pablo", path);
 	manejador->subirArchivo("pablo", filepath, "hola pablo", 10, "un metadato", 2048);
-	string pathCompleto = manejador->descargarArchivo("pablo", filepath);
+	string pathCompleto = manejador->descargarArchivo("pablo", filepath, LATEST);
 
 	char homeDirectory[1024];
 	getcwd(homeDirectory, sizeof(homeDirectory));
 	string pathAComparar(homeDirectory);
-	pathAComparar += "/" + pathFS + "/" + filepath;
+	pathAComparar += "/" + pathFS + "/" + filepath + RESERVED_FIRST;
 
 	EXPECT_EQ(pathAComparar,pathCompleto);
 }
@@ -427,18 +429,21 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaObtenerBienLaEstructuraDeLasCarpe
 	MetadatoArchivo metadato1;
 	metadato1.nombre = "saludo";
 	metadato1.extension = "txt";
+	metadato1.ultimaVersion = 1;
 	string metadatos1 = ParserJson::serializarMetadatoArchivo(metadato1);
 
 	string filepath2 = "pablo/como estas/bien/juan";
 	MetadatoArchivo metadato2;
 	metadato2.nombre = "juan";
 	metadato2.extension = "none";
+	metadato2.ultimaVersion = 1;
 	string metadatos2 = ParserJson::serializarMetadatoArchivo(metadato2);
 
 	string filepath3 = "pablo/como estas/bien/pepe.hola";
 	MetadatoArchivo metadato3;
 	metadato3.nombre = "pepe";
 	metadato3.extension = "hola";
+	metadato3.ultimaVersion = 1;
 	string metadatos3 = ParserJson::serializarMetadatoArchivo(metadato3);
 
 	manejador->crearUsuario("pablo");
@@ -454,9 +459,9 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaObtenerBienLaEstructuraDeLasCarpe
 
 	map<string, string> mapa = ParserJson::deserializarMapa(estructura);
 
-	EXPECT_EQ(mapa.at(filepath1), metadato1.nombre + "." + metadato1.extension);
-	EXPECT_EQ(mapa.at(filepath2), metadato2.nombre); // no tiene extension
-	EXPECT_EQ(mapa.at(filepath3), metadato3.nombre + "." + metadato3.extension);
+	EXPECT_EQ(mapa.at(filepath1), metadato1.nombre + "." + metadato1.extension + RESERVED_FIRST);
+	EXPECT_EQ(mapa.at(filepath2), metadato2.nombre + RESERVED_FIRST); // no tiene extension
+	EXPECT_EQ(mapa.at(filepath3), metadato3.nombre + "." + metadato3.extension + RESERVED_FIRST);
 	EXPECT_EQ(mapa.at(folderpath1), "vos?." + FOLDER);
 	EXPECT_EQ(mapa.at(folderpath2), "hola." + FOLDER);
 }
@@ -515,8 +520,8 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaObtenerEstructuraCorrectaDePermis
 
 	map<string, string> mapa = ParserJson::deserializarMapa(jsonEstructura);
 
-	EXPECT_EQ(mapa.at(filepath1), "saludo.txt");
-	EXPECT_EQ(mapa.at(filepath2), "saludo2.txt");
+	EXPECT_EQ(mapa.at(filepath1), "saludo.txt" + RESERVED_FIRST);
+	EXPECT_EQ(mapa.at(filepath2), "saludo2.txt" + RESERVED_FIRST);
 }
 
 TEST_F(ManejadorArchivosYMetadatosTest, deberiaNoPermitirSubirArchivoPorExcesoDeCuota) {
@@ -615,12 +620,12 @@ TEST_F(ManejadorArchivosYMetadatosTest, usuarioConPermisosDeberiaPoderAgregarPer
 TEST_F(ManejadorArchivosYMetadatosTest, usuarioConPermisosDeberiaPoderDescargarArchivo) {
 	string filepath = "pablo/archivos/saludo.txt";
 	inic(manejador, filepath);
-	string pathCompleto = manejador->descargarArchivo("juan", filepath);
+	string pathCompleto = manejador->descargarArchivo("juan", filepath); // LATEST implicito
 
 	char homeDirectory[1024];
 	getcwd(homeDirectory, sizeof(homeDirectory));
 	string pathAComparar(homeDirectory);
-	pathAComparar += "/" + pathFS + "/" + filepath;
+	pathAComparar += "/" + pathFS + "/" + filepath + RESERVED_FIRST;
 
 	EXPECT_EQ(pathAComparar,pathCompleto);
 }
@@ -645,9 +650,9 @@ TEST_F(ManejadorArchivosYMetadatosTest, usuarioConPermisosNoDeberiaPoderBorrarCa
 TEST_F(ManejadorArchivosYMetadatosTest, usuarioConPermisosDeberiaPoderActualizarArchivo) {
 	string filepath = "pablo/archivos/saludo.txt";
 	inic(manejador, filepath);
-	ASSERT_TRUE(manejador->actualizarArchivo("juan", filepath, "hola juan", 9, 2048));
+	ASSERT_TRUE(manejador->actualizarArchivo("juan", filepath, "hola juan", 9, 2048, FIRST));
 
-	string pathCompleto = pathFS + "/" + filepath;
+	string pathCompleto = pathFS + "/" + filepath + RESERVED_STR + to_string(FIRST+1);
 	ifstream archivo(pathCompleto.c_str());
 	string texto;
 	ASSERT_TRUE(archivo.is_open());
@@ -660,7 +665,7 @@ TEST_F(ManejadorArchivosYMetadatosTest, usuarioConPermisosDeberiaPoderActualizar
 TEST_F(ManejadorArchivosYMetadatosTest, usuarioConPermisosDeberiaSerElUltimoQueModifico) {
 	string filepath = "pablo/archivos/saludo.txt";
 	inic(manejador, filepath);
-	ASSERT_TRUE(manejador->actualizarArchivo("juan", filepath, "hola juan", 9, 2048));
+	ASSERT_TRUE(manejador->actualizarArchivo("juan", filepath, "hola juan", 9, 2048, FIRST));
 
 	string jsonMetadatos = manejador->consultarMetadatosArchivo("juan", filepath);
 	MetadatoArchivo metadato = ParserJson().deserializarMetadatoArchivo(jsonMetadatos);
@@ -689,7 +694,7 @@ TEST_F(ManejadorArchivosYMetadatosTest, usuarioSinPermisosNoDeberiaPoderActualiz
 	manejador->crearUsuario("pablo");
 	manejador->crearUsuario("juan");
 	manejador->subirArchivo("pablo", filepath, "hola pablo", 10, jsonArchOK, 2048);
-	EXPECT_FALSE(manejador->actualizarArchivo("juan", filepath, "hola juan", 9, 2048));
+	EXPECT_FALSE(manejador->actualizarArchivo("juan", filepath, "hola juan", 9, 2048, FIRST));
 }
 
 TEST_F(ManejadorArchivosYMetadatosTest, usuarioSinPermisosNoDeberiaPoderDescargarArchivo) {
@@ -905,9 +910,9 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaBuscarBienPorExtensionEnArchivosC
 	string jsonEstructura = manejador->buscarPorExtension("juan", "txt");
 	map<string, string> busquedaExtension = ParserJson::deserializarMapa(jsonEstructura);
 
-	EXPECT_EQ(busquedaExtension.at(filepath), "saludo.txt");
+	EXPECT_EQ(busquedaExtension.at(filepath), "saludo.txt" + RESERVED_STR + FIRST_STR);
 	EXPECT_FALSE(busquedaExtension.count(filepath2) > 0); // no existe en el mapa
-	EXPECT_EQ(busquedaExtension.at(filepath3), "saludo3.txt");
+	EXPECT_EQ(busquedaExtension.at(filepath3), "saludo3.txt" + RESERVED_STR + FIRST_STR);
 }
 
 TEST_F(ManejadorArchivosYMetadatosTest, deberiaBuscarBienPorNombreEnArchivosConPermisos) {
@@ -927,9 +932,9 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaBuscarBienPorNombreEnArchivosConP
 	string jsonEstructura = manejador->buscarPorNombre("juan", "saludo");
 	map<string, string> busquedaNombre = ParserJson::deserializarMapa(jsonEstructura);
 
-	EXPECT_EQ(busquedaNombre.at(filepath), "saludo.txt");
-	EXPECT_EQ(busquedaNombre.at(filepath2), "saludo2.png");
-	EXPECT_EQ(busquedaNombre.at(filepath3), "saludo3.txt");
+	EXPECT_EQ(busquedaNombre.at(filepath), "saludo.txt" + RESERVED_STR + FIRST_STR);
+	EXPECT_EQ(busquedaNombre.at(filepath2), "saludo2.png" + RESERVED_STR + FIRST_STR);
+	EXPECT_EQ(busquedaNombre.at(filepath3), "saludo3.txt" + RESERVED_STR + FIRST_STR);
 	EXPECT_FALSE(busquedaNombre.count(filepath4) > 0); // no existe en el mapa
 }
 
@@ -949,8 +954,8 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaBuscarBienPorPropietarioEnArchivo
 	string jsonEstructura = manejador->buscarPorPropietario("juan", "pablo");
 	map<string, string> busquedaNombre = ParserJson::deserializarMapa(jsonEstructura);
 
-	EXPECT_EQ(busquedaNombre.at(filepath), "saludo.txt");
-	EXPECT_EQ(busquedaNombre.at(filepath2), "saludo2.png");
+	EXPECT_EQ(busquedaNombre.at(filepath), "saludo.txt" + RESERVED_STR + FIRST_STR);
+	EXPECT_EQ(busquedaNombre.at(filepath2), "saludo2.png" + RESERVED_STR + FIRST_STR);
 	EXPECT_FALSE(busquedaNombre.count(filepath3) > 0); // no existe en el mapa
 }
 
@@ -981,16 +986,16 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaBuscarBienPorEtiquetasEnArchivosC
 
 	EXPECT_FALSE(busquedaEtiqueta.count(filepath) > 0); // no existe en el mapa
 	EXPECT_FALSE(busquedaEtiqueta.count(filepath2) > 0); // no existe en el mapa
-	EXPECT_EQ(busquedaEtiqueta.at(filepath3), "saludo3.txt");
-	EXPECT_EQ(busquedaEtiqueta.at(filepath4), "saludo4.txt");
+	EXPECT_EQ(busquedaEtiqueta.at(filepath3), "saludo3.txt" + RESERVED_STR + FIRST_STR);
+	EXPECT_EQ(busquedaEtiqueta.at(filepath4), "saludo4.txt" + RESERVED_STR + FIRST_STR);
 
 	string jsonEstructura2 = manejador->buscarPorEtiqueta("juan", "hola");
 	map<string, string> busquedaEtiqueta2 = ParserJson::deserializarMapa(jsonEstructura2);
 
-	EXPECT_EQ(busquedaEtiqueta2.at(filepath), "saludo.txt");
+	EXPECT_EQ(busquedaEtiqueta2.at(filepath), "saludo.txt" + RESERVED_STR + FIRST_STR);
 	EXPECT_FALSE(busquedaEtiqueta2.count(filepath2) > 0); // no existe en el mapa
 	EXPECT_FALSE(busquedaEtiqueta2.count(filepath3) > 0); // no existe en el mapa
-	EXPECT_EQ(busquedaEtiqueta2.at(filepath4), "saludo4.txt");
+	EXPECT_EQ(busquedaEtiqueta2.at(filepath4), "saludo4.txt" + RESERVED_STR + FIRST_STR);
 }
 
 TEST_F(ManejadorArchivosYMetadatosTest, deberiaBuscarBienPorExtensionEnArchivosDelFileSystem) {
@@ -1009,9 +1014,9 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaBuscarBienPorExtensionEnArchivosD
 	string jsonEstructura = manejador->buscarPorExtension("pablo", "txt");
 	map<string, string> busquedaExtension = ParserJson::deserializarMapa(jsonEstructura);
 
-	EXPECT_EQ(busquedaExtension.at(filepath), "saludo.txt");
+	EXPECT_EQ(busquedaExtension.at(filepath), "saludo.txt" + RESERVED_STR + FIRST_STR);
 	EXPECT_FALSE(busquedaExtension.count(filepath2) > 0); // no existe en el mapa
-	EXPECT_EQ(busquedaExtension.at(filepath3), "saludo3.txt");
+	EXPECT_EQ(busquedaExtension.at(filepath3), "saludo3.txt" + RESERVED_STR + FIRST_STR);
 }
 
 TEST_F(ManejadorArchivosYMetadatosTest, deberiaBuscarBienPorPropietarioEnArchivosDelFileSystem) {
@@ -1030,9 +1035,9 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaBuscarBienPorPropietarioEnArchivo
 	string jsonEstructura = manejador->buscarPorPropietario("pablo", "pablo");
 	map<string, string> busquedaPropietario = ParserJson::deserializarMapa(jsonEstructura);
 
-	EXPECT_EQ(busquedaPropietario.at(filepath), "saludo.txt");
-	EXPECT_EQ(busquedaPropietario.at(filepath2), "saludo2.png"); // no existe en el mapa
-	EXPECT_EQ(busquedaPropietario.at(filepath3), "saludo3.txt");
+	EXPECT_EQ(busquedaPropietario.at(filepath), "saludo.txt" + RESERVED_STR + FIRST_STR);
+	EXPECT_EQ(busquedaPropietario.at(filepath2), "saludo2.png" + RESERVED_STR + FIRST_STR); // no existe en el mapa
+	EXPECT_EQ(busquedaPropietario.at(filepath3), "saludo3.txt" + RESERVED_STR + FIRST_STR);
 }
 
 TEST_F(ManejadorArchivosYMetadatosTest, deberiaBuscarBienPorNombreEnArchivosDelFileSystem) {
@@ -1052,9 +1057,9 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaBuscarBienPorNombreEnArchivosDelF
 	string jsonEstructura = manejador->buscarPorNombre("pablo", "saludo");
 	map<string, string> busquedaNombre = ParserJson::deserializarMapa(jsonEstructura);
 
-	EXPECT_EQ(busquedaNombre.at(filepath), "saludo.txt");
-	EXPECT_EQ(busquedaNombre.at(filepath2), "saludo2.png");
-	EXPECT_EQ(busquedaNombre.at(filepath3), "saludo3.txt");
+	EXPECT_EQ(busquedaNombre.at(filepath), "saludo.txt" + RESERVED_STR + FIRST_STR);
+	EXPECT_EQ(busquedaNombre.at(filepath2), "saludo2.png" + RESERVED_STR + FIRST_STR);
+	EXPECT_EQ(busquedaNombre.at(filepath3), "saludo3.txt" + RESERVED_STR + FIRST_STR);
 	EXPECT_FALSE(busquedaNombre.count(filepath4) > 0); // no existe en el mapa
 }
 
@@ -1083,16 +1088,16 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaBuscarBienPorEtiquetasEnArchivosD
 
 	EXPECT_FALSE(busquedaEtiqueta.count(filepath) > 0); // no existe en el mapa
 	EXPECT_FALSE(busquedaEtiqueta.count(filepath2) > 0); // no existe en el mapa
-	EXPECT_EQ(busquedaEtiqueta.at(filepath3), "saludo3.txt");
-	EXPECT_EQ(busquedaEtiqueta.at(filepath4), "saludo4.txt");
+	EXPECT_EQ(busquedaEtiqueta.at(filepath3), "saludo3.txt" + RESERVED_STR + FIRST_STR);
+	EXPECT_EQ(busquedaEtiqueta.at(filepath4), "saludo4.txt" + RESERVED_STR + FIRST_STR);
 
 	string jsonEstructura2 = manejador->buscarPorEtiqueta("pablo", "hola");
 	map<string, string> busquedaEtiqueta2 = ParserJson::deserializarMapa(jsonEstructura2);
 
-	EXPECT_EQ(busquedaEtiqueta2.at(filepath), "saludo.txt");
+	EXPECT_EQ(busquedaEtiqueta2.at(filepath), "saludo.txt" + RESERVED_STR + FIRST_STR);
 	EXPECT_FALSE(busquedaEtiqueta2.count(filepath2) > 0); // no existe en el mapa
 	EXPECT_FALSE(busquedaEtiqueta2.count(filepath3) > 0); // no existe en el mapa
-	EXPECT_EQ(busquedaEtiqueta2.at(filepath4), "saludo4.txt");
+	EXPECT_EQ(busquedaEtiqueta2.at(filepath4), "saludo4.txt" + RESERVED_STR + FIRST_STR);
 }
 
 TEST_F(ManejadorArchivosYMetadatosTest, deberiaBuscarBienPorExtensionEnPermisosYArchivosDelFileSystem) {
@@ -1119,11 +1124,11 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaBuscarBienPorExtensionEnPermisosY
 	string jsonEstructura = manejador->buscarPorExtension("juan", "txt");
 	map<string, string> busquedaExtension = ParserJson::deserializarMapa(jsonEstructura);
 
-	EXPECT_EQ(busquedaExtension.at(filepath), "saludo.txt");
+	EXPECT_EQ(busquedaExtension.at(filepath), "saludo.txt" + RESERVED_STR + FIRST_STR);
 	EXPECT_FALSE(busquedaExtension.count(filepath2) > 0); // no existe en el mapa
-	EXPECT_EQ(busquedaExtension.at(filepath3), "saludo3.txt");
-	EXPECT_EQ(busquedaExtension.at(filepath4), "saludo4.txt");
-	EXPECT_EQ(busquedaExtension.at(filepath5), "saludo5.txt");
+	EXPECT_EQ(busquedaExtension.at(filepath3), "saludo3.txt" + RESERVED_STR + FIRST_STR);
+	EXPECT_EQ(busquedaExtension.at(filepath4), "saludo4.txt" + RESERVED_STR + FIRST_STR);
+	EXPECT_EQ(busquedaExtension.at(filepath5), "saludo5.txt" + RESERVED_STR + FIRST_STR);
 	EXPECT_FALSE(busquedaExtension.count(filepath6) > 0); // no existe en el mapa
 }
 
@@ -1151,9 +1156,9 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaBuscarBienPorPropietarioEnPermiso
 	string jsonEstructuraPablo = manejador->buscarPorPropietario("juan", "pablo");
 	map<string, string> busquedaPropietarioPablo = ParserJson::deserializarMapa(jsonEstructuraPablo);
 
-	EXPECT_EQ(busquedaPropietarioPablo.at(filepath), "saludo.txt");
-	EXPECT_EQ(busquedaPropietarioPablo.at(filepath2), "saludo2.png");
-	EXPECT_EQ(busquedaPropietarioPablo.at(filepath3), "saludo3.txt");
+	EXPECT_EQ(busquedaPropietarioPablo.at(filepath), "saludo.txt" + RESERVED_STR + FIRST_STR);
+	EXPECT_EQ(busquedaPropietarioPablo.at(filepath2), "saludo2.png" + RESERVED_STR + FIRST_STR);
+	EXPECT_EQ(busquedaPropietarioPablo.at(filepath3), "saludo3.txt" + RESERVED_STR + FIRST_STR);
 	EXPECT_FALSE(busquedaPropietarioPablo.count(filepath4) > 0); // no existe en el mapa
 	EXPECT_FALSE(busquedaPropietarioPablo.count(filepath5) > 0); // no existe en el mapa
 	EXPECT_FALSE(busquedaPropietarioPablo.count(filepath6) > 0); // no existe en el mapa
@@ -1164,9 +1169,9 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaBuscarBienPorPropietarioEnPermiso
 	EXPECT_FALSE(busquedaPropietarioJuan.count(filepath) > 0); // no existe en el mapa
 	EXPECT_FALSE(busquedaPropietarioJuan.count(filepath2) > 0); // no existe en el mapa
 	EXPECT_FALSE(busquedaPropietarioJuan.count(filepath3) > 0); // no existe en el mapa
-	EXPECT_EQ(busquedaPropietarioJuan.at(filepath4), "saludo4.txt");
-	EXPECT_EQ(busquedaPropietarioJuan.at(filepath5), "saludo5.txt");
-	EXPECT_EQ(busquedaPropietarioJuan.at(filepath6), "saludo6.jpg");
+	EXPECT_EQ(busquedaPropietarioJuan.at(filepath4), "saludo4.txt" + RESERVED_STR + FIRST_STR);
+	EXPECT_EQ(busquedaPropietarioJuan.at(filepath5), "saludo5.txt" + RESERVED_STR + FIRST_STR);
+	EXPECT_EQ(busquedaPropietarioJuan.at(filepath6), "saludo6.jpg" + RESERVED_STR + FIRST_STR);
 }
 
 TEST_F(ManejadorArchivosYMetadatosTest, deberiaBuscarBienPorNombreEnPermisosYArchivosDelFileSystem) {
@@ -1195,13 +1200,13 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaBuscarBienPorNombreEnPermisosYArc
 	string jsonEstructura = manejador->buscarPorNombre("juan", "saludo");
 	map<string, string> busquedaNombre = ParserJson::deserializarMapa(jsonEstructura);
 
-	EXPECT_EQ(busquedaNombre.at(filepath), "saludo.txt");
-	EXPECT_EQ(busquedaNombre.at(filepath2), "saludo2.png");
-	EXPECT_EQ(busquedaNombre.at(filepath3), "saludo3.txt");
+	EXPECT_EQ(busquedaNombre.at(filepath), "saludo.txt" + RESERVED_STR + FIRST_STR);
+	EXPECT_EQ(busquedaNombre.at(filepath2), "saludo2.png" + RESERVED_STR + FIRST_STR);
+	EXPECT_EQ(busquedaNombre.at(filepath3), "saludo3.txt" + RESERVED_STR + FIRST_STR);
 	EXPECT_FALSE(busquedaNombre.count(filepath4) > 0); // no existe en el mapa
-	EXPECT_EQ(busquedaNombre.at(filepath5), "hola_saludo5.txt");
+	EXPECT_EQ(busquedaNombre.at(filepath5), "hola_saludo5.txt" + RESERVED_STR + FIRST_STR);
 	EXPECT_FALSE(busquedaNombre.count(filepath6) > 0); // no existe en el mapa
-	EXPECT_EQ(busquedaNombre.at(filepath7), "saludo_panch7.jpg");
+	EXPECT_EQ(busquedaNombre.at(filepath7), "saludo_panch7.jpg" + RESERVED_STR + FIRST_STR);
 }
 
 TEST_F(ManejadorArchivosYMetadatosTest, deberiaBuscarBienPorEtiquetasEnPermisosYArchivosDelFileSystem) {
@@ -1246,35 +1251,35 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaBuscarBienPorEtiquetasEnPermisosY
 
 	EXPECT_FALSE(busquedaEtiqueta.count(filepath) > 0); // no existe en el mapa
 	EXPECT_FALSE(busquedaEtiqueta.count(filepath2) > 0); // no existe en el mapa
-	EXPECT_EQ(busquedaEtiqueta.at(filepath3), "saludo3.txt");
-	EXPECT_EQ(busquedaEtiqueta.at(filepath4), "saludo4.txt");
-	EXPECT_EQ(busquedaEtiqueta.at(filepath5), "hola_saludo5.txt");
+	EXPECT_EQ(busquedaEtiqueta.at(filepath3), "saludo3.txt" + RESERVED_STR + FIRST_STR);
+	EXPECT_EQ(busquedaEtiqueta.at(filepath4), "saludo4.txt" + RESERVED_STR + FIRST_STR);
+	EXPECT_EQ(busquedaEtiqueta.at(filepath5), "hola_saludo5.txt" + RESERVED_STR + FIRST_STR);
 	EXPECT_FALSE(busquedaEtiqueta.count(filepath6) > 0); // no existe en el mapa
-	EXPECT_EQ(busquedaEtiqueta.at(filepath7), "saludo_panch7.jpg");
+	EXPECT_EQ(busquedaEtiqueta.at(filepath7), "saludo_panch7.jpg" + RESERVED_STR + FIRST_STR);
 
 	string jsonEstructura2 = manejador->buscarPorEtiqueta("juan", "hola");
 	map<string, string> busquedaEtiqueta2 = ParserJson::deserializarMapa(jsonEstructura2);
 
-	EXPECT_EQ(busquedaEtiqueta2.at(filepath), "saludo.txt");
+	EXPECT_EQ(busquedaEtiqueta2.at(filepath), "saludo.txt" + RESERVED_STR + FIRST_STR);
 	EXPECT_FALSE(busquedaEtiqueta2.count(filepath2) > 0); // no existe en el mapa
 	EXPECT_FALSE(busquedaEtiqueta2.count(filepath3) > 0); // no existe en el mapa
-	EXPECT_EQ(busquedaEtiqueta2.at(filepath4), "saludo4.txt");
-	EXPECT_EQ(busquedaEtiqueta2.at(filepath5), "hola_saludo5.txt");
-	EXPECT_EQ(busquedaEtiqueta2.at(filepath6), "chau.txt");
+	EXPECT_EQ(busquedaEtiqueta2.at(filepath4), "saludo4.txt" + RESERVED_STR + FIRST_STR);
+	EXPECT_EQ(busquedaEtiqueta2.at(filepath5), "hola_saludo5.txt" + RESERVED_STR + FIRST_STR);
+	EXPECT_EQ(busquedaEtiqueta2.at(filepath6), "chau.txt" + RESERVED_STR + FIRST_STR);
 	EXPECT_FALSE(busquedaEtiqueta2.count(filepath7) > 0); // no existe en el mapa
 }
 
 TEST_F(ManejadorArchivosYMetadatosTest, deberiaSubirBienArchivoVacio) {
 	manejador->crearUsuario("pablo");
 	string filepath = "pablo/archivos/saludo.txt";
-	string filepathConFS = pathFS + "/" + filepath;
+	string filepathConFS = pathFS + "/" + filepath + RESERVED_FIRST;
 	ASSERT_TRUE( manejador->subirArchivo("pablo", filepath, "", 0, jsonArchOK, 2048) );
 	ASSERT_TRUE( manejador->validador.existeArchivo(filepathConFS) );
 	ASSERT_TRUE( manejador->validador.existeMetadato(filepath) );
 }
 
 TEST_F(ManejadorArchivosYMetadatosTest, deberiaSacarBienElNumeroDeSecuencia) {
-	EXPECT_EQ( "pablo/archivos/hola.txt" ,ParserURI::pathSinNroSecuencia("pablo/archivos/hola.txt!1") );
+	EXPECT_EQ( "pablo/archivos/hola.txt" ,ParserURI::pathSinNroSecuencia("pablo/archivos/hola.txt" + RESERVED_STR + FIRST_STR) );
 }
 
 TEST_F(ManejadorArchivosYMetadatosTest, deberiaSacarBienElNumeroDeSecuenciaDeArchivoEnTrash) {

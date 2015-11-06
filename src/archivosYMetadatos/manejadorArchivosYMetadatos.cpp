@@ -117,7 +117,7 @@ bool ManejadorArchivosYMetadatos::subirArchivo (string username, string filepath
 	if (not validador.verificarPermisos(username, filepath))
 		return false;
 
-	string filepathCompleto = this->pathFileSystem + "/" + filepath;
+	string filepathCompleto = this->pathFileSystem + "/" + filepath + RESERVED_FIRST;
 	if (validador.existeArchivo(filepathCompleto)) {
 		// TODO: Versionado
 		return false;
@@ -126,18 +126,20 @@ bool ManejadorArchivosYMetadatos::subirArchivo (string username, string filepath
 		Logger::logWarn("Se quiso subir el archivo " + filepath + " pero este ya existe. Debe utilizar el metodo actualizarArchivo.");
 		return false;
 	}
-	if (not this->actualizarArchivo(username, filepath, data, dataLen, cuota))
+	if (not this->actualizarArchivo(username, filepath, data, dataLen, cuota, FIRST-1))
 		return false;
 	return manejadorMetadatos.cargarMetadato(filepath, jsonMetadatos);
 }
 
-bool ManejadorArchivosYMetadatos::guardarArchivo (const string& filepath, const string& username, const char* data, int dataLen) {
+bool ManejadorArchivosYMetadatos::guardarArchivo (const string& filepath, const string& username, const char* data,
+		int dataLen, int nuevaVersion) {
 	vector<string> directorios = ParserURI::parsear(filepath, '/');
 	string pathSinArchivo = ParserURI::join(directorios, '/', 0, directorios.size() - 1);
 
 	//Verifico que existan todas las carpetas y sino las creo
 	if (pathSinArchivo != "" and not crearCarpetaSegura(username, pathSinArchivo)) {
-		Logger::logWarn("Al querer actualizar el archivo " + filepath + " no se pudieron crear las carpetas.");
+		Logger::logWarn("Al querer actualizar el archivo " + filepath + " a la version " + to_string(nuevaVersion)
+				+ " no se pudieron crear las carpetas.");
 		return false;
 	}
 
@@ -146,12 +148,13 @@ bool ManejadorArchivosYMetadatos::guardarArchivo (const string& filepath, const 
 		manejadorMetadatos.actualizarMetadatosPorActualizacionArchivo(filepath, username);
 	}
 
-	manejadorArchivos.guardarArchivoEnFileSystem(filepath, data, dataLen);
+	manejadorArchivos.guardarArchivoEnFileSystem(filepath + RESERVED_STR + to_string(nuevaVersion), data, dataLen);
 	return true;
 }
 
 // El filename deberia venir con los path de carpetas tambien y dentro tambien el nombre de usuario
-bool ManejadorArchivosYMetadatos::actualizarArchivo (string username, string filepath, const char* data, int dataLen, int cuota) {
+bool ManejadorArchivosYMetadatos::actualizarArchivo (string username, string filepath, const char* data, int dataLen,
+		int cuota, int versionAnterior) {
 	//No le agrego el FileSystem porque se agrega despues en el metodo crearCarpeta
 	if (not validador.verificarPermisos(username, filepath))
 		return false;
@@ -160,9 +163,10 @@ bool ManejadorArchivosYMetadatos::actualizarArchivo (string username, string fil
 	if (manejadorArchivos.tamanioCarpeta(username, folderSize)) {
 		int cuotaBytes = cuota * 1024 * 1024;
 		if (folderSize + dataLen <= cuotaBytes) { //TODO: Restar el tamanio del archivo viejo
-			return guardarArchivo(filepath, username, data, dataLen);
+			return guardarArchivo(filepath, username, data, dataLen, versionAnterior + 1);
 		}
-		Logger::logWarn("No se ha podido subir el archivo " + filepath + " debido a que se ha superado la cuota de " + to_string(cuota) + " MB.");
+		Logger::logWarn( "No se ha podido subir el archivo " + filepath +
+				" debido a que se ha superado la cuota de " + to_string(cuota) + " MB.");
 	}
 	return false;
 }
@@ -271,11 +275,14 @@ string ManejadorArchivosYMetadatos::obtenerEstructuraCarpeta (string path) {
 	return buscador.obtenerEstructuraCarpeta(path, false, predicate);
 }
 
-string ManejadorArchivosYMetadatos::descargarArchivo (string username, string filepath) {
+/* DEFAULT: version = LATEST */
+string ManejadorArchivosYMetadatos::descargarArchivo (string username, string filepath, int version) {
 	//OJO porque si no se corre desde la carpeta build como ./udrive esto va a pinchar seguramente (Ya que la carpeta del FileSystem no va a existir)
 	if (not validador.verificarPermisos(username, filepath))
 		return "";
-	string filepathCompleto = this->pathFileSystem + "/" + filepath;
+
+	string strVersion = RESERVED_STR + (version != LATEST ? to_string(version) : getLatestVersion(filepath));
+	string filepathCompleto = this->pathFileSystem + "/" + filepath + strVersion;
 	if (not validador.existeArchivo(filepathCompleto)) {
 		Logger::logWarn("Se ha querido descargar el archivo de path " + filepath + ", el cual no existe.");
 		return "";
@@ -295,6 +302,10 @@ string ManejadorArchivosYMetadatos::buscarPorEtiqueta(string username, string et
 
 string ManejadorArchivosYMetadatos::buscarPorNombre(string username, string nombre) {
 	return buscador.buscarPorNombre(username, nombre);
+}
+
+string ManejadorArchivosYMetadatos::getLatestVersion (const string& filepath) {
+	return string(FIRST_STR); // TODO obtener de los metadatos (mandar a subclase)
 }
 
 string ManejadorArchivosYMetadatos::buscarPorPropietario(string username, string propietario) {
