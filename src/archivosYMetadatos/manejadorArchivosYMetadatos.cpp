@@ -96,6 +96,8 @@ bool ManejadorArchivosYMetadatos::eliminarCarpeta (string username, string path)
 		string pathInterno = path + "/" + dirName;
 		string pathInternoConFS = this->pathFileSystem + "/" + pathInterno;
 
+		if (pathInterno.find(RESERVED_CHAR) != string::npos)	// es un archivo con nro de version
+			pathInterno = ParserURI::pathSinNroSecuencia(pathInterno);
 		this->eliminar(username, pathInterno);
 	}
 	closedir(dir);
@@ -237,7 +239,7 @@ bool ManejadorArchivosYMetadatos::eliminarArchivo (string username, string filep
 		return false;
 	if (TRASH == partes[1]) {
 		manejadorMetadatos.eliminarDefinitivamente(filepath);
-		manejadorArchivos.eliminarArchivoDefinitivamente(filepath);
+		manejadorArchivos.eliminarArchivoDefinitivamente(filepath + RESERVED_STR + "*");
 		return true;
 	} else {
 		return this->mandarArchivoATrash(username, filepath);
@@ -267,7 +269,7 @@ bool ManejadorArchivosYMetadatos::mandarArchivoATrash(string username, string fi
 	if (not manejadorMetadatos.mandarATrash(jsonMetadatos, username, filepath, pathCompletoPapelera))
 		return false;
 
-	return manejadorArchivos.mandarArchivoATrash(metadato.propietario, filepath, pathCompletoPapelera);
+	return manejadorArchivos.mandarArchivoATrash(filepath, pathCompletoPapelera, metadato.ultimaVersion);
 }
 
 string ManejadorArchivosYMetadatos::obtenerEstructuraCarpeta (string path) {

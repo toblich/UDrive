@@ -138,13 +138,17 @@ bool ManejadorArchivos::deleteFileSystem() {
 	return deleteCarpeta(this->pathFileSystem);
 }
 
-bool ManejadorArchivos::mandarArchivoATrash(const string& propietario, const string& filepath, const string& pathCompletoPapelera) {
-	string pathCompletoPapeleraConFS = this->pathFileSystem + "/" + pathCompletoPapelera;
-	string filepathCompleto = this->pathFileSystem + "/" + filepath;
+bool ManejadorArchivos::mandarArchivoATrash (const string& filepath, const string& pathCompletoPapelera,
+		int ultimaVersion) {
 
-	if (rename(filepathCompleto.c_str(), pathCompletoPapeleraConFS.c_str())) {
-		Logger::logWarn("La eliminacion del archivo " + filepath + " no fue correcta.");
-		return false;
+	for (int i = FIRST; i <= ultimaVersion; i++) {
+		string versionSuffix = RESERVED_STR + to_string(i);
+		string pathCompletoPapeleraConFS = this->pathFileSystem + "/" + pathCompletoPapelera + versionSuffix;
+		string filepathCompleto = this->pathFileSystem + "/" + filepath + versionSuffix;
+		if (rename(filepathCompleto.c_str(), pathCompletoPapeleraConFS.c_str())) {
+			Logger::logWarn("La eliminacion del archivo " + filepath + " no fue correcta.");
+			return false;
+		}
 	}
 	Logger::logInfo("La eliminacion del archivo " + filepath + " fue correcta.");
 	return true;

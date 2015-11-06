@@ -18,10 +18,12 @@ class ManejadorArchivosYMetadatosTest : public ::testing::Test {
 			pathFS = pathFSBase + testName;
 			manejador = new ManejadorArchivosYMetadatos(db, pathFS);
 			validador = new Validador(db);
-			Logger::logTrace("\n===================== TEST " + testName + " =====================");
+			Logger::logTrace("\n========================== " + testName + " ==========================\n");
 		}
 
 		virtual void TearDown() {
+			string testName = ::testing::UnitTest::GetInstance()->current_test_info()->name();
+			Logger::logTrace("\n************************** " + testName + " **************************\n");
 //			manejador->manejadorArchivos.deleteFileSystem();
 			delete manejador;
 			delete validador;
@@ -198,9 +200,11 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaEliminarBienArchivoDeTexto) {
 	manejador->crearUsuario("pablo");
 	manejador->crearCarpetaSegura("pablo", path);
 	manejador->subirArchivo("pablo", filepath, "hola pablo", 10, jsonArchOK, 2048);
-	string filepathCompleto = pathFS + "/" + filepath;
 	manejador->eliminarArchivo("pablo", filepath);
-	string filepathCompletoTrash = pathFS + "/pablo/" + TRASH + "/archivos" + RESERVED_STR + "saludo.txt" + RESERVED_STR + "0";
+
+	string filepathCompleto = pathFS + "/" + filepath + RESERVED_FIRST;
+	string filepathCompletoTrash =
+			pathFS + "/pablo/" + TRASH + "/archivos" + RESERVED_STR + "saludo.txt" + RESERVED_STR + "0" + RESERVED_FIRST;
 	struct stat buffer;
 	EXPECT_FALSE(stat (filepathCompleto.c_str(), &buffer) == 0); //No existe en el filesystem
 	EXPECT_TRUE(stat (filepathCompletoTrash.c_str(), &buffer) == 0); //Si existe en el trash
@@ -563,7 +567,8 @@ TEST_F(ManejadorArchivosYMetadatosTest, usuarioConPermisosDeberiaEliminarBienArc
 	inic(manejador, filepath);
 	string filepathCompleto = pathFS + "/" + filepath;
 	ASSERT_TRUE( manejador->eliminarArchivo("juan", filepath) );
-	string filename = "/archivos" + RESERVED_STR + "saludo.txt" + RESERVED_STR + "0";
+
+	string filename = "/archivos" + RESERVED_STR + "saludo.txt" + RESERVED_STR + "0" + RESERVED_FIRST;
 	string filepathCompletoTrashProp = pathFS + "/pablo/"+ TRASH + "/" + filename;
 	string filepathCompletoTrashJuan = pathFS + "/juan/" + TRASH + "/" + filename;
 	struct stat buffer;
