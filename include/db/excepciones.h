@@ -7,6 +7,11 @@
 
 using namespace std;
 
+/**
+ * @brief Se encarga del manejo de la excepción KeyNotFound en la Base de Datos.
+ *
+ * Esta excepción es lanzada cuando se quiere buscar una clave en la BD y ésta no existe.
+ */
 class KeyNotFound : public exception {
   private:
     string err_msg;
@@ -19,6 +24,11 @@ class KeyNotFound : public exception {
     const char *what() const throw() { return ("KeyNotFound: " + err_msg).c_str(); };
 };
 
+/**
+ * @brief Se encarga del manejo de la excepción InvalidDBAction en la Base de Datos.
+ *
+ * Esta excepción es lanzada cuando se quiere realizar una acción inválida en alguno de los métodos de la BD.
+ */
 class InvalidDBAction : public exception {
   private:
     string err_msg;

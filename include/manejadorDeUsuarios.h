@@ -14,7 +14,7 @@
 using std::string;
 
 /**
- * @brief Encapsula todo el manejo de usuarios.
+ * @brief Se encarga del manejo de usuarios en el servidor.
  *
  * Se encarga de crear usuarios, manejar sus perfiles, sus sesiones
  * y la autenticación de los mismos.

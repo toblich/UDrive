@@ -7,6 +7,12 @@
 
 using namespace std;
 
+/**
+ * @brief Clase que se utiliza como un Mock de la BaseDeDatos.
+ *
+ * Esta clase no brinda persistencia pero si brinda velocidad para los
+ * test que utilizan o prueban los métodos de la BaseDeDatos.
+ */
 class MapDB: public BD {
 private:
 	map<string, string> mapa;
