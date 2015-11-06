@@ -6,7 +6,7 @@ bool Server::running = true;
 
 Server::Server (string listeningPort, BD* perfiles, BD* sesiones, BD* passwords, BD* metadatos) {
 
-	//BD
+	//BDs
 	this->perfiles = perfiles;
 	this->sesiones = sesiones;
 	this->passwords = passwords;
@@ -23,7 +23,7 @@ Server::Server (string listeningPort, BD* perfiles, BD* sesiones, BD* passwords,
 	mapaURI.insert(pair<string, RealizadorDeEventos*>("metadata", new Metadata(manejadorUsuarios, manejadorAYM)));
 	mapaURI.insert(pair<string, RealizadorDeEventos*>("folder", new Folder(manejadorUsuarios, manejadorAYM)));
 
-	//Server
+	//Servers
 	mg_server* primerServer = mg_create_server((void *) this, Server::mgEventHandler);
 	mg_set_option(primerServer, "listening_port", listeningPort.c_str());
 	servers.push_back(primerServer);
@@ -32,17 +32,21 @@ Server::Server (string listeningPort, BD* perfiles, BD* sesiones, BD* passwords,
 		mg_copy_listeners(primerServer, server);
 		servers.push_back(server);
 	}
+
+	//Threads
 	for (auto &server : servers) {
 		threads.push_back(new thread(pollServer, server));
 	}
 }
 
 Server::~Server () {
-	//Server
+	//Threads
 	for (auto &thread : threads) {
 		thread->join();
 		delete thread;
 	}
+
+	//Servers
 	for (auto &server : servers) {
 		mg_destroy_server(&server);
 	}
@@ -52,7 +56,7 @@ Server::~Server () {
 	sesiones->deleteBD(); //
 	passwords->deleteBD(); //
 	metadatos->deleteBD(); //
-	//BD
+	//BDs
 	delete perfiles;
 	delete sesiones;
 	delete passwords;
