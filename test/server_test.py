@@ -468,6 +468,22 @@ class ServerTest(unittest.TestCase):
 		self.assertDictEqual(resultado, esperado)
 
 
+	def test_DeberiaRestaurarArchivoHabiendoBorradoSuCarpetaOriginal(self):
+		logTest("Deberia Restaurar Archivo Habiendo Borrado Su Carpeta Original")
+		token = registrarYLoguearUser(USER_SIMPLE)
+
+		TXT_FILENAME_SUBFOLDER = 'files/log.txt'
+
+		r = requests.put(FILE + USER_SIMPLE["user"] + "/" + TXT_FILENAME_SUBFOLDER, \
+			files={'file': open(TXT_FILENAME_SUBFOLDER, 'rb'), "token": token, "user": USER_SIMPLE["user"]})	# sube 'log.txt' en carpeta 'files'
+		self.assertEquals(r.status_code, RESOURCE_CREATED)
+
+		s = requests.delete(FOLDER + USER_SIMPLE["user"] + "/files", data = {"token" : token, "user": USER_SIMPLE["user"]})
+		self.assertEquals(s.status_code, SUCCESS)
+
+		restaurarUri = FILE + USER_SIMPLE["user"] + "/" + TRASH_TYPE + "files" + RESERVED_STR + "log.txt" + RESERVED_STR + "0"
+		t = requests.delete(restaurarUri, data={"restore" : "true", "token" : token, "user" : USER_SIMPLE["user"]})
+		self.assertEquals(t.status_code, SUCCESS)
 
 
 if __name__ == '__main__':

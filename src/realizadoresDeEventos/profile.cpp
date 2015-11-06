@@ -47,7 +47,7 @@ void Profile::enviarPerfil (mg_connection* connection, string userPerfil) {
 
 mg_result Profile::GETHandler (mg_connection* connection) {
 	string uri = string(connection->uri);
-	vector<string> uris = ParserURI::parsear(uri, '/');
+	vector<string> uris = ParserURI::parsear(uri, URI_DELIM);
 	Logger::logInfo("Se parseó la uri correctamente.");
 	string token = getVar(connection, "token");
 	Logger::logInfo("Se obtuvo la variable token con valor: " + token);
@@ -76,7 +76,7 @@ mg_result Profile::GETHandler (mg_connection* connection) {
 
 		//Si uris[1] == ^fotos se quiere descargar una foto de perfil
 		else if (uris[1] == FOTOS) {
-			string filePath = getFilepathFrom(uris);
+			string filePath = ParserURI::join(uris, URI_DELIM, 1, uris.size());
 			enviarFotoPerfil(connection, filePath, user);
 
 		} else { //Si no se quiere descargar el perfil de un usuario
@@ -86,13 +86,12 @@ mg_result Profile::GETHandler (mg_connection* connection) {
 	} else {
 		this->responderAutenticacionFallida(connection);
 	}
-	Logger::logDebug("HECHO");
 	return MG_TRUE;
 }
 
 mg_result Profile::PUTHandler (mg_connection* connection) {
 	string uri = string(connection->uri);
-	vector<string> uris = ParserURI::parsear(uri, '/');
+	vector<string> uris = ParserURI::parsear(uri, URI_DELIM);
 	Logger::logInfo("Se parseó la uri correctamente.");
 
 	if (uris.size() != 2) {
@@ -136,15 +135,14 @@ mg_result Profile::PUTHandler (mg_connection* connection) {
 			string pathFotoViejo = viejoPerfil.pathFotoPerfil;
 
 			//Parseo el nombre y extension del archivo para ver si cambio la extension.
-			vector<string> nombreYExtension = ParserURI::parsear(datosArch.fileName, '.');
+			vector<string> nombreYExtension = ParserURI::parsear(datosArch.fileName, NAME_DELIM);
 			Logger::logInfo("Se parseó el nombre del archivo correctamente.");
 
 			//Obtengo el nuevo path para la foto de perfil -> ^fotos/user.extension
 			string pathFotoNuevo = FOTOS + "/" + user + "." + nombreYExtension[nombreYExtension.size() - 1];
 
 			//Si se cambio el path de la foto, la actualizo en el perfil del usuario. Sino queda como antes.
-			if (manejadorAyM->actualizarFotoPerfil(pathFotoViejo, pathFotoNuevo, datosArch.fileData,
-					datosArch.dataLength)) {
+			if (manejadorAyM->actualizarFotoPerfil(pathFotoViejo, pathFotoNuevo, datosArch.fileData, datosArch.dataLength)) {
 				Logger::logInfo("Se actualizo la foto de perfil y cambio el path.");
 				viejoPerfil.pathFotoPerfil = pathFotoNuevo;
 			}

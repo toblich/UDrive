@@ -25,7 +25,7 @@ void File::enviarArchivo (const string& completePath, mg_connection* connection)
 
 mg_result File::GETHandler (mg_connection* connection) {
 	string uri = string(connection->uri);
-	vector<string> uris = ParserURI::parsear(uri, '/');
+	vector<string> uris = ParserURI::parsear(uri, URI_DELIM);
 	Logger::logInfo("Se parseó la uri correctamente.");
 	string token = getVar(connection, "token");
 	Logger::logInfo("Se obtuvo la variable token con valor: " + token);
@@ -34,7 +34,7 @@ mg_result File::GETHandler (mg_connection* connection) {
 
 	if (manejadorUs->autenticarToken(token, user)) {
 		Logger::logInfo("Se autenticó la sesión correctamente.");
-		string filepath = getFilepathFrom(uris);
+		string filepath = ParserURI::join(uris, URI_DELIM, 1, uris.size());
 		string completePath = manejadorArchYMet->descargarArchivo(user, filepath);
 		enviarArchivo(completePath, connection);
 	} else {
@@ -45,17 +45,12 @@ mg_result File::GETHandler (mg_connection* connection) {
 
 MetadatoArchivo File::extractMetadataFrom (const vector<string>& nombreYExtension, const string& user, const vector<string>& uris) {
 	MetadatoArchivo metArch;
-	metArch.nombre = "";
+
 	if (nombreYExtension.size() >= 2) {
-		for (int i = 0; i <= nombreYExtension.size() - 2; i++) {
-			metArch.nombre += nombreYExtension[i];
-			if (i != nombreYExtension.size() - 2) {
-				metArch.nombre += ".";
-			}
-		}
+		metArch.nombre = ParserURI::join(nombreYExtension, NAME_DELIM, 0, nombreYExtension.size() - 1);
 		metArch.extension = nombreYExtension[nombreYExtension.size() - 1];
 	} else {
-		metArch.nombre += nombreYExtension[0];
+		metArch.nombre = nombreYExtension[0];
 		metArch.extension = "none";
 	}
 
@@ -65,12 +60,13 @@ MetadatoArchivo File::extractMetadataFrom (const vector<string>& nombreYExtensio
 	int anio = tiempo->tm_year + 1900;
 	int mes = tiempo->tm_mon + 1;
 	int dia = tiempo->tm_mday;
+
 	metArch.fechaUltimaModificacion = to_string(dia) + "/" + to_string(mes) + "/" + to_string(anio);
-	;
 	metArch.usuarioUltimaModificacion = user;
 	metArch.propietario = uris[1];
-	metArch.etiquetas = list<string>();		// TODO
+	metArch.etiquetas = list<string>();
 	metArch.usuariosHabilitados.push_back(metArch.propietario);
+
 	return metArch;
 }
 
@@ -90,8 +86,8 @@ void File::actualizarUltimaUbicacion(string user, string latitud, string longitu
 }
 
 void File::subirArchivo (const vector<string>& uris, const DatosArchivo& datosArch, const string& user, mg_connection* connection) {
-	string filepath = getFilepathFrom(uris);
-	vector<string> nombreYExtension = ParserURI::parsear(datosArch.fileName, '.');
+	string filepath = ParserURI::join(uris, URI_DELIM, 1, uris.size());
+	vector<string> nombreYExtension = ParserURI::parsear(datosArch.fileName, NAME_DELIM);
 	Logger::logInfo("Se parseó el nombre del archivo correctamente.");
 	MetadatoArchivo metArch = extractMetadataFrom(nombreYExtension, user, uris);
 	string jsonMetadata = ParserJson::serializarMetadatoArchivo(metArch);
@@ -117,7 +113,7 @@ void File::subirArchivo (const vector<string>& uris, const DatosArchivo& datosAr
 
 mg_result File::PUTHandler (mg_connection* connection) {
 	string uri = string(connection->uri);
-	vector<string> uris = ParserURI::parsear(uri, '/');
+	vector<string> uris = ParserURI::parsear(uri, URI_DELIM);
 	Logger::logInfo("Se parseó la uri correctamente.");
 
 	string varFile = "file";
@@ -126,6 +122,12 @@ mg_result File::PUTHandler (mg_connection* connection) {
 	Logger::logInfo("Se obtuvo la variable token con valor: " + token);
 	string user = datosArch.user;
 	Logger::logInfo("Se obtuvo la variable user con valor: " + user);
+
+	if (datosArch.dataLength == 0){
+		string mensaje = "Error, no se paso ningun archivo para subir por parametro.";
+		this->responderBadRequest(connection, mensaje);
+		return MG_TRUE;
+	}
 
 	if (manejadorUs->autenticarToken(token, user)) {
 		Logger::logInfo("Se autenticó la sesión correctamente.");
@@ -139,7 +141,7 @@ mg_result File::PUTHandler (mg_connection* connection) {
 
 mg_result File::DELETEHandler (mg_connection* connection) {
 	string uri = string(connection->uri);
-	vector<string> uris = ParserURI::parsear(uri, '/');
+	vector<string> uris = ParserURI::parsear(uri, URI_DELIM);
 	Logger::logInfo("Se parseó la uri correctamente.");
 	string token = getVar(connection, "token");
 	Logger::logInfo("Se obtuvo la variable token con valor: " + token);
@@ -150,7 +152,7 @@ mg_result File::DELETEHandler (mg_connection* connection) {
 
 	if (manejadorUs->autenticarToken(token, user)) {
 		Logger::logInfo("Se autenticó la sesión correctamente.");
-		string filepath = getFilepathFrom(uris);
+		string filepath = ParserURI::join(uris, URI_DELIM, 1, uris.size());
 		if (restore == "true"){
 			if (manejadorArchYMet->restaurar(user, filepath)){
 				string mensaje = "Se restauró el archivo: " + filepath + " correctamente.";

@@ -9,7 +9,7 @@ Metadata::~Metadata () {
 }
 
 void Metadata::GETMetadatos(mg_connection* connection, vector<string> uris, string user) {
-	string filepath = getFilepathFrom(uris);
+	string filepath = ParserURI::join(uris, URI_DELIM, 1, uris.size());
 	string metadatosArch = manejadorArchYMet->consultarMetadatosArchivo(user, filepath);
 	if (metadatosArch != "") {
 		Logger::logInfo("Se enviaron los metadatos del archivo: " + filepath + " correctamente.");
@@ -53,7 +53,7 @@ void Metadata::responderBusqueda(mg_connection* connection, string resultado) {
 
 mg_result Metadata::GETHandler (mg_connection* connection) {
 	string uri = string(connection->uri);
-	vector<string> uris = ParserURI::parsear(uri, '/');
+	vector<string> uris = ParserURI::parsear(uri, URI_DELIM);
 	Logger::logInfo("Se parseó la uri correctamente.");
 	string token = getVar(connection, "token");
 	Logger::logInfo("Se obtuvo la variable token con valor: " + token);
@@ -87,7 +87,7 @@ mg_result Metadata::GETHandler (mg_connection* connection) {
 
 mg_result Metadata::PUTHandler (mg_connection* connection) {
 	string uri = string(connection->uri);
-	vector<string> uris = ParserURI::parsear(uri, '/');
+	vector<string> uris = ParserURI::parsear(uri, URI_DELIM);
 	Logger::logInfo("Se parseó la uri correctamente.");
 	string token = getVar(connection, "token");
 	Logger::logInfo("Se obtuvo la variable token con valor: " + token);
@@ -98,7 +98,7 @@ mg_result Metadata::PUTHandler (mg_connection* connection) {
 
 	if (manejadorUs->autenticarToken(token, user)) {
 		Logger::logInfo("Se autenticó la sesión correctamente.");
-		string filepath = getFilepathFrom(uris);
+		string filepath = ParserURI::join(uris, URI_DELIM, 1, uris.size());
 		if (manejadorArchYMet->actualizarMetadatos(user, filepath, nuevosMetadatos)) {
 			string mensaje = "Se actualizaron los metadatos del archivo: " + filepath + " correctamente.";
 			this->responderSucces(connection, mensaje);

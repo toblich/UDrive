@@ -41,18 +41,24 @@ bool ManejadorArchivosYMetadatos::restaurar(string username, string pathEnPapele
 
 	string pathRealConHashYSecuencia = ParserURI::parsear(pathEnPapeleraSinFS, '/').back();
 	vector<string> partes = ParserURI::parsear(pathRealConHashYSecuencia, RESERVED_CHAR);
-	string pathRealSinFS = username + "/" + ParserURI::join(partes, '/', 0, partes.size()-1);	// descarta el numero de secuencia
+	string filepathRealSinFS = username + "/" + ParserURI::join(partes, '/', 0, partes.size()-1);	// descarta el numero de secuencia
+	string pathRealSinFS = username + "/" + ParserURI::join(partes, '/', 0, partes.size()-2); //Solo me quedo con la/las carpeta/s
 
-	if (not validador.puedoRestaurarA(pathEnPapeleraSinFS, pathRealSinFS, pathFileSystem))
+	if (not crearCarpetaSegura(username, pathRealSinFS)){
+		Logger::logWarn("No se pudo crear la carpeta " + pathRealSinFS + " en la restauración del archivo");
+		return false;
+	}
+
+	if (not validador.puedoRestaurarA(pathEnPapeleraSinFS, filepathRealSinFS, pathFileSystem))
 		return false;
 
-	if (not manejadorArchivos.restaurarArchivo(pathRealSinFS, pathEnPapeleraSinFS))
+	if (not manejadorArchivos.restaurarArchivo(filepathRealSinFS, pathEnPapeleraSinFS))
 		return false;
 
-	if (manejadorMetadatos.restaurarMetadatos(pathEnPapeleraSinFS, username, pathRealSinFS))
+	if (manejadorMetadatos.restaurarMetadatos(pathEnPapeleraSinFS, username, filepathRealSinFS))
 		return true;
 
-	manejadorArchivos.deshacerRestaurado(pathRealSinFS, pathEnPapeleraSinFS);
+	manejadorArchivos.deshacerRestaurado(filepathRealSinFS, pathEnPapeleraSinFS);
 	return false;
 }
 

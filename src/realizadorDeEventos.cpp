@@ -52,10 +52,10 @@ RealizadorDeEventos::DatosArchivo RealizadorDeEventos::getMultipartData(mg_conne
 }
 
 bool RealizadorDeEventos::sendFile(mg_connection* connection, string filePath) {
-	char buf[1024];
+	char buf[MAX_LENGTH];
 	int n;
-	FILE *fp;
-	fp = fopen(filePath.c_str(), "rb");
+
+	FILE* fp = fopen(filePath.c_str(), "rb");
 	if (fp == NULL)	return false;
 
 	while ((n = fread(buf, 1, sizeof(buf), fp)) > 0) {
@@ -63,6 +63,7 @@ bool RealizadorDeEventos::sendFile(mg_connection* connection, string filePath) {
 	}
 	fclose(fp);
 	mg_send_data(connection,"",0);
+
 	return true;
 }
 
@@ -146,15 +147,4 @@ void RealizadorDeEventos::responderResourceCreated(mg_connection* connection, st
 	mg_send_status(connection, CODESTATUS_RESOURCE_CREATED);
 	mg_send_header(connection, contentType.c_str(), jsonType.c_str());
 	printfData(connection, "{\"success\": \"%s\"}", msg.c_str());
-}
-
-string RealizadorDeEventos::getFilepathFrom(const vector<string>& uris) {
-	string filepath = "";
-	for (int i = 1; i <= uris.size() - 1; i++) {
-		filepath += uris[i];
-		if (i != uris.size() - 1) {
-			filepath += "/";
-		}
-	}
-	return filepath;
 }
