@@ -121,14 +121,10 @@ bool BaseDeDatos::addActionToBatch(const DBAction& action, rocksdb::WriteBatch& 
 
 bool BaseDeDatos::writeBatch(const Batch& batch) {
 	WriteBatch writeBatch;
-	list<DBAction>::const_iterator it = batch.getAcciones().cbegin();
-	list<DBAction>::const_iterator end = batch.getAcciones().cend();
-	bool ok = true;
-
-	for (; it != end and ok; it++) {
-		ok = addActionToBatch(*it, writeBatch);
+	for (auto &dbAction : batch.getAcciones()) {
+		if (not addActionToBatch(dbAction, writeBatch))
+			return false;
 	}
-	if (not ok) return false;
 	Status s = db->Write(WriteOptions(), &writeBatch);
 	return s.ok();
 }

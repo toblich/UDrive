@@ -18,7 +18,7 @@ bool ManejadorDeUsuarios::validarLogin (string username, string password) {
 	} catch (KeyNotFound& e) {
 		return false;
 	}
-	return (realPassword == password);	//TODO: Comparacion segura :P
+	return (realPassword == password);
 }
 
 bool ManejadorDeUsuarios::registrarUsuario (string username, string password, string perfil) {
@@ -42,7 +42,7 @@ string ManejadorDeUsuarios::iniciarSesion (string username) {
 	time_t timestamp;
 	time(&timestamp);
 	string token = generarToken(username, timestamp);
-	if (sesiones->put(token, username))	//TODO agregar timestamp en la BD?
+	if (sesiones->put(token, username))
 		return token;
 	usleep(100000);	//Vuelve a probar 100 miliseg despues
 	return iniciarSesion(username);
@@ -89,7 +89,6 @@ bool ManejadorDeUsuarios::esCaracterInvalido (char c) {
 }
 
 bool ManejadorDeUsuarios::esPasswordValida (const string& password) {
-	// TODO: forzar Alfanumerica?
 	return (password.size() >= 8);
 }
 

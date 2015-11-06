@@ -86,6 +86,7 @@ private:
 	const string USERLIST = RESERVED_STR + "users";	///< clave reservada para la lista de usuarios en la base de datos de perfiles
 	const regex REGEX_NOMBRE = regex("^[ [:alpha:]]+$", std::regex_constants::ECMAScript);	 ///< Regex de usernames validos
 	const regex REGEX_EMAIL = regex("^[-_[:alnum:]]+@[[:alpha:]]+\\.([.[:alpha:]]+)+$");	///< Regex de emails validos
+
 };
 
 #endif /* MANEJADORDEUSUARIOS_H_ */

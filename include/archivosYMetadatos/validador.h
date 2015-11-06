@@ -32,6 +32,7 @@ public:
 	 */
 	Validador(BD* dbMetadatos);
 	virtual ~Validador();
+
 	/**
 	 * @brief Verifica existencia de un archivo.
 	 *
@@ -42,6 +43,7 @@ public:
 	 * @retval false			si no existe el archivo.
 	 */
 	bool existeArchivo(string filepath);
+
 	/**
 	 * @brief Verifica existencia de una carpeta.
 	 *
@@ -52,6 +54,7 @@ public:
 	 * @retval false			si no existe la carpeta.
 	 */
 	bool existeCarpeta(string path);
+
 	/**
 	 * @brief Verifica si una carpeta contiene o no elementos.
 	 *
@@ -62,6 +65,9 @@ public:
 	 * @retval false			si la carpeta contiene algún elemento (no está vacía).
 	 */
 	bool carpetaVacia(string path);
+
+	bool existeMetadato(const string& path) {return dbMetadatos->contains(path); }
+
 	/**
 	 * @brief Verifica si un determinado path contiene o no un determinado caracter.
 	 *
@@ -71,6 +77,7 @@ public:
 	 * @retval false			si el path contiene el char RESERVED_CHAR.
 	 */
 	bool esPathValido(string path);
+
 	/**
 	 * @brief Verifica si un usuario tiene o no permisos sobre un determinado path (Generalmente
 	 * será un path a un archivo).
@@ -87,6 +94,7 @@ public:
 	 * @retval false			si el usuario no tiene permisos sobre ese path.
 	 */
 	bool verificarPermisos(string username, string path);
+
 	/**
 	 * @brief Verifica si un archivo puede ser restaurado de la papelera.
 	 *
@@ -106,6 +114,7 @@ public:
 	 * @retval false			si no es posible la restauración del archivo.
 	 */
 	bool puedoRestaurarA(string pathEnPapeleraSinFS, string pathRealSinFS, string pathFileSystem);
+
 	/**
 	 * @brief Obtiene el número de secuencia que debe tener el archivo.
 	 *

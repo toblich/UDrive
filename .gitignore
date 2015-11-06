@@ -49,3 +49,4 @@ perfiles/
 sesiones/
 *_build/
 docs/doxygen
+.idea/

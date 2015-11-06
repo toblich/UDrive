@@ -4,16 +4,21 @@ cmake_minimum_required(VERSION 2.8)
 option(test "Build all tests." ON) # Makes boolean 'test' available.
 option(rocksdb "Build with RocksDB." ON) 
 option(coverage "Build coverage." OFF)  
+option(environment "Default exports" OFF)
+
+if(environment)
+	set(ENV{LIB} "/usr/lib")
+endif()
 
 project(UDrive)
 
 #Incluyo las librerias de headers
-include_directories(include/ include/db/)
+include_directories(include/ include/db/ include/util/ include/archivosYMetadatos/ include/realizadoresDeEventos/ include/libs/)
 
 set(PROJ ${CMAKE_CURRENT_LIST_DIR})
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -std=c++11 -pthread -DMONGOOSE_ENABLE_THREADS")
-set(CMAKE_C_FLAGS "${CFLAGS_EXTRA} ${CFLAGS} -W -Wall -pthread -g -O0 -DMONGOOSE_ENABLE_THREADS")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -std=c++11 -pthread")
+
 
 ########## COVERAGE ##########
 
@@ -42,7 +47,7 @@ if(coverage)
 
 		# Capturing lcov counters and generating report
 		COMMAND ${LCOV_PATH} --directory . --capture --output-file ${_outputname}.info
-		COMMAND ${LCOV_PATH} --remove ${_outputname}.info 'test/*' '/usr/*' 'src/mongoose.c' '*.h' 'src/jsoncpp.cpp' 'src/logger.cpp' 'src/main*' --output-file ${_outputname}.info.cleaned
+		COMMAND ${LCOV_PATH} --remove ${_outputname}.info 'test/*' '/usr/*' 'src/libs/mongoose.c' '*.h' 'src/libs/jsoncpp.cpp' 'src/util/logger.cpp' 'src/main*' --output-file ${_outputname}.info.cleaned
 		COMMAND ${GENHTML_PATH} -o ${_outputname} ${_outputname}.info.cleaned
 		COMMAND ${CMAKE_COMMAND} -E remove ${_outputname}.info ${_outputname}.info.cleaned
 	)
@@ -55,7 +60,7 @@ endif()
 include_directories(include/ include/db/)
 
 #Agrego todos los archivos de SOURCE
-file(GLOB SOURCE "src/*" "src/db/*")
+file(GLOB SOURCE "src/*" "src/db/*" "src/archivosYMetadatos/*" "src/util/*" "src/realizadoresDeEventos/*" "src/libs/*")
 
 if (NOT rocksdb)
 	list(REMOVE_ITEM SOURCE ${PROJ}/src/main.cpp)
@@ -105,7 +110,7 @@ if(test)
 	#Agrego todos los archivos de TEST
 	file(GLOB SOURCE_TEST "test/*" "test/db/*")
 
-	file(GLOB SOURCE2 "src/*" "src/db/*")
+	file(GLOB SOURCE2 "src/*" "src/db/*" "src/archivosYMetadatos/*" "src/util/*" "src/realizadoresDeEventos/*" "src/libs/*")
 	list(REMOVE_ITEM SOURCE2 ${PROJ}/src/main.cpp)
 	list(REMOVE_ITEM SOURCE2 ${PROJ}/src/main_rocksdbless.cpp)
 

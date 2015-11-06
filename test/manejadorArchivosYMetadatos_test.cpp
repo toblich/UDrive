@@ -18,7 +18,7 @@ class ManejadorArchivosYMetadatosTest : public ::testing::Test {
 		}
 
 		virtual void TearDown() {
-			manejador->deleteFileSystem();
+			manejador->manejadorArchivos.deleteFileSystem();
 			delete manejador;
 			delete validador;
 			db->deleteBD();
@@ -269,7 +269,7 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaPoderAgregarPermisoYAgregarloAlMe
 	manejador->crearUsuario("juan");
 	manejador->crearCarpetaSegura("pablo", path);
 	manejador->subirArchivo("pablo", filepath, "hola pablo", 10, jsonArchOK, 2048);
-	manejador->agregarPermiso("pablo",filepath,"juan");
+	manejador->manejadorMetadatos.agregarPermiso("pablo",filepath,"juan");
 	string metadatoActualizado = manejador->consultarMetadatosArchivo("pablo",filepath);
 	MetadatoArchivo asd = ParserJson::deserializarMetadatoArchivo(metadatoActualizado);
 	EXPECT_EQ("juan", asd.usuariosHabilitados.back());
@@ -349,7 +349,7 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaCambiarBienFechaYUsuarioUltimaMod
 	int mes = tiempo->tm_mon + 1;
 	int dia = tiempo->tm_mday;
 
-	std::string jsonNuevoMetadato = manejador->actualizarUsuarioFechaModificacion(jsonArchOK, "juancito");
+	std::string jsonNuevoMetadato = manejador->manejadorMetadatos.actualizarUsuarioFechaModificacion(jsonArchOK, "juancito");
 	MetadatoArchivo nuevoMetadato = ParserJson::deserializarMetadatoArchivo(jsonNuevoMetadato);
 	std::string fecha = std::to_string(dia) + "/" + std::to_string(mes) + "/" + std::to_string(anio);
 	EXPECT_EQ(fecha, nuevoMetadato.fechaUltimaModificacion);
@@ -359,7 +359,7 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaCambiarBienFechaYUsuarioUltimaMod
 TEST_F(ManejadorArchivosYMetadatosTest, deberiaTenerTamanioCeroCarpetaVacia) {
 	unsigned long int size = 0;
 	manejador->crearUsuario("pablo");
-	manejador->tamanioCarpeta("pablo", size);
+	manejador->manejadorArchivos.tamanioCarpeta("pablo", size);
 	EXPECT_EQ(0,size);
 }
 
@@ -369,7 +369,7 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaTenerCarpetaTamanioIgualAlUnicoAr
 	manejador->crearUsuario("pablo");
 	manejador->crearCarpetaSegura("pablo","pablo/como estas/bien");
 	manejador->subirArchivo("pablo", filepath, "hola pablo", 10, "un metadato", 2048);
-	manejador->tamanioCarpeta("pablo", size);
+	manejador->manejadorArchivos.tamanioCarpeta("pablo", size);
 	EXPECT_EQ(10, size);
 }
 
@@ -385,9 +385,9 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaTenerCarpetaTamanioIgualASumaDeAr
 	manejador->subirArchivo("pablo", filepath, "hola pablo", 10, "un metadato", 2048);
 	manejador->subirArchivo("pablo", filepath2, "hola tobi", 9, "un metadato", 2048);
 	manejador->subirArchivo("pablo", filepath3, "hola pancho", 11, "un metadato", 2048);
-	manejador->tamanioCarpeta("pablo", sizePablo);
-	manejador->tamanioCarpeta("pablo/como estas/bien", sizeBien);
-	manejador->tamanioCarpeta("pablo/como estas/bien/vos?", sizeVos);
+	manejador->manejadorArchivos.tamanioCarpeta("pablo", sizePablo);
+	manejador->manejadorArchivos.tamanioCarpeta("pablo/como estas/bien", sizeBien);
+	manejador->manejadorArchivos.tamanioCarpeta("pablo/como estas/bien/vos?", sizeVos);
 	EXPECT_EQ(30, sizePablo);
 	EXPECT_EQ(30, sizeBien);
 	EXPECT_EQ(19, sizeVos);
@@ -530,7 +530,7 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaBorrarElFileSystem) {
 	manejador->crearCarpetaSegura("pablo", path); //Creo una carpeta para asegurarme que exista el FS
 	//Me fijo si existe la carpeta del FS
 	EXPECT_TRUE(stat(pathFS.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode));
-	manejador->deleteFileSystem();
+	manejador->manejadorArchivos.deleteFileSystem();
 	//Ahora no deberia existir
 	EXPECT_FALSE(stat(pathFS.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode));
 }
@@ -541,7 +541,7 @@ void inic(ManejadorArchivosYMetadatos* manejador, string path){
 	manejador->crearUsuario("pablo");
 	manejador->crearUsuario("juan");
 	manejador->subirArchivo("pablo", path, "hola pablo", 10, jsonArchOK, 2048);
-	manejador->agregarPermiso("pablo", path, "juan");
+	manejador->manejadorMetadatos.agregarPermiso("pablo", path, "juan");
 }
 
 TEST_F(ManejadorArchivosYMetadatosTest, deberiaNoHaberErrorEnPermisos) {
@@ -605,7 +605,7 @@ TEST_F(ManejadorArchivosYMetadatosTest, usuarioConPermisosDeberiaPoderAgregarPer
 	string filepath = "pablo/archivos/saludo.txt";
 	inic(manejador, filepath);
 	manejador->crearUsuario("pepe");
-	manejador->agregarPermiso("juan",filepath,"pepe");
+	manejador->manejadorMetadatos.agregarPermiso("juan",filepath,"pepe");
 	string metadatoActualizado = manejador->consultarMetadatosArchivo("pepe",filepath);
 	MetadatoArchivo asd = ParserJson::deserializarMetadatoArchivo(metadatoActualizado);
 	EXPECT_EQ("pepe", asd.usuariosHabilitados.back());
@@ -635,9 +635,9 @@ TEST_F(ManejadorArchivosYMetadatosTest, usuarioConPermisosNoDeberiaPoderBorrarCa
 	manejador->subirArchivo("pablo", filepath, "hola pablo", 10, jsonArchOK, 2048);
 	manejador->subirArchivo("pablo", filepath2, "hola pablo", 10, jsonArchOK, 2048);
 	manejador->subirArchivo("pablo", filepath3, "hola pablo", 10, jsonArchOK, 2048);
-	manejador->agregarPermiso("pablo", filepath, "juan");
-	manejador->agregarPermiso("pablo", filepath2, "juan");
-	manejador->agregarPermiso("pablo", filepath3, "juan");
+	manejador->manejadorMetadatos.agregarPermiso("pablo", filepath, "juan");
+	manejador->manejadorMetadatos.agregarPermiso("pablo", filepath2, "juan");
+	manejador->manejadorMetadatos.agregarPermiso("pablo", filepath3, "juan");
 	EXPECT_FALSE( manejador->eliminar("juan","pablo/como estas") );
 }
 
@@ -884,7 +884,7 @@ void subirArchivoYAgregarPermiso(ManejadorArchivosYMetadatos* manejador, string 
 	metadatoNuevo.etiquetas = etiquetas;
 	string jsonArchOKNuevo = ParserJson::serializarMetadatoArchivo(metadatoNuevo);
 	manejador->subirArchivo(propietario, filepath, texto.c_str(), texto.size(), jsonArchOKNuevo, 2048);
-	if ( permiso != "" ) manejador->agregarPermiso(propietario, filepath, permiso);
+	if ( permiso != "" ) manejador->manejadorMetadatos.agregarPermiso(propietario, filepath, permiso);
 }
 
 string myStrings[] = {"hola", "true", "10"};

@@ -37,19 +37,14 @@ void MapDB::modify(string key, string value) {
 }
 
 bool MapDB::writeBatch(const Batch& batch) {
-	list<DBAction>::const_iterator it = batch.getAcciones().cbegin();
-	const list<DBAction>::const_iterator END = batch.getAcciones().cend();
-	bool ok = true;
-	for (; it != END and ok; it++) {
-		ok = checkAction(*it);
+	for (auto &action : batch.getAcciones()) {
+		if (not checkAction(action))
+			return false;
 	}
-	if (ok) {
-		it = batch.getAcciones().cbegin(); //reinicia
-		for (; it != END; it++) {
-			executeAction(*it);
-		}
+	for (auto &action : batch.getAcciones()) {
+		executeAction(action);
 	}
-	return ok;
+	return true;
 }
 
 bool MapDB::contains(string key) {
