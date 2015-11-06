@@ -81,8 +81,6 @@ public:
 	 * @brief Se encarga de actualizar los metadatos de un determinado archivo.
 	 */
 	bool actualizarMetadatos(string username, string filepath, string jsonNuevosMetadatos);
-
-	// Busquedas
 	/**
 	 * @brief Se encarga de buscar por extensión dentro del FileSystem del usuario y los archivos que se le compartieron.
 	 */
