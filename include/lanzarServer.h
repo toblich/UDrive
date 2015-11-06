@@ -21,7 +21,7 @@ void lanzarServer(BD* perfiles, BD* sesiones, BD* passwords, BD* metadatos) {
 	Server server(puerto, perfiles, sesiones, passwords, metadatos);
 
 	while (server.isRunning()) {
-		usleep(100000);
+		usleep(10000);
 	}
 
 	Logger::logDebug("Cerrando servidor");

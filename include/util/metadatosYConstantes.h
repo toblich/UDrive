@@ -28,6 +28,7 @@ typedef struct{
 	std::string fechaUltimaModificacion;
 	std::string usuarioUltimaModificacion;
 	std::string propietario;
+	int ultimaVersion;
 	std::list<std::string> etiquetas;
 	std::list<std::string> usuariosHabilitados; // Seria correcto que aca figurara el propietario tambien
 }MetadatoArchivo;

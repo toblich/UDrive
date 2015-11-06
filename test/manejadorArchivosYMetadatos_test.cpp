@@ -36,6 +36,7 @@ const std::string jsonArchOK = "{\n"
 		"\t\"fecha ultima modificacion\" : \"09/09/2015\",\n"
 		"\t\"nombre\" : \"saludo\",\n"
 		"\t\"propietario\" : \"pablo\",\n"
+		"\t\"ultima version\" : 1,\n"
 		"\t\"usuario ultima modificacion\" : \"pablo\",\n"
 		"\t\"usuarios\" : [ \"pablo\" ]\n"
 		"}";
@@ -1261,4 +1262,24 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaBuscarBienPorEtiquetasEnPermisosY
 	EXPECT_EQ(busquedaEtiqueta2.at(filepath5), "hola_saludo5.txt");
 	EXPECT_EQ(busquedaEtiqueta2.at(filepath6), "chau.txt");
 	EXPECT_FALSE(busquedaEtiqueta2.count(filepath7) > 0); // no existe en el mapa
+}
+
+TEST_F(ManejadorArchivosYMetadatosTest, deberiaSubirBienArchivoVacio) {
+	manejador->crearUsuario("pablo");
+	string filepath = "pablo/archivos/saludo.txt";
+	string filepathConFS = pathFS + "/" + filepath;
+	ASSERT_TRUE( manejador->subirArchivo("pablo", filepath, "", 0, jsonArchOK, 2048) );
+	ASSERT_TRUE( manejador->validador.existeArchivo(filepathConFS) );
+	ASSERT_TRUE( manejador->validador.existeMetadato(filepath) );
+}
+
+TEST_F(ManejadorArchivosYMetadatosTest, deberiaSacarBienElNumeroDeSecuencia) {
+	EXPECT_EQ( "pablo/archivos/hola.txt" ,ParserURI::pathSinNroSecuencia("pablo/archivos/hola.txt!1") );
+}
+
+TEST_F(ManejadorArchivosYMetadatosTest, deberiaSacarBienElNumeroDeSecuenciaDeArchivoEnTrash) {
+	string sinNroSecTrash = ParserURI::pathSinNroSecuencia("pablo/!trash/archivos!hola.txt!1!0");
+	EXPECT_EQ ( "pablo/!trash/archivos!hola.txt!1", sinNroSecTrash);
+	string sinNrosSec = ParserURI::pathSinNroSecuencia(sinNroSecTrash);
+	EXPECT_EQ ( "pablo/!trash/archivos!hola.txt", sinNrosSec);
 }

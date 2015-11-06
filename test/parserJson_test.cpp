@@ -9,6 +9,7 @@ const string jsonArchOK = "{\n"
 		"\t\"fecha ultima modificacion\" : \"09/09/2015\",\n"
 		"\t\"nombre\" : \"sol\",\n"
 		"\t\"propietario\" : \"Pancheitor\",\n"
+		"\t\"ultima version\" : 3,\n"
 		"\t\"usuario ultima modificacion\" : \"Pepe\",\n"
 		"\t\"usuarios\" : [ \"Pancheitor\", \"Juan\", \"Pepe\", \"Santi\" ]\n"
 		"}";
@@ -54,12 +55,33 @@ TEST(ParserJsonTest, deberiaDeserializarBienNombreInexistenteMetadatoArchivo){
 			"\t\"extension\" : \"jpg\",\n"
 			"\t\"fecha ultima modificacion\" : \"09/09/2015\",\n"
 			"\t\"propietario\" : \"Pancheitor\",\n"
+			"\t\"ultima version\" : 3,\n"
 			"\t\"usuario ultima modificacion\" : \"Pepe\",\n"
 			"\t\"usuarios\" : [ \"Pancheitor\", \"Juan\", \"Pepe\", \"Santi\" ]\n"
 			"}";
 	MetadatoArchivo pruebaArch = ParserJson::deserializarMetadatoArchivo(jsonArch);
 
 	EXPECT_EQ("", pruebaArch.nombre);
+}
+
+TEST(ParserJsonTest, deberiaDeserializarBienVersionCorrectaMetadatoArchivo) {
+	MetadatoArchivo pruebaArch = ParserJson::deserializarMetadatoArchivo(jsonArchOK);
+	EXPECT_EQ(3, pruebaArch.ultimaVersion);
+}
+
+TEST(ParserJsonTest, deberiaDeserializarBienVersionInexistenteMetadatoArchivo){
+	string jsonArch = "{\n"
+			"\t\"etiquetas\" : [ \"23\", true, \"juan\" ],\n"
+			"\t\"extension\" : \"jpg\",\n"
+			"\t\"fecha ultima modificacion\" : \"09/09/2015\",\n"
+			"\t\"nombre\" : \"sol\",\n"
+			"\t\"propietario\" : \"Pancheitor\",\n"
+			"\t\"usuario ultima modificacion\" : \"Pepe\",\n"
+			"\t\"usuarios\" : [ \"Pancheitor\", \"Juan\", \"Pepe\", \"Santi\" ]\n"
+			"}";
+	MetadatoArchivo pruebaArch = ParserJson::deserializarMetadatoArchivo(jsonArch);
+
+	EXPECT_EQ(1, pruebaArch.ultimaVersion);
 }
 
 TEST(ParserJsonTest, deberiaDeserializarBienEtiquetasCorrectasMetadatoArchivo){
@@ -91,6 +113,7 @@ TEST(ParserJsonTest, deberiaDeserializarBienEtiquetasInexistenteMetadatoArchivo)
 			"\t\"fecha ultima modificacion\" : \"09/09/2015\",\n"
 			"\t\"nombre\" : \"sol\",\n"
 			"\t\"propietario\" : \"Pancheitor\",\n"
+			"\t\"ultima version\" : 3,\n"
 			"\t\"usuario ultima modificacion\" : \"Pepe\",\n"
 			"\t\"usuarios\" : [ \"Pancheitor\", \"Juan\", \"Pepe\", \"Santi\" ]\n"
 			"}";
@@ -243,6 +266,7 @@ TEST(ParserJsonTest, deberiaObtenerLoMismoAlSerializarYDeserializarMetadatoArchi
 			"29/09/2015",
 			"pablo",
 			"santi",
+			3,
 			etiquetas,
 			usuariosHabilitados
 	};
@@ -255,6 +279,7 @@ TEST(ParserJsonTest, deberiaObtenerLoMismoAlSerializarYDeserializarMetadatoArchi
 	EXPECT_EQ(original.fechaUltimaModificacion, deserializado.fechaUltimaModificacion);
 	EXPECT_EQ(original.usuarioUltimaModificacion, deserializado.usuarioUltimaModificacion);
 	EXPECT_EQ(original.propietario, deserializado.propietario);
+	EXPECT_EQ(original.ultimaVersion, deserializado.ultimaVersion);
 	EXPECT_TRUE(sonListasIguales(original.etiquetas, deserializado.etiquetas));
 	EXPECT_TRUE(sonListasIguales(original.usuariosHabilitados, deserializado.usuariosHabilitados));
 }
