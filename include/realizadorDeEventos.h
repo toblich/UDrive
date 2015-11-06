@@ -18,6 +18,8 @@ using namespace std;
 #define MAX_LENGTH 1024
 #define URI_DELIM '/'
 #define NAME_DELIM '.'
+#define CUOTA_PREMIUM 5120 //5 GB
+#define CUOTA_NORMAL  2048 //2 GB
 
 /**
  * @brief Clase abstracta de la cual heredan las clases que manejan la API REST.

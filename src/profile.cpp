@@ -90,6 +90,7 @@ mg_result Profile::GETHandler (mg_connection* connection) {
 }
 
 mg_result Profile::PUTHandler (mg_connection* connection) {
+	string token, nombre, email;
 	string uri = string(connection->uri);
 	vector<string> uris = ParserURI::parsear(uri, URI_DELIM);
 	Logger::logInfo("Se parseó la uri correctamente.");
@@ -103,11 +104,20 @@ mg_result Profile::PUTHandler (mg_connection* connection) {
 	string user = uris[1];
 	string varFile = "picture";
 	DatosArchivo datosArch = getMultipartData(connection, varFile);
-	string token = datosArch.token;
+	bool hayNuevaFotoPerfil = (datosArch.dataLength != 0) ? true : false;
+
+	if(hayNuevaFotoPerfil){
+		token = datosArch.token;
+		nombre = datosArch.nombre;
+		email = datosArch.email;
+	} else {
+		token = getVar(connection, "token");
+		nombre = getVar(connection, "nombre");
+		email = getVar(connection, "email");
+	}
+
 	Logger::logInfo("Se obtuvo la variable token con valor: " + token);
-	string nombre = datosArch.nombre;
 	Logger::logInfo("Se obtuvo la variable nombre con valor: " + nombre);
-	string email = datosArch.email;
 	Logger::logInfo("Se obtuvo la variable email con valor: " + email);
 
 	if (manejadorUs->autenticarToken(token, user)) {
@@ -117,10 +127,8 @@ mg_result Profile::PUTHandler (mg_connection* connection) {
 		MetadatoUsuario viejoPerfil = ParserJson::deserializarMetadatoUsuario(manejadorUs->getPerfil(user));
 
 		//Actualizo el perfil viejo con el nuevo email y nombre en caso de que se hayan modificado.
-		if (nombre != "")
-			viejoPerfil.nombre = nombre;
-		if (email != "")
-			viejoPerfil.email = email;
+		viejoPerfil.nombre = nombre;
+		viejoPerfil.email = email;
 
 		//Verifico si ambos son validos antes de seguir, sino hay problema en que se actualiza la foto
 		//y tal vez el perfil no es valido.
@@ -130,7 +138,7 @@ mg_result Profile::PUTHandler (mg_connection* connection) {
 			return MG_TRUE;
 		}
 
-		if (datosArch.dataLength != 0) { //Si se subio una nueva foto de perfil.
+		if (hayNuevaFotoPerfil) { //Si se subio una nueva foto de perfil.
 			//Obtengo el perfil del usuario y a partir de ahi el path foto de perfil viejo.
 			string pathFotoViejo = viejoPerfil.pathFotoPerfil;
 
@@ -179,11 +187,7 @@ mg_result Profile::POSTHandler (mg_connection* connection) {
 	perfil.pathFotoPerfil = FOTOS + "/" + username + ".jpg";
 
 	//Le agrego al perfil su cuota dependiendo si es premium o no
-	if (premium == "true") {
-		perfil.cuota = 5 * 1024; // 5 GB
-	} else {
-		perfil.cuota = 2 * 1024; // 2 GB
-	}
+	perfil.cuota = (premium == "true") ? CUOTA_PREMIUM : CUOTA_NORMAL;
 
 	string perfilActualizado = ParserJson::serializarMetadatoUsuario(perfil);
 

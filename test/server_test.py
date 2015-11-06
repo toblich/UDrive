@@ -364,7 +364,7 @@ class ServerTest(unittest.TestCase):
 		password = "masdeocholetras"
 		token = registrarYLoguear(username, password, PERFIL)
 
-		r = requests.put(PROFILE + username, files={"nombre": "otroNombre", "email": "otro@email",
+		r = requests.put(PROFILE + username, data={"nombre": "otroNombre", "email": "otro@email",
 			"token": token}) # actualizar perfil con email invalido
 		self.assertEquals(r.status_code, BAD_REQUEST)
 
