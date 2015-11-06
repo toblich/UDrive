@@ -46,7 +46,7 @@ private:
 
 	const string CHARS_INVALIDOS = "/ ~#?=&" + RESERVED_STR;
 	const string USERLIST = RESERVED_STR + "users";
-	const regex REGEX_NOMBRE = regex("^[ [:alpha:]]+$", std::regex_constants::ECMAScript);	 //TODO: ver si requiere aceptar tildes
+	const regex REGEX_NOMBRE = regex("^[ [:alpha:]]+$", std::regex_constants::ECMAScript);
 	const regex REGEX_EMAIL = regex("^[-_[:alnum:]]+@[[:alpha:]]+\\.([.[:alpha:]]+)+$");
 };
 

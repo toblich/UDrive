@@ -56,9 +56,6 @@ int ParserJson::verificarInt(std::string key, Json::Value raiz) {
 
 string ParserJson::serializarMetadatoArchivo(MetadatoArchivo metadato) {
 	Value archivo;
-
-	//TODO: Habría que verificar que no esten vacios, o se podria asumir
-	//		que como los escribimos nosotros van a estar bien??
 	archivo["nombre"] = metadato.nombre;
 	archivo["extension"] = metadato.extension;
 	archivo["fecha ultima modificacion"] = metadato.fechaUltimaModificacion;
@@ -87,9 +84,6 @@ string ParserJson::serializarMetadatoArchivo(MetadatoArchivo metadato) {
 
 string ParserJson::serializarMetadatoUsuario(MetadatoUsuario metadato) {
 	Value archivo;
-
-	//TODO: Habría que verificar que no esten vacios, o se podria asumir
-	//		que como los escribimos nosotros van a estar bien??
 	archivo["nombre"] = metadato.nombre;
 	archivo["email"] = metadato.email;
 	archivo["path foto de perfil"] = metadato.pathFotoPerfil;
@@ -106,9 +100,6 @@ string ParserJson::serializarMetadatoUsuario(MetadatoUsuario metadato) {
 
 string ParserJson::serializarMetadatoSesion(MetadatoSesion metadato){
 	Value archivo;
-
-	//TODO: Habría que verificar que no esten vacios, o se podria asumir
-	//		que como los escribimos nosotros van a estar bien??
 	archivo["username"] = metadato.username;
 	archivo["password"] = metadato.password;
 	archivo["token"] = metadato.token;
