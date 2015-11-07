@@ -241,7 +241,7 @@ bool ManejadorArchivosYMetadatos::eliminarArchivo (string username, string filep
 		return false;
 	if (TRASH == partes[1]) {
 		manejadorMetadatos.eliminarDefinitivamente(filepath);
-		manejadorArchivos.eliminarArchivoDefinitivamente(filepath + RESERVED_STR + "*");
+		manejadorArchivos.eliminarArchivoDefinitivamente(filepath + RESERVED_STR, true); // true -> agregar * al final
 		return true;
 	} else {
 		return this->mandarArchivoATrash(username, filepath);

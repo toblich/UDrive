@@ -106,9 +106,11 @@ bool ManejadorArchivos::renombrarArchivo (const string& pathInterno, const strin
 	return true;
 }
 
-void ManejadorArchivos::eliminarArchivoDefinitivamente (const string& filepath) {
+void ManejadorArchivos::eliminarArchivoDefinitivamente (const string& filepath, bool usarWildcardFinal) {
 	string filepathConFS = this->pathFileSystem + "/" + filepath;
 	string command = "exec rm '" + filepathConFS + "'";
+	if (usarWildcardFinal)
+		command += '*';
 	system(command.c_str());
 	Logger::logInfo("Se borro definitivamente el archivo " + filepath);
 }

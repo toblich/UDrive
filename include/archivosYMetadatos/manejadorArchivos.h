@@ -17,7 +17,7 @@ public:
 	bool restaurarArchivo (const string& pathRealSinFS, const string& pathEnPapeleraSinFS, int ultimaVersion);
 	void deshacerRestaurado (const string& pathRealSinFS, const string& pathEnPapeleraSinFS);
 
-	void eliminarArchivoDefinitivamente (const string& filepath);
+	void eliminarArchivoDefinitivamente (const string& filepath, bool usarWildcardFinal = false);
 	bool mandarArchivoATrash (const string& filepath, const string& pathCompletoPapelera, int ultimaVersion);
 	void guardarArchivoEnFileSystem(const string& filepath, const char* data, int dataLen);
 
