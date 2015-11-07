@@ -788,8 +788,9 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaRestaurarArchivoPropioBorrado) {
 	ASSERT_TRUE(manejador->crearUsuario(propietario));
 	ASSERT_TRUE(manejador->subirArchivo(propietario, path, contenido.c_str(), contenido.size(), jsonArchOK, 2048));
 	ASSERT_TRUE(manejador->eliminar(propietario, path));
-
+	Logger::logDebug("Fue eliminado el archivo " + path);
 	EXPECT_TRUE(manejador->restaurar(propietario, pathEnPapelera));
+	Logger::logDebug("Fue restaurado el archivo " + pathEnPapelera);
 	EXPECT_NE("", manejador->consultarMetadatosArchivo(propietario, path));	// Los metadatos existen (no son iguales por la fecha y los permisos)
 	EXPECT_NE("", manejador->descargarArchivo(propietario, path));	// El archivo existe (da el path)
 	EXPECT_EQ("", manejador->consultarMetadatosArchivo(propietario, pathEnPapelera));
@@ -828,7 +829,9 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaRestaurarUnaVezArchivoBorradoDosV
 	manejador->crearUsuario(propietario);
 	for (int i = 0; i < 2; i++) {
 		ASSERT_TRUE(manejador->subirArchivo(propietario, path, contenido.c_str(), contenido.size(), jsonArchOK, 2048));
+		Logger::logTrace("Se subio el archivo " + path);
 		ASSERT_TRUE(manejador->eliminar(propietario, path));
+		Logger::logTrace("Se elimino el archivo " + path);
 	}
 
 	EXPECT_TRUE(manejador->restaurar(propietario, pathEnPapelera));

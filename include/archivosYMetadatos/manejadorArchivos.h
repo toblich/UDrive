@@ -14,7 +14,7 @@ public:
 	bool deleteCarpeta(string path);
 
 	bool renombrarArchivo (const string& pathInterno, const string& nuevoFilename);
-	bool restaurarArchivo (const string& pathRealSinFS, const string& pathEnPapeleraSinFS);
+	bool restaurarArchivo (const string& pathRealSinFS, const string& pathEnPapeleraSinFS, int ultimaVersion);
 	void deshacerRestaurado (const string& pathRealSinFS, const string& pathEnPapeleraSinFS);
 
 	void eliminarArchivoDefinitivamente (const string& filepath);

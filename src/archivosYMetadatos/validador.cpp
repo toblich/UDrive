@@ -56,7 +56,7 @@ bool Validador::tienePermisos (string username, string path) {
 bool Validador::verificarPermisos (string username, string path) {
 	vector<string> directorios = ParserURI::parsear(path, '/');
 	if (directorios.size() > 0) {
-		//Si el directorio raiz es ^fotos cualquiera tiene permisos.
+		//Si el directorio raiz es !fotos cualquiera tiene permisos.
 		if (directorios[0] == FOTOS) return true;
 		string fileOwner = directorios[0];
 		if (username == fileOwner or this->tienePermisos(username, path))
@@ -68,8 +68,8 @@ bool Validador::verificarPermisos (string username, string path) {
 
 string Validador::obtenerNumeroSecuencia(string pathFileSystem, string propietario, string pathSinUsernameConReserved) {
 	string comando = "ls '" + pathFileSystem + "/" + propietario + "/" + TRASH + "' -1 | grep \"^" +
-			pathSinUsernameConReserved + RESERVED_REGEX + "[0-9]\\+$\" | rev | cut -d " + RESERVED_REGEX +
-			" -f 1 | rev | sort -nr | head -n1";
+			pathSinUsernameConReserved + RESERVED_REGEX + "[0-9]\\+" + RESERVED_REGEX + "[0-9]\\+$\" | rev | cut -d " + RESERVED_REGEX +
+			" -f 2 | rev | sort -nr | head -n1";
 	string nuevoNroSecuencia;
 	FILE *fp;
 	char ultimoNroSecuencia[4];

@@ -88,7 +88,6 @@ Batch ManejadorMetadatos::armarBatchEliminarArchivo (const string& jsonMetadatos
 	Batch batch;
 	string jsonMetadatosConFechaModif = this->actualizarUsuarioFechaModificacion(jsonMetadatos, username);
 	MetadatoArchivo metadatoConFechaModif = ParserJson::deserializarMetadatoArchivo(jsonMetadatosConFechaModif);
-
 	for (auto &usuario : metadatoConFechaModif.usuariosHabilitados) {
 		if (usuario == metadatoConFechaModif.propietario)
 			continue;

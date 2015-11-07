@@ -52,7 +52,8 @@ bool ManejadorArchivosYMetadatos::restaurar(string username, string pathEnPapele
 	if (not validador.puedoRestaurarA(pathEnPapeleraSinFS, filepathRealSinFS, pathFileSystem))
 		return false;
 
-	if (not manejadorArchivos.restaurarArchivo(filepathRealSinFS, pathEnPapeleraSinFS))
+	MetadatoArchivo metadato = ParserJson::deserializarMetadatoArchivo(manejadorMetadatos.obtenerMetadato(pathEnPapeleraSinFS));
+	if (not manejadorArchivos.restaurarArchivo(filepathRealSinFS, pathEnPapeleraSinFS, metadato.ultimaVersion))
 		return false;
 
 	if (manejadorMetadatos.restaurarMetadatos(pathEnPapeleraSinFS, username, filepathRealSinFS))

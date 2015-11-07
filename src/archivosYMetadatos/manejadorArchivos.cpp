@@ -113,18 +113,21 @@ void ManejadorArchivos::guardarArchivoEnFileSystem (const string& filepath, cons
 	outFile.close();
 }
 
-bool ManejadorArchivos::restaurarArchivo(const string& pathRealSinFS, const string& pathEnPapeleraSinFS) {
-	string pathRealConFS = pathFileSystem + "/" + pathRealSinFS;
-	string pathEnPapeleraConFS = pathFileSystem + "/" + pathEnPapeleraSinFS;
-
-	if (rename(pathEnPapeleraConFS.c_str(), pathRealConFS.c_str()) != 0) {
-		Logger::logWarn("La restauracion del archivo " + pathEnPapeleraSinFS + " no fue correcta.");
-		return false;
+bool ManejadorArchivos::restaurarArchivo(const string& pathRealSinFS, const string& pathEnPapeleraSinFS, int ultimaVersion) {
+	for (int i = FIRST; i <= ultimaVersion; i++) {
+		string versionSuffix = RESERVED_STR + to_string(i);
+		string pathRealConFS = pathFileSystem + "/" + pathRealSinFS + versionSuffix;
+		string pathEnPapeleraConFS = pathFileSystem + "/" + pathEnPapeleraSinFS + versionSuffix;
+		if (rename(pathEnPapeleraConFS.c_str(), pathRealConFS.c_str()) != 0) {
+			Logger::logWarn("La restauracion del archivo " + pathEnPapeleraSinFS + " no fue correcta.");
+			return false;
+		}
 	}
 	Logger::logInfo("La restauracion del archivo " + pathEnPapeleraSinFS + " fue correcta.");
 	return true;
 }
 
+// TODO: actualizar a que sea con todas las versiones que se hayan llegado a borrar
 void ManejadorArchivos::deshacerRestaurado(const string& pathRealSinFS, const string& pathEnPapeleraSinFS) {
 	string pathRealConFS = pathFileSystem + "/" + pathRealSinFS;
 	string pathEnPapeleraConFS = pathFileSystem + "/" + pathEnPapeleraSinFS;
