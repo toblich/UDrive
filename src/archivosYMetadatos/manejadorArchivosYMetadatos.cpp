@@ -188,11 +188,12 @@ bool ManejadorArchivosYMetadatos::actualizarMetadatosChequeados (const string& f
 
 	string nuevoJson;
 	bool deboRenombrar = manejadorMetadatos.actualizarPermisos(filepath, jsonNuevosMetadatos, username, nuevoJson);
-	if (not deboRenombrar) return true;
+	if (not deboRenombrar)
+		return true;
 
 	MetadatoArchivo metadatosNuevos = ParserJson::deserializarMetadatoArchivo(nuevoJson);
 	string nuevoFilename = metadatosNuevos.nombre + "." + metadatosNuevos.extension;
-	if (not manejadorArchivos.renombrarArchivo(filepath, nuevoFilename)) {
+	if (not manejadorArchivos.renombrarArchivo(filepath, nuevoFilename, metadatosNuevos.ultimaVersion)) {
 		Logger::logError("Metadatos que pinchan el renombrado: " + jsonNuevosMetadatos);
 		return false;
 	}

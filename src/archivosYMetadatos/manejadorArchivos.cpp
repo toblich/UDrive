@@ -81,19 +81,26 @@ bool ManejadorArchivos::deleteCarpeta (string path) {
 	return true;
 }
 
-bool ManejadorArchivos::renombrarArchivo (const string& pathInterno, const string& nuevoFilename) {
+bool ManejadorArchivos::renombrarArchivo (const string& pathInterno, const string& nuevoFilename, int ultimaVersion) {
 	string nuevoPathInterno = ParserURI::pathConNuevoFilename(pathInterno, nuevoFilename);
-	string pathConFS = pathFileSystem + "/" + pathInterno;
-	string nuevoPathConFS = pathFileSystem + "/" + nuevoPathInterno;
-
-	if (validador->existeArchivo(nuevoPathConFS) or validador->existeMetadato(nuevoPathInterno)) {
+	if (validador->existeMetadato(nuevoPathInterno)) {
 		Logger::logWarn("No se renombro el archivo " + pathInterno + " a " + nuevoFilename
-				+ " porque ya existe un archivo allí con ese nombre en el FileSystem o la base de datos.");
+				+ " porque ya existe un archivo allí con ese nombre en la base de datos");
 		return false;
 	}
-	if (rename(pathConFS.c_str(), nuevoPathConFS.c_str())) {
-		Logger::logError("Fallo el renombrado del archivo " + pathInterno + " a " + nuevoFilename);
-		return false;
+	for (int i = FIRST; i <= ultimaVersion; i++) {
+		string versionSuffix = RESERVED_STR + to_string(i);
+		string pathConFS = pathFileSystem + "/" + pathInterno + versionSuffix;
+		string nuevoPathConFS = pathFileSystem + "/" + nuevoPathInterno + versionSuffix;
+		if (validador->existeArchivo(nuevoPathConFS)) {
+			Logger::logWarn("No se renombro el archivo " + pathInterno + " a " + nuevoFilename
+					+ " porque ya existe un archivo allí con ese nombre en el FileSystem");
+			return false;
+		}
+		if (rename(pathConFS.c_str(), nuevoPathConFS.c_str())) {
+			Logger::logError("Fallo el renombrado del archivo " + pathInterno + " a " + nuevoFilename);
+			return false;
+		}
 	}
 	Logger::logInfo("Se renombro correctamente " + pathInterno + " a " + nuevoFilename);
 	return true;

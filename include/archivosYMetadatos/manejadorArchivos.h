@@ -13,7 +13,7 @@ public:
 	bool crearCarpeta(string username, string path);
 	bool deleteCarpeta(string path);
 
-	bool renombrarArchivo (const string& pathInterno, const string& nuevoFilename);
+	bool renombrarArchivo (const string& pathInterno, const string& nuevoFilename, int ultimaVersion);
 	bool restaurarArchivo (const string& pathRealSinFS, const string& pathEnPapeleraSinFS, int ultimaVersion);
 	void deshacerRestaurado (const string& pathRealSinFS, const string& pathEnPapeleraSinFS);
 
