@@ -225,10 +225,13 @@ bool ManejadorMetadatos::cargarMetadato (const string& filepath, const string& j
 	return dbMetadatos->put(filepath, jsonMetadatos);
 }
 
-void ManejadorMetadatos::actualizarMetadatosPorActualizacionArchivo (const string& filepath, const string& username) {
+void ManejadorMetadatos::actualizarMetadatosPorActualizacionArchivo (const string& filepath, const string& username, int nuevaVersion) {
 	string metadatos = dbMetadatos->get(filepath);
-	string nuevosMetadatos = actualizarUsuarioFechaModificacion(metadatos, username);
-	dbMetadatos->modify(filepath, nuevosMetadatos);
+	string jsonNuevosMetadatos = actualizarUsuarioFechaModificacion(metadatos, username);
+	MetadatoArchivo metadato = ParserJson::deserializarMetadatoArchivo(jsonNuevosMetadatos);
+	metadato.ultimaVersion = nuevaVersion;
+	jsonNuevosMetadatos = ParserJson::serializarMetadatoArchivo(metadato);
+	dbMetadatos->modify(filepath, jsonNuevosMetadatos);
 }
 
 bool ManejadorMetadatos::mandarATrash(const string& jsonMetadatos, const string& username,

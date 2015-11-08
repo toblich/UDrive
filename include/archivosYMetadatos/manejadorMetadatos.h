@@ -24,7 +24,7 @@ public:
 	bool cargarMetadato(const string& filepath, const string& jsonMetadatos);
 	string obtenerMetadato(const string& filepath);
 
-	void actualizarMetadatosPorActualizacionArchivo(const string& filepath, const string& username);
+	void actualizarMetadatosPorActualizacionArchivo(const string& filepath, const string& username, int nuevaVersion);
 
 private:
 	BD* dbMetadatos;

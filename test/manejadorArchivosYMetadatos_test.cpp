@@ -1298,3 +1298,94 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaSacarBienElNumeroDeSecuenciaDeArc
 	string sinNrosSec = ParserURI::pathSinNroSecuencia(sinNroSecTrash);
 	EXPECT_EQ ( "pablo/!trash/archivos!hola.txt", sinNrosSec);
 }
+
+// TESTS DE VERSIONADO
+// Todos los tests se hacen con modificaciones por parte del propietario, no de usuarios con permisos
+
+const std::string filepathDefault = "pablo/archivos/saludo.txt";
+
+void crearUsuarioPabloYSubirArchivoYActualizar(ManejadorArchivosYMetadatos* manejador){
+	manejador->crearUsuario("pablo");
+	ASSERT_TRUE( manejador->subirArchivo("pablo", filepathDefault, "hola pablo", 10, jsonArchOK, 2048) );
+	ASSERT_TRUE( manejador->actualizarArchivo("pablo", filepathDefault, "hola pepe", 9, 2048, FIRST) );
+}
+
+TEST_F(ManejadorArchivosYMetadatosTest, deberiaPoderActualizarASegundaVersion) {
+	crearUsuarioPabloYSubirArchivoYActualizar(manejador);
+	string pathCompleto = pathFS + "/" + filepathDefault + RESERVED_STR + to_string(FIRST+1);
+	ifstream archivo(pathCompleto.c_str());
+	string texto;
+	ASSERT_TRUE(archivo.is_open());
+	while ( getline(archivo,texto) ) {
+		EXPECT_EQ(texto, "hola pepe");
+	}
+	archivo.close();
+}
+
+TEST_F(ManejadorArchivosYMetadatosTest, deberiaPoderActualizarATerceraVersion) {
+	crearUsuarioPabloYSubirArchivoYActualizar(manejador);
+	ASSERT_TRUE( manejador->actualizarArchivo("pablo", filepathDefault, "hola pancho", 11, 2048, FIRST+1) );
+
+	string pathCompleto = pathFS + "/" + filepathDefault + RESERVED_STR + to_string(FIRST+2);
+	ifstream archivo(pathCompleto.c_str());
+	string texto;
+	ASSERT_TRUE(archivo.is_open());
+	while ( getline(archivo,texto) ) {
+		EXPECT_EQ(texto, "hola pancho");
+	}
+	archivo.close();
+}
+
+TEST_F(ManejadorArchivosYMetadatosTest, deberiaActualizarUltimaVersionEnMetadatosAlActualizarArchivo) {
+	crearUsuarioPabloYSubirArchivoYActualizar(manejador);
+	string jsonMetadato = manejador->consultarMetadatosArchivo("pablo", filepathDefault);
+	MetadatoArchivo metadato = ParserJson::deserializarMetadatoArchivo(jsonMetadato);
+	EXPECT_EQ(2, metadato.ultimaVersion);
+}
+
+TEST_F(ManejadorArchivosYMetadatosTest, deberiaEliminarTodasLasVersiones) {
+	crearUsuarioPabloYSubirArchivoYActualizar(manejador);
+	manejador->eliminar("pablo", filepathDefault);
+	EXPECT_TRUE(manejador->validador.carpetaVacia(pathFS + "/pablo/archivos"));
+	EXPECT_TRUE(manejador->validador.existeArchivo(pathFS + "/pablo/" + TRASH + "/archivos!saludo.txt!0", FIRST));
+	EXPECT_TRUE(manejador->validador.existeArchivo(pathFS + "/pablo/" + TRASH + "/archivos!saludo.txt!0", FIRST + 1));
+}
+
+TEST_F(ManejadorArchivosYMetadatosTest, deberiaRestaurarTodasLasVersiones) {
+	crearUsuarioPabloYSubirArchivoYActualizar(manejador);
+	ASSERT_TRUE( manejador->eliminar("pablo", filepathDefault) );
+	EXPECT_TRUE( manejador->restaurar("pablo", "pablo/" + TRASH + "/archivos" + RESERVED_STR + "saludo.txt" + RESERVED_STR + "0") );
+	EXPECT_TRUE( manejador->validador.carpetaVacia(pathFS + "/pablo/!trash") );
+	EXPECT_TRUE( manejador->validador.existeArchivo(pathFS + "/" + filepathDefault, FIRST) );
+	EXPECT_TRUE( manejador->validador.existeArchivo(pathFS + "/" + filepathDefault, FIRST + 1) );
+}
+
+TEST_F(ManejadorArchivosYMetadatosTest, deberiaRestaurarTodasLasVersionesDePrimeraEliminacion) {
+	crearUsuarioPabloYSubirArchivoYActualizar(manejador);
+	ASSERT_TRUE( manejador->eliminar("pablo", filepathDefault) );
+	ASSERT_TRUE( manejador->subirArchivo("pablo", filepathDefault, "hola pablo", 10, jsonArchOK, 2048) );
+	ASSERT_TRUE( manejador->actualizarArchivo("pablo", filepathDefault, "hola pepe", 9, 2048, FIRST) );
+	ASSERT_TRUE( manejador->eliminar("pablo", filepathDefault) );
+
+	EXPECT_TRUE( manejador->restaurar("pablo", "pablo/" + TRASH + "/archivos" + RESERVED_STR + "saludo.txt" + RESERVED_STR + "0") );
+	EXPECT_FALSE( manejador->validador.carpetaVacia(pathFS + "/pablo/!trash") ); //Estan los archivos de la segunda eliminacion
+	EXPECT_TRUE( manejador->validador.existeArchivo(pathFS + "/" + filepathDefault, FIRST) );
+	EXPECT_TRUE( manejador->validador.existeArchivo(pathFS + "/" + filepathDefault, FIRST + 1) );
+}
+
+TEST_F(ManejadorArchivosYMetadatosTest, deberiaRenombrarTodasLasVersiones) {
+	crearUsuarioPabloYSubirArchivoYActualizar(manejador);
+	string jsonNuevo = "{\n"
+			"\t\"etiquetas\" : [ \"23\", true, \"hola\" ],\n"
+			"\t\"extension\" : \"txt\",\n"
+			"\t\"fecha ultima modificacion\" : \"09/09/2015\",\n"
+			"\t\"nombre\" : \"hola\",\n"
+			"\t\"propietario\" : \"pablo\",\n"
+			"\t\"ultima version\" : 2,\n"
+			"\t\"usuario ultima modificacion\" : \"pablo\",\n"
+			"\t\"usuarios\" : [ ]\n"
+			"}";
+	ASSERT_TRUE( manejador->actualizarMetadatos("pablo", filepathDefault, jsonNuevo) );
+	EXPECT_TRUE( manejador->validador.existeArchivo(pathFS + "/pablo/archivos/hola.txt", FIRST) );
+	EXPECT_TRUE( manejador->validador.existeArchivo(pathFS + "/pablo/archivos/hola.txt", FIRST + 1) );
+}

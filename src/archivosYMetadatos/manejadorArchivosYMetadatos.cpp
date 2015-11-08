@@ -148,7 +148,7 @@ bool ManejadorArchivosYMetadatos::guardarArchivo (const string& filepath, const 
 
 	if (validador.existeMetadato(filepath)) {
 		//Significa que no fui llamado desde el subirArchivo, por lo que la actualizacion se hará ahí
-		manejadorMetadatos.actualizarMetadatosPorActualizacionArchivo(filepath, username);
+		manejadorMetadatos.actualizarMetadatosPorActualizacionArchivo(filepath, username, nuevaVersion);
 	}
 
 	manejadorArchivos.guardarArchivoEnFileSystem(filepath + RESERVED_STR + to_string(nuevaVersion), data, dataLen);
