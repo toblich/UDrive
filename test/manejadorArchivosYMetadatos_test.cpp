@@ -19,6 +19,8 @@ class ManejadorArchivosYMetadatosTest : public ::testing::Test {
 			manejador = new ManejadorArchivosYMetadatos(db, pathFS);
 			validador = new Validador(db);
 			Logger::logTrace("\n========================== " + testName + " ==========================\n");
+			if (validador->existeCarpeta(pathFS))
+				manejador->manejadorArchivos.deleteCarpeta(pathFS);
 		}
 
 		virtual void TearDown() {
@@ -183,7 +185,7 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaSubirBienArchivoDeTexto) {
 	string filepath = "pablo/archivos/saludo.txt";
 	manejador->crearUsuario("pablo");
 	manejador->crearCarpetaSegura("pablo", path);
-	manejador->subirArchivo("pablo", filepath, "hola pablo", 10, "", 2048);
+	manejador->subirArchivo("pablo", filepath, "hola pablo", 10, jsonArchOK, 2048);
 	string pathCompleto = pathFS + "/" + filepath + RESERVED_FIRST;
 	ifstream archivo(pathCompleto.c_str());
 	string texto;
@@ -215,9 +217,9 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaPoderConsultarMetadatosDeArchivo)
 	string filepath = "pablo/archivos/saludo.txt";
 	manejador->crearUsuario("pablo");
 	manejador->crearCarpetaSegura("pablo", path);
-	manejador->subirArchivo("pablo", filepath, "hola pablo", 10, "un metadato", 2048);
+	manejador->subirArchivo("pablo", filepath, "hola pablo", 10, jsonArchOK, 2048);
 	string metadato = manejador->consultarMetadatosArchivo("pablo", filepath);
-	EXPECT_EQ("un metadato", metadato);
+	EXPECT_NE("", metadato);
 }
 
 TEST_F(ManejadorArchivosYMetadatosTest, deberiaPoderActualizarMetadatosDeArchivo) {
@@ -377,7 +379,7 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaTenerCarpetaTamanioIgualAlUnicoAr
 	string filepath = "pablo/como estas/bien/saludo.txt";
 	manejador->crearUsuario("pablo");
 	manejador->crearCarpetaSegura("pablo","pablo/como estas/bien");
-	manejador->subirArchivo("pablo", filepath, "hola pablo", 10, "un metadato", 2048);
+	manejador->subirArchivo("pablo", filepath, "hola pablo", 10, jsonArchOK, 2048);
 	manejador->manejadorArchivos.tamanioCarpeta("pablo", size);
 	EXPECT_EQ(10, size);
 }
@@ -388,12 +390,16 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaTenerCarpetaTamanioIgualASumaDeAr
 	unsigned long int sizeVos = 0;
 	string filepath  = "pablo/como estas/bien/vos?/saludo.txt";
 	string filepath2 = "pablo/como estas/bien/vos?/juan";
-	string filepath3 = "pablo/como estas/bien/juan";
+	string filepath3 = "pablo/como estas/bien/saludo.txt";
 	manejador->crearUsuario("pablo");
 	manejador->crearCarpetaSegura("pablo","pablo/como estas/bien/vos?");
-	manejador->subirArchivo("pablo", filepath, "hola pablo", 10, "un metadato", 2048);
-	manejador->subirArchivo("pablo", filepath2, "hola tobi", 9, "un metadato", 2048);
-	manejador->subirArchivo("pablo", filepath3, "hola pancho", 11, "un metadato", 2048);
+	manejador->subirArchivo("pablo", filepath, "hola pablo", 10, jsonArchOK, 2048);
+	MetadatoArchivo metadatoJsonOK = ParserJson::deserializarMetadatoArchivo(jsonArchOK);
+	metadatoJsonOK.nombre = "juan";
+	metadatoJsonOK.extension = "none";
+	string nuevoJsonMetadato = ParserJson::serializarMetadatoArchivo(metadatoJsonOK);
+	manejador->subirArchivo("pablo", filepath2, "hola tobi", 9, nuevoJsonMetadato, 2048);
+	manejador->subirArchivo("pablo", filepath3, "hola pancho", 11, jsonArchOK, 2048);
 	manejador->manejadorArchivos.tamanioCarpeta("pablo", sizePablo);
 	manejador->manejadorArchivos.tamanioCarpeta("pablo/como estas/bien", sizeBien);
 	manejador->manejadorArchivos.tamanioCarpeta("pablo/como estas/bien/vos?", sizeVos);
@@ -435,21 +441,21 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaObtenerBienLaEstructuraDeLasCarpe
 	MetadatoArchivo metadato1;
 	metadato1.nombre = "saludo";
 	metadato1.extension = "txt";
-	metadato1.ultimaVersion = 1;
+	metadato1.ultimaVersion = FIRST;
 	string metadatos1 = ParserJson::serializarMetadatoArchivo(metadato1);
 
 	string filepath2 = "pablo/como estas/bien/juan";
 	MetadatoArchivo metadato2;
 	metadato2.nombre = "juan";
 	metadato2.extension = "none";
-	metadato2.ultimaVersion = 1;
+	metadato2.ultimaVersion = FIRST;
 	string metadatos2 = ParserJson::serializarMetadatoArchivo(metadato2);
 
 	string filepath3 = "pablo/como estas/bien/pepe.hola";
 	MetadatoArchivo metadato3;
 	metadato3.nombre = "pepe";
 	metadato3.extension = "hola";
-	metadato3.ultimaVersion = 1;
+	metadato3.ultimaVersion = FIRST;
 	string metadatos3 = ParserJson::serializarMetadatoArchivo(metadato3);
 
 	manejador->crearUsuario("pablo");
@@ -1388,4 +1394,35 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaRenombrarTodasLasVersiones) {
 	ASSERT_TRUE( manejador->actualizarMetadatos("pablo", filepathDefault, jsonNuevo) );
 	EXPECT_TRUE( manejador->validador.existeArchivo(pathFS + "/pablo/archivos/hola.txt", FIRST) );
 	EXPECT_TRUE( manejador->validador.existeArchivo(pathFS + "/pablo/archivos/hola.txt", FIRST + 1) );
+}
+
+//TODO Borrado definitivo
+TEST_F(ManejadorArchivosYMetadatosTest, deberiaEliminarDefinitivamenteTodasLasVersiones) {
+	crearUsuarioPabloYSubirArchivoYActualizar(manejador);
+	string pathEnPapelera = "pablo/" + TRASH + "/archivos" + RESERVED_STR + "saludo.txt" + RESERVED_STR + "0";
+	ASSERT_TRUE( manejador->eliminar("pablo", filepathDefault) );
+	EXPECT_TRUE( manejador->validador.carpetaVacia(pathFS + "/pablo/archivos") );
+	ASSERT_TRUE( manejador->eliminar("pablo", pathEnPapelera) ); // lo borra definitivamente
+	EXPECT_TRUE( manejador->validador.carpetaVacia(pathFS + "/pablo/!trash") ); //Se eliminaron definitivamente
+}
+
+
+TEST_F(ManejadorArchivosYMetadatosTest, deberiaRestaurarBienAlEliminarCarpetaConArchivo) {
+	manejador->crearUsuario("pablo");
+	manejador->subirArchivo("pablo", filepathDefault, "hola pablo", 10, jsonArchOK, 2048);
+	ASSERT_TRUE( manejador->eliminar("pablo", "pablo/archivos") );
+	string pathEnPapeleraSinFS = "pablo/" + TRASH + "/archivos" + RESERVED_STR + "saludo.txt" + RESERVED_STR + "0";
+	ASSERT_TRUE( manejador->restaurar("pablo", pathEnPapeleraSinFS) );
+
+	EXPECT_TRUE( manejador->validador.existeArchivo(pathFS + "/" + filepathDefault) );
+}
+
+TEST_F(ManejadorArchivosYMetadatosTest, deberiaRestaurarBienAlEliminarCarpetaConArchivoYMuchasVersiones) {
+	crearUsuarioPabloYSubirArchivoYActualizar(manejador);
+	ASSERT_TRUE( manejador->eliminar("pablo", "pablo/archivos") );
+	string pathEnPapeleraSinFS = "pablo/" + TRASH + "/archivos" + RESERVED_STR + "saludo.txt" + RESERVED_STR + "0";
+	ASSERT_TRUE( manejador->restaurar("pablo", pathEnPapeleraSinFS) );
+
+	EXPECT_TRUE( manejador->validador.existeArchivo(pathFS + "/" + filepathDefault, FIRST) );
+	EXPECT_TRUE( manejador->validador.existeArchivo(pathFS + "/" + filepathDefault, FIRST + 1) );
 }
