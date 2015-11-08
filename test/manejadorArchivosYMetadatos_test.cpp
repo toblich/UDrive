@@ -1426,3 +1426,37 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaRestaurarBienAlEliminarCarpetaCon
 	EXPECT_TRUE( manejador->validador.existeArchivo(pathFS + "/" + filepathDefault, FIRST) );
 	EXPECT_TRUE( manejador->validador.existeArchivo(pathFS + "/" + filepathDefault, FIRST + 1) );
 }
+
+TEST_F(ManejadorArchivosYMetadatosTest, deberiaTenerBienNumerosDeSecuenciaAlEliminar){
+	manejador->crearUsuario("pablo");
+	manejador->subirArchivo("pablo", filepathDefault, "hola pablo", 10, jsonArchOK, 2048);
+	ASSERT_TRUE( manejador->eliminar("pablo", filepathDefault) );
+
+	manejador->subirArchivo("pablo", filepathDefault, "hola pepe", 9, jsonArchOK, 2048);
+	manejador->actualizarArchivo("pablo", filepathDefault, "hola pancho", 11, 2048, FIRST);
+	ASSERT_TRUE( manejador->eliminar("pablo", filepathDefault) );
+
+	string pathEnPapelera = pathFS + "/pablo/" + TRASH + "/archivos" + RESERVED_STR + "saludo.txt" + RESERVED_STR;
+	EXPECT_TRUE(manejador->validador.existeArchivo(pathEnPapelera + "0", FIRST));
+	EXPECT_FALSE(manejador->validador.existeArchivo(pathEnPapelera + "0", FIRST + 1));
+	EXPECT_TRUE(manejador->validador.existeArchivo(pathEnPapelera + "1", FIRST));
+	EXPECT_TRUE(manejador->validador.existeArchivo(pathEnPapelera + "1", FIRST + 1));
+}
+
+TEST_F(ManejadorArchivosYMetadatosTest, deberiaRestaurarBienConNumerosDeSecuencia){
+	manejador->crearUsuario("pablo");
+	manejador->subirArchivo("pablo", filepathDefault, "hola pablo", 10, jsonArchOK, 2048);
+	ASSERT_TRUE( manejador->eliminar("pablo", filepathDefault) );
+
+	manejador->subirArchivo("pablo", filepathDefault, "hola pepe", 9, jsonArchOK, 2048);
+	manejador->actualizarArchivo("pablo", filepathDefault, "hola pancho", 11, 2048, FIRST);
+	ASSERT_TRUE( manejador->eliminar("pablo", filepathDefault) );
+
+	string pathEnPapeleraSinFS = "pablo/" + TRASH + "/archivos" + RESERVED_STR + "saludo.txt" + RESERVED_STR;
+	ASSERT_TRUE( manejador->restaurar("pablo", pathEnPapeleraSinFS + "1") );
+	EXPECT_TRUE(manejador->validador.existeArchivo(pathFS + "/" + pathEnPapeleraSinFS + "0", FIRST));
+	EXPECT_FALSE(manejador->validador.existeArchivo(pathFS + "/" + pathEnPapeleraSinFS + "1", FIRST));
+	EXPECT_FALSE(manejador->validador.existeArchivo(pathFS + "/" + pathEnPapeleraSinFS + "1", FIRST + 1));
+	EXPECT_TRUE(manejador->validador.existeArchivo(pathFS + "/" + filepathDefault, FIRST));
+	EXPECT_TRUE(manejador->validador.existeArchivo(pathFS + "/" + filepathDefault, FIRST + 1));
+}
