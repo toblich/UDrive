@@ -1,4 +1,3 @@
-
 #ifndef INCLUDE_BD_H_
 #define INCLUDE_BD_H_
 
@@ -6,6 +5,9 @@
 #include "excepciones.h"
 #include "batch.h"
 
+/**
+ * @brief Clase abstracta de la que heredan las clases BaseDeDatos y MapDB.
+ */
 class BD {
 public:
 	virtual ~BD() {};

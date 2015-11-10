@@ -94,6 +94,15 @@ public:
 		return str;
 	}
 
+	/**
+	 * @brief Esta función sirve para cuando se renombra un archivo reemplaza
+	 * en el path interno del mismo el filename viejo por el nuevo.
+	 *
+	 * @param pathInterno		string con el path interno actual del archivo.
+	 * @param nuevoFilename		string con el nuevo filename del archivo.
+	 *
+	 * @retval string			string del path interno del archivo con el nuevo filename.
+	 */
 	static string pathConNuevoFilename (const string& pathInterno, const string& nuevoFilename) {
 		vector<string> partes = ParserURI::parsear(pathInterno, '/');
 		partes.pop_back();

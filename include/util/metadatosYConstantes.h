@@ -61,7 +61,7 @@ typedef struct{
 }MetadatoUsuario;
 
 /**
- * @brief Strutc para guardar los datos de la sesión de un usuario
+ * @brief Struct para guardar los datos de la sesión de un usuario
  *
  */
 typedef struct{

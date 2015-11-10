@@ -14,7 +14,7 @@
 using std::string;
 
 /**
- * @brief Encapsula todo el manejo de usuarios.
+ * @brief Se encarga del manejo de usuarios en el servidor.
  *
  * Se encarga de crear usuarios, manejar sus perfiles, sus sesiones
  * y la autenticación de los mismos.
@@ -68,8 +68,20 @@ public:
 	 */
 	string buscarUsuariosCon(const string& substring);
 
+	/**
+	 * @brief Obtiene el perfil del username.
+	 */
 	string getPerfil(string username);
+
+	/**
+	 * @brief Modifica el perfil del username por el nuevo perfil y devuelve si pudo
+	 * lograr la operación.
+	 */
 	bool modifyPerfil(string username, string perfil);
+
+	/**
+	 * @brief Indica si el nombre y el email del perfil son validos.
+	 */
 	bool esPerfilValido(const string& perfil);
 
 private:
