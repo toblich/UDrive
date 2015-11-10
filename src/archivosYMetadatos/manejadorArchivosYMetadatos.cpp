@@ -166,7 +166,7 @@ bool ManejadorArchivosYMetadatos::actualizarArchivo (string username, string fil
 	unsigned long int folderSize = 0;
 	if (manejadorArchivos.tamanioCarpeta(username, folderSize)) {
 		int cuotaBytes = cuota * 1024 * 1024;
-		if (folderSize + dataLen <= cuotaBytes) { //TODO: Restar el tamanio del archivo viejo
+		if (folderSize + dataLen <= cuotaBytes) {
 			return guardarArchivo(filepath, username, data, dataLen, versionAnterior + 1);
 		}
 		Logger::logWarn( "No se ha podido subir el archivo " + filepath +

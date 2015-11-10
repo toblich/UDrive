@@ -79,6 +79,11 @@ public:
 	 */
 	bool modifyPerfil(string username, string perfil);
 
+	/**
+	 * @brief Indica si el nombre y el email del perfil son validos.
+	 */
+	bool esPerfilValido(const string& perfil);
+
 private:
 	BD* perfiles;	///< Base de datos de perfiles de usuario (y la lista de usuarios bajo la clave del atributo USERLIST)
 	BD* sesiones;	///< Base de datos de sesiones activas
@@ -88,7 +93,6 @@ private:
 	bool esUsernameValido(const string& username);
 	bool esPasswordValida(const string& password);
 	string usuariosConSubstring(const string& substring);
-	bool esPerfilValido(const string& perfil);
 
 	const string CHARS_INVALIDOS = "/ ~#?=&" + RESERVED_STR;	///< string que contiene todos los caracteres prohibidos en los usernames
 	const string USERLIST = RESERVED_STR + "users";	///< clave reservada para la lista de usuarios en la base de datos de perfiles

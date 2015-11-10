@@ -9,7 +9,7 @@
 using std::string;
 
 /**
- * @brief Encapsula todo el manejo de archivos Json.
+ * @brief Encapsula integramente el manejo de archivos Json.
  *
  * Se encarga del parseo de archivos/strings del formato Json, así como también de
  * transformar determinados structs o mapas en un archivo/string Json válido.
