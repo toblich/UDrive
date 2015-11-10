@@ -51,10 +51,11 @@ public:
 	 * @brief Se encarga de obtener los metadatos de un determinado archivo.
 	 */
 	string obtenerMetadato(const string& filepath);
+
 	/**
 	 * @brief Se encarga de actualizar los metadatos luego de la actualización de algun archivo.
 	 */
-	void actualizarMetadatosPorActualizacionArchivo(const string& filepath, const string& username);
+	void actualizarMetadatosPorActualizacionArchivo(const string& filepath, const string& username, int nuevaVersion);
 
 private:
 	BD* dbMetadatos;

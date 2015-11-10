@@ -40,17 +40,13 @@ public:
 	 * @retval false 	en caso de que la carpeta no exista o no se haya podido eliminar
 	 */
 	bool deleteCarpeta(string path);
-	/**
-	 * @brief Se encarga de eliminar el FileSystem.
-	 */
-	bool deleteFileSystem();
 
-	bool renombrarArchivo (const string& pathInterno, const string& nuevoFilename);
-	bool restaurarArchivo (const string& pathRealSinFS, const string& pathEnPapeleraSinFS);
+	bool renombrarArchivo (const string& pathInterno, const string& nuevoFilename, int ultimaVersion);
+	bool restaurarArchivo (const string& pathRealSinFS, const string& pathEnPapeleraSinFS, int ultimaVersion);
 	void deshacerRestaurado (const string& pathRealSinFS, const string& pathEnPapeleraSinFS);
 
-	void eliminarArchivoDefinitivamente (const string& filepath);
-	bool mandarArchivoATrash(const string& propietario, const string& filepath, const string& pathCompletoPapelera);
+	void eliminarArchivoDefinitivamente (const string& filepath, bool usarWildcardFinal = false);
+	bool mandarArchivoATrash (const string& filepath, const string& pathCompletoPapelera, int ultimaVersion);
 	void guardarArchivoEnFileSystem(const string& filepath, const char* data, int dataLen);
 	/**
 	 * @brief Se encarga de asignarle la foto de perfil por default a un determinado user.
@@ -58,6 +54,8 @@ public:
 	void crearFotoPerfilDefault(string username);
 
 private:
+	bool deleteFileSystem();
+
 	string pathFileSystem;
 	Validador* validador;
 };

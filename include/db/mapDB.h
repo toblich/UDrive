@@ -3,6 +3,7 @@
 #define INCLUDE_MAPDB_H_
 
 #include "bd.h"
+#include "logger.h"
 #include <map>
 
 using namespace std;

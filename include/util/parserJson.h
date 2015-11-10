@@ -20,7 +20,7 @@ class ParserJson {
 private:
 	static string verificarString(string key, Json::Value raiz);
 	static double verificarDouble(string key, Json::Value raiz);
-	static int verificarInt(string key, Json::Value raiz);
+	static int verificarInt(string key, Json::Value raiz, int porDefecto);
 	ParserJson() {}
 
 public:

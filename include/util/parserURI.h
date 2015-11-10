@@ -2,6 +2,7 @@
 #define PARSERURI_H_
 
 #include <vector>
+#include "metadatosYConstantes.h"
 
 using namespace std;
 
@@ -108,6 +109,31 @@ public:
 		partes.push_back(nuevoFilename);
 		string nuevoPathInterno = ParserURI::join(partes, '/');
 		return nuevoPathInterno;
+	}
+
+	/**
+	 * @brief Quita el último campo que este luego del RESERVED_CHAR.
+	 *
+	 * @param filepath			string al cual se le quiere quitar el nro de secuencia.
+	 *
+	 * @retval string			string sin el numero de secuencia.
+	 */
+	static string pathSinNroSecuencia (const string& filepath) {
+		vector<string> partes = ParserURI::parsear(filepath, RESERVED_CHAR);
+		string filepathSinSecuencia = ParserURI::join(partes, RESERVED_CHAR, 0, partes.size() - 1);
+		return filepathSinSecuencia;
+	}
+
+	/**
+	 * @brief Devuelve el numero de secuencia (o version) final en un filepath o URI.
+	 *
+	 * @param filepath			string del que se obtendrá el nro de secuencia/version.
+	 *
+	 * @retval int				numero de secuencia/version.
+	 */
+	static int obtenerNroSecuencia (const string& filepath) {
+		string version = parsear(filepath, RESERVED_CHAR).back();
+		return stoi(version);
 	}
 };
 

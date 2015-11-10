@@ -81,27 +81,36 @@ bool ManejadorArchivos::deleteCarpeta (string path) {
 	return true;
 }
 
-bool ManejadorArchivos::renombrarArchivo (const string& pathInterno, const string& nuevoFilename) {
+bool ManejadorArchivos::renombrarArchivo (const string& pathInterno, const string& nuevoFilename, int ultimaVersion) {
 	string nuevoPathInterno = ParserURI::pathConNuevoFilename(pathInterno, nuevoFilename);
-	string pathConFS = pathFileSystem + "/" + pathInterno;
-	string nuevoPathConFS = pathFileSystem + "/" + nuevoPathInterno;
-
-	if (validador->existeArchivo(nuevoPathConFS) or validador->existeMetadato(nuevoPathInterno)) {
+	if (validador->existeMetadato(nuevoPathInterno)) {
 		Logger::logWarn("No se renombro el archivo " + pathInterno + " a " + nuevoFilename
-				+ " porque ya existe un archivo allí con ese nombre en el FileSystem o la base de datos.");
+				+ " porque ya existe un archivo allí con ese nombre en la base de datos");
 		return false;
 	}
-	if (rename(pathConFS.c_str(), nuevoPathConFS.c_str())) {
-		Logger::logError("Fallo el renombrado del archivo " + pathInterno + " a " + nuevoFilename);
-		return false;
+	for (int i = FIRST; i <= ultimaVersion; i++) {
+		string versionSuffix = RESERVED_STR + to_string(i);
+		string pathConFS = pathFileSystem + "/" + pathInterno + versionSuffix;
+		string nuevoPathConFS = pathFileSystem + "/" + nuevoPathInterno + versionSuffix;
+		if (validador->existeArchivo(nuevoPathConFS)) {
+			Logger::logWarn("No se renombro el archivo " + pathInterno + " a " + nuevoFilename
+					+ " porque ya existe un archivo allí con ese nombre en el FileSystem");
+			return false;
+		}
+		if (rename(pathConFS.c_str(), nuevoPathConFS.c_str())) {
+			Logger::logError("Fallo el renombrado del archivo " + pathInterno + " a " + nuevoFilename);
+			return false;
+		}
 	}
 	Logger::logInfo("Se renombro correctamente " + pathInterno + " a " + nuevoFilename);
 	return true;
 }
 
-void ManejadorArchivos::eliminarArchivoDefinitivamente (const string& filepath) {
+void ManejadorArchivos::eliminarArchivoDefinitivamente (const string& filepath, bool usarWildcardFinal) {
 	string filepathConFS = this->pathFileSystem + "/" + filepath;
 	string command = "exec rm '" + filepathConFS + "'";
+	if (usarWildcardFinal)
+		command += '*';
 	system(command.c_str());
 	Logger::logInfo("Se borro definitivamente el archivo " + filepath);
 }
@@ -113,18 +122,21 @@ void ManejadorArchivos::guardarArchivoEnFileSystem (const string& filepath, cons
 	outFile.close();
 }
 
-bool ManejadorArchivos::restaurarArchivo(const string& pathRealSinFS, const string& pathEnPapeleraSinFS) {
-	string pathRealConFS = pathFileSystem + "/" + pathRealSinFS;
-	string pathEnPapeleraConFS = pathFileSystem + "/" + pathEnPapeleraSinFS;
-
-	if (rename(pathEnPapeleraConFS.c_str(), pathRealConFS.c_str()) != 0) {
-		Logger::logWarn("La restauracion del archivo " + pathEnPapeleraSinFS + " no fue correcta.");
-		return false;
+bool ManejadorArchivos::restaurarArchivo(const string& pathRealSinFS, const string& pathEnPapeleraSinFS, int ultimaVersion) {
+	for (int i = FIRST; i <= ultimaVersion; i++) {
+		string versionSuffix = RESERVED_STR + to_string(i);
+		string pathRealConFS = pathFileSystem + "/" + pathRealSinFS + versionSuffix;
+		string pathEnPapeleraConFS = pathFileSystem + "/" + pathEnPapeleraSinFS + versionSuffix;
+		if (rename(pathEnPapeleraConFS.c_str(), pathRealConFS.c_str()) != 0) {
+			Logger::logWarn("La restauracion del archivo " + pathEnPapeleraSinFS + " no fue correcta.");
+			return false;
+		}
 	}
 	Logger::logInfo("La restauracion del archivo " + pathEnPapeleraSinFS + " fue correcta.");
 	return true;
 }
 
+// TODO: actualizar a que sea con todas las versiones que se hayan llegado a borrar
 void ManejadorArchivos::deshacerRestaurado(const string& pathRealSinFS, const string& pathEnPapeleraSinFS) {
 	string pathRealConFS = pathFileSystem + "/" + pathRealSinFS;
 	string pathEnPapeleraConFS = pathFileSystem + "/" + pathEnPapeleraSinFS;
@@ -138,13 +150,17 @@ bool ManejadorArchivos::deleteFileSystem() {
 	return deleteCarpeta(this->pathFileSystem);
 }
 
-bool ManejadorArchivos::mandarArchivoATrash(const string& propietario, const string& filepath, const string& pathCompletoPapelera) {
-	string pathCompletoPapeleraConFS = this->pathFileSystem + "/" + pathCompletoPapelera;
-	string filepathCompleto = this->pathFileSystem + "/" + filepath;
+bool ManejadorArchivos::mandarArchivoATrash (const string& filepath, const string& pathCompletoPapelera,
+		int ultimaVersion) {
 
-	if (rename(filepathCompleto.c_str(), pathCompletoPapeleraConFS.c_str())) {
-		Logger::logWarn("La eliminacion del archivo " + filepath + " no fue correcta.");
-		return false;
+	for (int i = FIRST; i <= ultimaVersion; i++) {
+		string versionSuffix = RESERVED_STR + to_string(i);
+		string pathCompletoPapeleraConFS = this->pathFileSystem + "/" + pathCompletoPapelera + versionSuffix;
+		string filepathCompleto = this->pathFileSystem + "/" + filepath + versionSuffix;
+		if (rename(filepathCompleto.c_str(), pathCompletoPapeleraConFS.c_str())) {
+			Logger::logWarn("La eliminacion del archivo " + filepath + " no fue correcta.");
+			return false;
+		}
 	}
 	Logger::logInfo("La eliminacion del archivo " + filepath + " fue correcta.");
 	return true;

@@ -38,6 +38,7 @@ string Buscador::obtenerEstructuraCarpeta (string path, bool esRecursivo, functi
 				mapa.insert(pair<string, string>(pathInterno, foldername + "." + FOLDER));
 			}
 		} else { //Es un archivo
+			pathInterno = ParserURI::pathSinNroSecuencia(pathInterno);
 			if (not dbMetadatos->contains(pathInterno)) {
 				Logger::logWarn("Se quiso obtener los metadatos del archivo " + path + " pero este no existe.");
 				return "";
@@ -47,6 +48,8 @@ string Buscador::obtenerEstructuraCarpeta (string path, bool esRecursivo, functi
 			string nombre = metadato.nombre;
 			if (metadato.extension != "none")
 				nombre += "." + metadato.extension;
+			nombre += RESERVED_STR + to_string(metadato.ultimaVersion);
+
 			if ( predicate(metadato) ) {
 				mapa.insert(pair<string, string>(pathInterno, nombre));
 			}
@@ -73,6 +76,7 @@ string Buscador::obtenerEstructuraCompartidos (string path) {
 		string nombre = metadatoArchivoCompartido.nombre;
 		if (metadatoArchivoCompartido.extension != "none")
 			nombre += "." + metadatoArchivoCompartido.extension;
+		nombre += RESERVED_STR + to_string(metadatoArchivoCompartido.ultimaVersion);
 		mapa.insert(pair<string, string>(archivoCompartido, nombre));
 	}
 	return ParserJson::serializarMapa(mapa);
@@ -91,6 +95,7 @@ map<string, string> Buscador::buscar (string username, function<bool (MetadatoAr
 			string nombre = metadatoArchivoCompartido.nombre;
 			if (metadatoArchivoCompartido.extension != "none")
 				nombre += "." + metadatoArchivoCompartido.extension;
+			nombre += RESERVED_STR + to_string(metadatoArchivoCompartido.ultimaVersion);
 			estructura.insert(pair<string, string>(archivoCompartido, nombre));
 		}
 	}

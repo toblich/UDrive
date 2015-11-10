@@ -38,8 +38,11 @@ void MapDB::modify(string key, string value) {
 
 bool MapDB::writeBatch(const Batch& batch) {
 	for (auto &action : batch.getAcciones()) {
-		if (not checkAction(action))
+		if (not checkAction(action)) {
+			Logger::logDebug("La accion '" + to_string(action.action) + " " + action.key + " " + action.value
+					+ "' no se puede ejecutar en el batch");
 			return false;
+		}
 	}
 	for (auto &action : batch.getAcciones()) {
 		executeAction(action);

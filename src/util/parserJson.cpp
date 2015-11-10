@@ -40,16 +40,16 @@ double ParserJson::verificarDouble(string key, Value raiz){
 	return value;
 }
 
-int ParserJson::verificarInt(std::string key, Json::Value raiz) {
+int ParserJson::verificarInt(std::string key, Json::Value raiz, int porDefecto) {
 	Value parametro = raiz.get(key, "NO");
 	int value;
 	if (not parametro.isNull() and parametro.isInt() and parametro.asInt() > 0){
 		value = parametro.asInt();
 	} else {
 		Logger logger;
-		string error = "Parametro de tipo int \"" + key + "\" invalido, inexistente o menor que 0 en un Json. Se asigna el valor \"2048\" (2 GB) para esta key.";
+		string error = "Parametro de tipo int \"" + key + "\" invalido, inexistente o menor que 0 en un Json. Se asigna el valor " + to_string(porDefecto) + " para esta key.";
 		logger.loggear(error, WARN);
-		value = CUOTA;
+		value = porDefecto;
 	}
 	return value;
 }
@@ -61,6 +61,7 @@ string ParserJson::serializarMetadatoArchivo(MetadatoArchivo metadato) {
 	archivo["fecha ultima modificacion"] = metadato.fechaUltimaModificacion;
 	archivo["usuario ultima modificacion"] = metadato.usuarioUltimaModificacion;
 	archivo["propietario"] = metadato.propietario;
+	archivo["ultima version"] = metadato.ultimaVersion;
 
 	Value etiquetas(arrayValue);
 	std::list<string> etiq = metadato.etiquetas;
@@ -138,6 +139,7 @@ MetadatoArchivo ParserJson::deserializarMetadatoArchivo(string json) {
 		metadatos.fechaUltimaModificacion = ParserJson::verificarString("fecha ultima modificacion", raiz);
 		metadatos.usuarioUltimaModificacion = ParserJson::verificarString("usuario ultima modificacion", raiz);
 		metadatos.propietario = ParserJson::verificarString("propietario", raiz);
+		metadatos.ultimaVersion = ParserJson::verificarInt("ultima version", raiz, 1);
 
 		std::list<string> etiquetas;
 		Value etiq = raiz.get("etiquetas", "NO");
@@ -188,7 +190,7 @@ MetadatoUsuario ParserJson::deserializarMetadatoUsuario(string json) {
 		metadatos.nombre = ParserJson::verificarString("nombre", raiz);
 		metadatos.email = ParserJson::verificarString("email", raiz);
 		metadatos.pathFotoPerfil = ParserJson::verificarString("path foto de perfil", raiz);
-		metadatos.cuota = ParserJson::verificarInt("cuota", raiz);
+		metadatos.cuota = ParserJson::verificarInt("cuota", raiz, CUOTA);
 
 		Value ubicacion = raiz.get("ultima ubicacion", "NO");
 		if (not ubicacion.isNull() and ubicacion.isObject()){

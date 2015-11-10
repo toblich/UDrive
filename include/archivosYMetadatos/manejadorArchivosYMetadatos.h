@@ -11,6 +11,7 @@ using std::string;
 /**
  * @brief Se encarga de proveer una interfaz entre las clases de la API REST y los diferentes manejadores.
  */
+
 class ManejadorArchivosYMetadatos {
 
 private:
@@ -25,9 +26,11 @@ private:
 	bool eliminarArchivo(string username, string filepath);
 	bool eliminarCarpeta(string username, string path);
 	bool mandarArchivoATrash(string username, string filepath);
-	bool guardarArchivo (const string& filepath, const string& username, const char* data, int dataLen);
+	bool guardarArchivo (const string& filepath, const string& username, const char* data, int dataLen, int nuevaVersion);
 
 	bool actualizarMetadatosChequeados (const string& filepath, const string& jsonNuevosMetadatos, const string& username);
+
+	int getLatestVersion(const string& filepath);
 
 public:
 	/**
@@ -65,9 +68,11 @@ public:
 	 */
 	bool restaurar(string username, string path);
 
-	bool subirArchivo(string username, string filepath, const char* data, int dataLen, string jsonMetadatos, int cuota);
-	string descargarArchivo(string username, string filepath);
-	bool actualizarArchivo(string username, string filepath, const char* data, int dataLen, int cuota);
+	bool subirArchivo (string username, string filepath, const char* data, int dataLen, string jsonMetadatos, int cuota,
+			int version = FIRST);
+	string descargarArchivo(string username, string filepath, int version = LATEST);
+	bool actualizarArchivo (string username, string filepath, const char* data, int dataLen, int cuota,
+			int versionAnterior = FIRST-1);	// TODO SACAR EL DEFAULT
 
 	/**
 	 * @brief Se encarga de actualizar la foto de perfil de los usuarios.
