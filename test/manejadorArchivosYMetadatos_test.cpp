@@ -499,14 +499,6 @@ TEST_F(ManejadorArchivosYMetadatosTest, noDeberiaPoderConsultarMetadatoInexisten
 	EXPECT_EQ(manejador->consultarMetadatosArchivo("pablo", filepath), "");
 }
 
-TEST_F(ManejadorArchivosYMetadatosTest, noDeberiaPoderSubirDosVecesUnArchivoConMetodoSubirArchivo) {
-	string filepath = "pablo/archivos/saludo.txt";
-	manejador->crearUsuario("pablo");
-	manejador->crearCarpetaSegura("pablo", "pablo/archivos");
-	EXPECT_TRUE(manejador->subirArchivo("pablo", filepath, "hola pablo", 10, jsonArchOK, 2048));
-	EXPECT_FALSE(manejador->subirArchivo("pablo", filepath, "hola pablo", 10, jsonArchOK, 2048));
-}
-
 TEST_F(ManejadorArchivosYMetadatosTest, deberiaObtenerEstructuraCorrectaDePermisos) {
 	MetadatoArchivo metadato = ParserJson::deserializarMetadatoArchivo(jsonArchOK);
 	MetadatoArchivo metadato2 = ParserJson::deserializarMetadatoArchivo(jsonArchOK);

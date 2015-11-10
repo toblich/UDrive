@@ -24,6 +24,8 @@ private:
 	bool eliminarCarpeta(string username, string path);
 	bool mandarArchivoATrash(string username, string filepath);
 	bool guardarArchivo (const string& filepath, const string& username, const char* data, int dataLen, int nuevaVersion);
+	bool actualizarArchivo (string username, string filepath, const char* data, int dataLen, int cuota,
+			int versionAnterior);
 
 	bool actualizarMetadatosChequeados (const string& filepath, const string& jsonNuevosMetadatos, const string& username);
 
@@ -44,8 +46,7 @@ public:
 	bool subirArchivo (string username, string filepath, const char* data, int dataLen, string jsonMetadatos, int cuota,
 			int version = FIRST);
 	string descargarArchivo(string username, string filepath, int version = LATEST);
-	bool actualizarArchivo (string username, string filepath, const char* data, int dataLen, int cuota,
-			int versionAnterior = FIRST-1);	// TODO SACAR EL DEFAULT
+
 	bool actualizarFotoPerfil(string filepathViejo, string filepathNuevo, const char* data, int dataLen);
 
 	string consultarMetadatosArchivo(string username, string filename);

@@ -177,14 +177,15 @@ bool ManejadorMetadatos::actualizarPermisos (const string& filepath, const strin
 	string jsonMetadatosViejos = dbMetadatos->get(filepath);
 	MetadatoArchivo metadatosViejos = ParserJson::deserializarMetadatoArchivo(jsonMetadatosViejos);
 	MetadatoArchivo metadatosNuevos = ParserJson::deserializarMetadatoArchivo(jsonNuevosMetadatos);
+	metadatosNuevos.ultimaVersion = metadatosViejos.ultimaVersion;
 
 	if (metadatosNuevos.usuariosHabilitados.empty()) {
 		metadatosNuevos.usuariosHabilitados = metadatosViejos.usuariosHabilitados;
-		nuevoJson = ParserJson::serializarMetadatoArchivo(metadatosNuevos);
 	} else {
 		actualizarPermisosMetadato(metadatosViejos, metadatosNuevos, username, filepath);	// actualiza quienes tienen permiso
-		nuevoJson = jsonNuevosMetadatos;
 	}
+
+	nuevoJson = ParserJson::serializarMetadatoArchivo(metadatosNuevos);
 
 	bool deboRenombrar = metadatosViejos.nombre != metadatosNuevos.nombre or metadatosViejos.extension != metadatosNuevos.extension;
 	if (not deboRenombrar) {

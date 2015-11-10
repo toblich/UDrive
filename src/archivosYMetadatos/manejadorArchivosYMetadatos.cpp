@@ -121,17 +121,16 @@ bool ManejadorArchivosYMetadatos::subirArchivo (string username, string filepath
 	if (not validador.verificarPermisos(username, filepath))
 		return false;
 
-	string filepathCompleto = this->pathFileSystem + "/" + filepath + RESERVED_FIRST;
+	string filepathCompleto = this->pathFileSystem + "/" + filepath;
 	if (validador.existeArchivo(filepathCompleto) and validador.existeMetadato(filepath)) {
+		Logger::logDebug("Actualizando archivo con path: " + filepath);
 		return actualizarArchivo(username, filepath, data, dataLen, cuota, version - 1);
 	}
-//	if (validador.existeMetadato(filepath)) {
-//		Logger::logWarn( "Se quiso subir el archivo " + filepath
-//						+ " pero este ya existe. Debe utilizar el metodo actualizarArchivo.");
-//		return false;
-//	}
-	if (not this->actualizarArchivo(username, filepath, data, dataLen, cuota, FIRST - 1))
+
+	if (not this->actualizarArchivo(username, filepath, data, dataLen, cuota, FIRST - 1)) {
+		Logger::logWarn("Fallo la subida del archivo " + filepath);
 		return false;
+	}
 	return manejadorMetadatos.cargarMetadato(filepath, jsonMetadatos);
 }
 
