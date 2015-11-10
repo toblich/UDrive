@@ -162,22 +162,20 @@ class ServerTest(unittest.TestCase):
 		r = requests.put(METADATA + PATH, data={"user" : USER["user"], "token" : token, "metadatos" : metadatosPermiso})	# le da permiso a PABLO
 		self.assertEquals(r.status_code, SUCCESS)
 
-		requests.put(FILE + PATH + RESERVED_STR + "3", files={'file': open(FILENAME, 'rb'), "token": token, "user": USER["user"]})	# sube Makefile!3
+		requests.put(FILE + PATH + RESERVED_STR + "3", files={'file': open(FILENAME, 'rb'), "token": otroToken, "user": "PABLO"})	# sube Makefile!3
 
 		metadatosRenombre = '{"propietario" : "' +  USER["user"] + '" , "extension" : "NUEVA", "nombre" : "NUEVO", "etiquetas" : [], "usuarios" : ["tobi", "PABLO"], ' \
 			+ '"usuario ultima modificacion" : "PABLO" , "fecha ultima modificacion" : "23/10/2015"}'
 		s = requests.put(METADATA + PATH, data={"user" : "PABLO", "token" : otroToken, "metadatos" : metadatosRenombre})
 		self.assertEquals(s.status_code, SUCCESS)
 
-		requests.put(FILE + USER["user"] + "/NUEVO.NUEVA!4", files={'file': open(FILENAME, 'rb'), "token": token, "user": USER["user"]})	# sube Makefile!3
+		requests.put(FILE + USER["user"] + "/NUEVO.NUEVA!4", files={'file': open(FILENAME, 'rb'), "token": token, "user": USER["user"]})	# sube NUEVO.NUEVA!4
 
 		t = requests.get(FOLDER + USER["user"], data={"user" : USER["user"], "token" : token})
 		estructuraReal = literal_eval(t.content)
 		estructuraEsperada = {USER["user"] + "/NUEVO.NUEVA" : "NUEVO.NUEVA" + RESERVED_STR + "4", USER["user"] + "/!trash" : "!trash."+ FOLDER_TYPE}
 		expected = {"estructura" :  estructuraEsperada}
 		self.assertDictEqual(expected, estructuraReal)
-
-
 
 
 
