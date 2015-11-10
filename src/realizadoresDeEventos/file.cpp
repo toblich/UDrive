@@ -68,6 +68,7 @@ MetadatoArchivo File::extractMetadataFrom (const vector<string>& nombreYExtensio
 	metArch.propietario = uris[1];
 	metArch.etiquetas = list<string>();
 	metArch.usuariosHabilitados.push_back(metArch.propietario);
+	metArch.ultimaVersion = FIRST;
 
 	return metArch;
 }
@@ -91,14 +92,15 @@ void File::subirArchivo (const vector<string>& uris, const DatosArchivo& datosAr
 	string filepath = ParserURI::join(uris, URI_DELIM, 1, uris.size());
 	vector<string> nombreYExtension = ParserURI::parsear(datosArch.fileName, NAME_DELIM);
 	Logger::logInfo("Se parseó el nombre del archivo correctamente.");
-	MetadatoArchivo metArch = extractMetadataFrom(nombreYExtension, user, uris);
-	string jsonMetadata = ParserJson::serializarMetadatoArchivo(metArch);
-	Logger::logInfo("Se serializaron los metadatos del archivo correctamente.");
 	int cuotaUsuario = ParserJson::deserializarMetadatoUsuario(manejadorUs->getPerfil(user)).cuota;
 	int version = ParserURI::obtenerNroSecuencia(filepath);
 	filepath = ParserURI::pathSinNroSecuencia(filepath);
 
-	if (manejadorArchYMet->subirArchivo(user, filepath, datosArch.fileData, datosArch.dataLength, jsonMetadata, cuotaUsuario)) {
+	MetadatoArchivo metArch = extractMetadataFrom(nombreYExtension, user, uris);
+	string jsonMetadata = ParserJson::serializarMetadatoArchivo(metArch);
+	Logger::logInfo("Se serializaron los metadatos del archivo correctamente.");
+
+	if (manejadorArchYMet->subirArchivo(user, filepath, datosArch.fileData, datosArch.dataLength, jsonMetadata, cuotaUsuario, version)) {
 		//Como el usuario subio un archivo se actualiza su ultima ubicacion
 		string latitud = datosArch.latitud;
 		Logger::logInfo("Se obtuvo la variable latitud con valor: " + latitud);

@@ -13,6 +13,9 @@ def definirConstantesGlobales():
 	global RESERVED_STR
 	RESERVED_STR = "!"
 
+	global FIRST
+	FIRST = "1"
+
 	global FOLDER_TYPE
 	FOLDER_TYPE = RESERVED_STR + "folder"
 
@@ -90,7 +93,7 @@ class ServerTest(unittest.TestCase):
 		if exists("FileSystem"):
 			rmtree("FileSystem")
 		self.serverProcess = Popen(["./udrive", "&"])
-		sleep(0.02)
+		sleep(0.05)
 
 
 	def tearDown(self):
@@ -186,8 +189,8 @@ class ServerTest(unittest.TestCase):
 		token = registrarYLoguearUser(USER_SIMPLE)
 		FILENAME = "Makefile"
 
-		uri = FILE + USER_SIMPLE["user"] + "/" + FILENAME;
-		uriConVersion = uri + RESERVED_STR + "1"
+		uri = FILE + USER_SIMPLE["user"] + "/" + FILENAME
+		uriConVersion = uri + RESERVED_STR + FIRST
 		r = requests.put(uriConVersion, files={'file': open(FILENAME, 'rb'), "token": token, "user": USER_SIMPLE["user"], 
 							"latitud": "10.5", "longitud":"20.0"})	# lo sube pasandole la ubicacion para que la actualice
 		self.assertEquals(r.status_code, RESOURCE_CREATED)
@@ -289,7 +292,8 @@ class ServerTest(unittest.TestCase):
 		token = registrarYLoguearUser(USER_SIMPLE)
 		FILENAME = "../src/db/batch.cpp"
 		internalUri = USER_SIMPLE["user"] + FILENAME[2:] # saca los '..'
-		requests.put(FILE + internalUri, files={'file': open(FILENAME, 'rb'), "token": token, "user": USER_SIMPLE["user"]})	# sube archivo
+		uriConVersion = internalUri + RESERVED_STR + FIRST
+		requests.put(FILE + uriConVersion, files={'file': open(FILENAME, 'rb'), "token": token, "user": USER_SIMPLE["user"]})	# sube archivo
 
 		nuevosMetadatos = '{"propietario" : "' +  USER_SIMPLE["user"] + '" , "extension" : "nuevaExtension", "nombre" : "nuevoNombre", ' \
 			+ '"etiquetas" : ["nuevaEtiqueta"], "usuarios" : [], "usuario ultima modificacion" : "' + USER_SIMPLE["user"] + '" , ' \
@@ -305,7 +309,7 @@ class ServerTest(unittest.TestCase):
 		u = requests.get(METADATA + newInternalUri, data={"token": token, "user": USER_SIMPLE["user"]})
 		self.assertEquals(u.status_code, SUCCESS)
 
-		estructuraEsperada = {USER_SIMPLE["user"] + "/src/db/nuevoNombre.nuevaExtension" : "nuevoNombre.nuevaExtension"}
+		estructuraEsperada = {USER_SIMPLE["user"] + "/src/db/nuevoNombre.nuevaExtension" : "nuevoNombre.nuevaExtension" + RESERVED_STR + FIRST}
 		expected = {"estructura" : estructuraEsperada}
 		v = requests.get(FOLDER + USER_SIMPLE["user"] + "/src/db", data={"token" : token, "user": USER_SIMPLE["user"]})
 		estructuraRecibida = literal_eval(v.content)
@@ -367,7 +371,7 @@ class ServerTest(unittest.TestCase):
 		FILENAME = "Makefile"
 
 		uri = FILE + USER_SIMPLE["user"] + "/" + FILENAME
-		r = requests.put(uri, files={'file': open(FILENAME, 'rb'), "token": token, "user": USER_SIMPLE["user"]})	# lo sube
+		r = requests.put(uri + RESERVED_STR + FIRST, files={'file': open(FILENAME, 'rb'), "token": token, "user": USER_SIMPLE["user"]})	# lo sube
 		self.assertEquals(r.status_code, RESOURCE_CREATED)
 
 		s = requests.delete(uri, data={"user": USER_SIMPLE["user"], "token": token}) # lo borra
@@ -475,7 +479,7 @@ class ServerTest(unittest.TestCase):
 
 		TXT_FILENAME_SUBFOLDER = 'files/log.txt'
 
-		r = requests.put(FILE + USER_SIMPLE["user"] + "/" + TXT_FILENAME_SUBFOLDER, \
+		r = requests.put(FILE + USER_SIMPLE["user"] + "/" + TXT_FILENAME_SUBFOLDER + RESERVED_STR + FIRST, \
 			files={'file': open(TXT_FILENAME_SUBFOLDER, 'rb'), "token": token, "user": USER_SIMPLE["user"]})	# sube 'log.txt' en carpeta 'files'
 		self.assertEquals(r.status_code, RESOURCE_CREATED)
 

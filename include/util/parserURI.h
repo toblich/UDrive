@@ -123,6 +123,7 @@ public:
 	 * @retval int				numero de secuencia/version.
 	 */
 	static int obtenerNroSecuencia (const string& filepath) {
+		cout << filepath << endl;
 		string version = parsear(filepath, RESERVED_CHAR).back();
 		return stoi(version);
 	}

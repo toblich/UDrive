@@ -128,7 +128,7 @@ bool ManejadorArchivos::restaurarArchivo(const string& pathRealSinFS, const stri
 		string pathRealConFS = pathFileSystem + "/" + pathRealSinFS + versionSuffix;
 		string pathEnPapeleraConFS = pathFileSystem + "/" + pathEnPapeleraSinFS + versionSuffix;
 		if (rename(pathEnPapeleraConFS.c_str(), pathRealConFS.c_str()) != 0) {
-			Logger::logWarn("La restauracion del archivo " + pathEnPapeleraSinFS + " no fue correcta.");
+			Logger::logWarn("La restauracion del archivo " + pathEnPapeleraConFS + " no fue correcta.");
 			return false;
 		}
 	}
@@ -158,7 +158,7 @@ bool ManejadorArchivos::mandarArchivoATrash (const string& filepath, const strin
 		string pathCompletoPapeleraConFS = this->pathFileSystem + "/" + pathCompletoPapelera + versionSuffix;
 		string filepathCompleto = this->pathFileSystem + "/" + filepath + versionSuffix;
 		if (rename(filepathCompleto.c_str(), pathCompletoPapeleraConFS.c_str())) {
-			Logger::logWarn("La eliminacion del archivo " + filepath + " no fue correcta.");
+			Logger::logWarn("La eliminacion del archivo " + filepathCompleto + " no fue correcta.");
 			return false;
 		}
 	}
