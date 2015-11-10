@@ -224,7 +224,8 @@ class ServerTest(unittest.TestCase):
 		FILENAME = "../src/db/batch.cpp"
 
 		internalUri = USER_SIMPLE["user"] + FILENAME[2:] # saca los '..'
-		requests.put(FILE + internalUri, files={'file': open(FILENAME, 'rb'), "token": token, "user": USER_SIMPLE["user"]})	# sube archivo
+		uriConVersion = internalUri + RESERVED_STR + FIRST
+		requests.put(FILE + uriConVersion, files={'file': open(FILENAME, 'rb'), "token": token, "user": USER_SIMPLE["user"]})	# sube archivo
 
 		r = requests.get(METADATA + internalUri, data={"user": USER_SIMPLE["user"], "token": token})	# consulta metadatos
 		self.assertEquals(r.status_code, SUCCESS)
@@ -264,7 +265,8 @@ class ServerTest(unittest.TestCase):
 		BASE_FOLDER = FOLDER + USER_SIMPLE["user"] + "/src/"
 
 		internalUri = USER_SIMPLE["user"] + FILENAME[2:] # saca los '..'
-		requests.put(FILE + internalUri, files={'file': open(FILENAME, 'rb'), "token": token, "user": USER_SIMPLE["user"]})	# sube archivo
+		uriConVersion = internalUri + RESERVED_STR + FIRST
+		requests.put(FILE + uriConVersion, files={'file': open(FILENAME, 'rb'), "token": token, "user": USER_SIMPLE["user"]})	# sube archivo
 
 		r = requests.put(BASE_FOLDER + "subcarpeta", data={"token": token, "user": USER_SIMPLE["user"]})
 		self.assertEquals(r.status_code, RESOURCE_CREATED)
@@ -354,7 +356,7 @@ class ServerTest(unittest.TestCase):
 		FILENAME = "Makefile"
 
 		uri = FILE + USER_SIMPLE["user"] + "/" + FILENAME
-		r = requests.put(uri, files={'file': open(FILENAME, 'rb'), "token": token, "user": USER_SIMPLE["user"]})	# lo sube
+		r = requests.put(uri + RESERVED_STR + FIRST, files={'file': open(FILENAME, 'rb'), "token": token, "user": USER_SIMPLE["user"]})	# lo sube
 		self.assertEquals(r.status_code, RESOURCE_CREATED)
 
 		s = requests.delete(uri, data={"user": USER_SIMPLE["user"], "token": token}) # lo borra
@@ -443,26 +445,26 @@ class ServerTest(unittest.TestCase):
 		JPG_FILENAME_ROOT = 'default.jpg'
 		TXT_FILENAME_SUBFOLDER = 'files/log.txt'
 
-		requests.put(FILE + USER_SIMPLE["user"] + "/" + TXT_FILENAME_ROOT, \
+		requests.put(FILE + USER_SIMPLE["user"] + "/" + TXT_FILENAME_ROOT + RESERVED_STR + FIRST, \
 			files={'file': open(TXT_FILENAME_ROOT, 'rb'), "token": token, "user": USER_SIMPLE["user"]})
-		requests.put(FILE + USER_SIMPLE["user"] + "/" + JPG_FILENAME_ROOT, \
+		requests.put(FILE + USER_SIMPLE["user"] + "/" + JPG_FILENAME_ROOT + RESERVED_STR + FIRST, \
 			files={'file': open(JPG_FILENAME_ROOT, 'rb'), "token": token, "user": USER_SIMPLE["user"]})
-		requests.put(FILE + USER_SIMPLE["user"] + "/" + TXT_FILENAME_SUBFOLDER, \
+		requests.put(FILE + USER_SIMPLE["user"] + "/" + TXT_FILENAME_SUBFOLDER + RESERVED_STR + FIRST, \
 			files={'file': open(TXT_FILENAME_SUBFOLDER, 'rb'), "token": token, "user": USER_SIMPLE["user"]})
 
 		# Busco por extension txt
 		r = requests.get(METADATA, data={"user": USER_SIMPLE["user"], "token": token, "extension": "txt"})
 		self.assertEquals(r.status_code, SUCCESS)
 		resultado = r.json().get("busqueda")
-		esperado = { USER_SIMPLE["user"] +"/"+ TXT_FILENAME_ROOT : TXT_FILENAME_ROOT, \
-			USER_SIMPLE["user"] + "/" + TXT_FILENAME_SUBFOLDER : TXT_FILENAME_SUBFOLDER.split("/")[-1]}	# CMakeCache.txt y el log
+		esperado = { USER_SIMPLE["user"] +"/"+ TXT_FILENAME_ROOT : TXT_FILENAME_ROOT + RESERVED_STR + FIRST, \
+			USER_SIMPLE["user"] + "/" + TXT_FILENAME_SUBFOLDER : TXT_FILENAME_SUBFOLDER.split("/")[-1] + RESERVED_STR + FIRST}	# CMakeCache.txt y el log
 		self.assertDictEqual(resultado, esperado)
 
 		# Busco por nombre con g -> no busca sobre la extension, asi que no toma al jpg
 		s = requests.get(METADATA, data={"user": USER_SIMPLE["user"], "token": token, "nombre": "g"})
 		self.assertEquals(s.status_code, SUCCESS)
 		resultado = s.json().get("busqueda")
-		esperado = { USER_SIMPLE["user"] + "/" + TXT_FILENAME_SUBFOLDER : TXT_FILENAME_SUBFOLDER.split("/")[-1]} # el log
+		esperado = { USER_SIMPLE["user"] + "/" + TXT_FILENAME_SUBFOLDER : TXT_FILENAME_SUBFOLDER.split("/")[-1] + RESERVED_STR + FIRST} # el log
 		self.assertDictEqual(resultado, esperado)
 
 		# Busco por nombre con s -> no busca sobre el path (las carpetas), asi que no toma al log
