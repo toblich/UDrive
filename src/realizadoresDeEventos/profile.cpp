@@ -27,7 +27,7 @@ void Profile::enviarFotoPerfil (mg_connection* connection, string filePath, stri
 			this->responderInternalServerError(connection, mensaje);
 		}
 	} else {
-		string mensaje = "Path inválido, no se encontró el archivo: " + filePathCompleto;
+		string mensaje = "Path de descarga vacío";
 		this->responderResourceNotFound(connection, mensaje);
 	}
 }

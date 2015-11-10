@@ -31,11 +31,13 @@ mg_result File::GETHandler (mg_connection* connection) {
 	Logger::logInfo("Se obtuvo la variable token con valor: " + token);
 	string user = getVar(connection, "user");
 	Logger::logInfo("Se obtuvo la variable user con valor: " + user);
+	int version = ParserURI::obtenerNroSecuencia(uri);
 
 	if (manejadorUs->autenticarToken(token, user)) {
 		Logger::logInfo("Se autenticó la sesión correctamente.");
 		string filepath = ParserURI::join(uris, URI_DELIM, 1, uris.size());
-		string completePath = manejadorArchYMet->descargarArchivo(user, filepath);
+		filepath = ParserURI::pathSinNroSecuencia(filepath);
+		string completePath = manejadorArchYMet->descargarArchivo(user, filepath, version);
 		enviarArchivo(completePath, connection);
 	} else {
 		this->responderAutenticacionFallida(connection);
@@ -93,6 +95,8 @@ void File::subirArchivo (const vector<string>& uris, const DatosArchivo& datosAr
 	string jsonMetadata = ParserJson::serializarMetadatoArchivo(metArch);
 	Logger::logInfo("Se serializaron los metadatos del archivo correctamente.");
 	int cuotaUsuario = ParserJson::deserializarMetadatoUsuario(manejadorUs->getPerfil(user)).cuota;
+	int version = ParserURI::obtenerNroSecuencia(filepath);
+	filepath = ParserURI::pathSinNroSecuencia(filepath);
 
 	if (manejadorArchYMet->subirArchivo(user, filepath, datosArch.fileData, datosArch.dataLength, jsonMetadata, cuotaUsuario)) {
 		//Como el usuario subio un archivo se actualiza su ultima ubicacion

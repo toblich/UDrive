@@ -116,20 +116,21 @@ bool ManejadorArchivosYMetadatos::actualizarFotoPerfil(string filepathViejo, str
 }
 
 // En la base de datos se guarda el path sin la carpeta del FS
-bool ManejadorArchivosYMetadatos::subirArchivo (string username, string filepath, const char* data, int dataLen, string jsonMetadatos, int cuota) {
+bool ManejadorArchivosYMetadatos::subirArchivo (string username, string filepath, const char* data, int dataLen,
+		string jsonMetadatos, int cuota, int version) {
 	if (not validador.verificarPermisos(username, filepath))
 		return false;
 
 	string filepathCompleto = this->pathFileSystem + "/" + filepath + RESERVED_FIRST;
-	if (validador.existeArchivo(filepathCompleto)) {
-		// TODO: Versionado
-		return false;
+	if (validador.existeArchivo(filepathCompleto) and validador.existeMetadato(filepath)) {
+		return actualizarArchivo(username, filepath, data, dataLen, cuota, version - 1);
 	}
-	if (validador.existeMetadato(filepath)) {
-		Logger::logWarn("Se quiso subir el archivo " + filepath + " pero este ya existe. Debe utilizar el metodo actualizarArchivo.");
-		return false;
-	}
-	if (not this->actualizarArchivo(username, filepath, data, dataLen, cuota, FIRST-1))
+//	if (validador.existeMetadato(filepath)) {
+//		Logger::logWarn( "Se quiso subir el archivo " + filepath
+//						+ " pero este ya existe. Debe utilizar el metodo actualizarArchivo.");
+//		return false;
+//	}
+	if (not this->actualizarArchivo(username, filepath, data, dataLen, cuota, FIRST - 1))
 		return false;
 	return manejadorMetadatos.cargarMetadato(filepath, jsonMetadatos);
 }
@@ -283,6 +284,10 @@ string ManejadorArchivosYMetadatos::obtenerEstructuraCarpeta (string path) {
 string ManejadorArchivosYMetadatos::descargarArchivo (string username, string filepath, int version) {
 	//OJO porque si no se corre desde la carpeta build como ./udrive esto va a pinchar seguramente (Ya que la carpeta del FileSystem no va a existir)
 	string filepathCompleto = this->pathFileSystem + "/" + filepath;
+	if (filepathCompleto.find(FOTOS) != string::npos) {
+		return string(homeDirectory) + "/" + filepathCompleto;
+	}
+
 	if (not validador.verificarPermisos(username, filepath) or not validador.existeArchivo(filepathCompleto, FIRST) ) {
 		return "";
 	}

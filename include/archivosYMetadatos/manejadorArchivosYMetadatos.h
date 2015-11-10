@@ -41,7 +41,8 @@ public:
 	bool eliminar(string username, string path); //Sirve para carpetas y archivos
 	bool restaurar(string username, string path);
 
-	bool subirArchivo(string username, string filepath, const char* data, int dataLen, string jsonMetadatos, int cuota);
+	bool subirArchivo (string username, string filepath, const char* data, int dataLen, string jsonMetadatos, int cuota,
+			int version = FIRST);
 	string descargarArchivo(string username, string filepath, int version = LATEST);
 	bool actualizarArchivo (string username, string filepath, const char* data, int dataLen, int cuota,
 			int versionAnterior = FIRST-1);	// TODO SACAR EL DEFAULT

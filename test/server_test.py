@@ -186,12 +186,13 @@ class ServerTest(unittest.TestCase):
 		token = registrarYLoguearUser(USER_SIMPLE)
 		FILENAME = "Makefile"
 
-		uri = FILE + USER_SIMPLE["user"] + "/" + FILENAME
-		r = requests.put(uri, files={'file': open(FILENAME, 'rb'), "token": token, "user": USER_SIMPLE["user"], 
+		uri = FILE + USER_SIMPLE["user"] + "/" + FILENAME;
+		uriConVersion = uri + RESERVED_STR + "1"
+		r = requests.put(uriConVersion, files={'file': open(FILENAME, 'rb'), "token": token, "user": USER_SIMPLE["user"], 
 							"latitud": "10.5", "longitud":"20.0"})	# lo sube pasandole la ubicacion para que la actualice
 		self.assertEquals(r.status_code, RESOURCE_CREATED)
 
-		s = requests.get(uri, data={"user": USER_SIMPLE["user"], "token": token})	# lo baja
+		s = requests.get(uriConVersion, data={"user": USER_SIMPLE["user"], "token": token})	# lo baja
 		self.assertEquals(s.status_code, SUCCESS)
 
 		contenido = open(FILENAME, 'rb').read()	# compara el archivo bajado con el original
@@ -203,7 +204,7 @@ class ServerTest(unittest.TestCase):
 		u = requests.delete(uri, data={"user": USER_SIMPLE["user"], "token": token}) # trata de borrar otra vez
 		self.assertEquals(u.status_code, NOT_FOUND)
 
-		v = requests.get(uri, data={"user": USER_SIMPLE["user"], "token": token})	# trata de bajarlo
+		v = requests.get(uriConVersion, data={"user": USER_SIMPLE["user"], "token": token})	# trata de bajarlo
 		self.assertEquals(v.status_code, NOT_FOUND)
 
 		w = requests.get(PROFILE + USER_SIMPLE["user"], data={"token": token, "user": USER_SIMPLE["user"]})

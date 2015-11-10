@@ -114,6 +114,18 @@ public:
 		string filepathSinSecuencia = ParserURI::join(partes, RESERVED_CHAR, 0, partes.size() - 1);
 		return filepathSinSecuencia;
 	}
+
+	/**
+	 * @brief Devuelve el numero de secuencia (o version) final en un filepath o URI.
+	 *
+	 * @param filepath			string del que se obtendrá el nro de secuencia/version.
+	 *
+	 * @retval int				numero de secuencia/version.
+	 */
+	static int obtenerNroSecuencia (const string& filepath) {
+		string version = parsear(filepath, RESERVED_CHAR).back();
+		return stoi(version);
+	}
 };
 
 #endif /* PARSERURI_H_ */
