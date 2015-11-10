@@ -44,6 +44,7 @@ if(coverage)
 		COMMAND unitTest
 		COMMAND udrive --no-action
 		COMMAND python ../test/server_test.py -v
+		COMMAND python ../test/version_test.py -v
 
 		# Capturing lcov counters and generating report
 		COMMAND ${LCOV_PATH} --directory . --capture --output-file ${_outputname}.info

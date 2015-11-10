@@ -49,7 +49,7 @@ before_script:
   - mkdir files
 
 script:
-  - cmake -Dtest=ON -Drocksdb=OFF ../ && make unitTest && ./unitTest && make udrive && python ../test/server_test.py
+  - cmake -Dtest=ON -Drocksdb=OFF ../ && make unitTest && ./unitTest && make udrive && python ../test/server_test.py -v && ../test/version_test.py -v
 
 after_failure:
   - echo LOG; cat files/log.txt
