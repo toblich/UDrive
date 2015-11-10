@@ -1396,7 +1396,6 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaRenombrarTodasLasVersiones) {
 	EXPECT_TRUE( manejador->validador.existeArchivo(pathFS + "/pablo/archivos/hola.txt", FIRST + 1) );
 }
 
-//TODO Borrado definitivo
 TEST_F(ManejadorArchivosYMetadatosTest, deberiaEliminarDefinitivamenteTodasLasVersiones) {
 	crearUsuarioPabloYSubirArchivoYActualizar(manejador);
 	string pathEnPapelera = "pablo/" + TRASH + "/archivos" + RESERVED_STR + "saludo.txt" + RESERVED_STR + "0";
@@ -1460,3 +1459,66 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaRestaurarBienConNumerosDeSecuenci
 	EXPECT_TRUE(manejador->validador.existeArchivo(pathFS + "/" + filepathDefault, FIRST));
 	EXPECT_TRUE(manejador->validador.existeArchivo(pathFS + "/" + filepathDefault, FIRST + 1));
 }
+
+TEST_F(ManejadorArchivosYMetadatosTest, deberiaObtenerBienEstructuraConVariosArchivosYVersiones){
+	manejador->crearUsuario("pablo");
+	manejador->subirArchivo("pablo", filepathDefault, "hola pablo", 10, jsonArchOK, 2048);
+	manejador->actualizarArchivo("pablo", filepathDefault, "hola pancho", 11, 2048, FIRST);
+	manejador->actualizarArchivo("pablo", filepathDefault, "hola pepe", 9, 2048, FIRST + 1);
+
+	string filepath2 = "pablo/archivos/saludo2.txt";
+	MetadatoArchivo metadatoArch2 = ParserJson::deserializarMetadatoArchivo(jsonArchOK);
+	metadatoArch2.nombre = "saludo2";
+	string jsonArch2 = ParserJson::serializarMetadatoArchivo(metadatoArch2);
+	manejador->subirArchivo("pablo", filepath2, "hola pablo", 10, jsonArch2, 2048);
+	manejador->actualizarArchivo("pablo", filepath2, "hola pancho", 11, 2048, FIRST);
+
+	string filepath3 = "pablo/archivos/saludo3.txt";
+	MetadatoArchivo metadatoArch3 = ParserJson::deserializarMetadatoArchivo(jsonArchOK);
+	metadatoArch3.nombre = "saludo3";
+	string jsonArch3 = ParserJson::serializarMetadatoArchivo(metadatoArch3);
+	manejador->subirArchivo("pablo", filepath3, "hola pablo", 10, jsonArch3, 2048);
+	manejador->actualizarArchivo("pablo", filepath3, "hola pancho", 11, 2048, FIRST);
+	manejador->actualizarArchivo("pablo", filepath3, "hola pepe", 9, 2048, FIRST + 1);
+	manejador->actualizarArchivo("pablo", filepath3, "hola tobi", 9, 2048, FIRST + 2);
+
+	string estructura = manejador->obtenerEstructuraCarpeta("pablo/archivos");
+	map<string, string> mapa = ParserJson::deserializarMapa(estructura);
+	EXPECT_EQ(mapa.at(filepathDefault), "saludo.txt" + RESERVED_STR + to_string(FIRST + 2));
+	EXPECT_EQ(mapa.at(filepath2), "saludo2.txt" + RESERVED_STR + to_string(FIRST + 1));
+	EXPECT_EQ(mapa.at(filepath3), "saludo3.txt" + RESERVED_STR + to_string(FIRST + 3));
+}
+
+TEST_F(ManejadorArchivosYMetadatosTest, deberiaPoderDescargarVersionesAnteriores){
+	crearUsuarioPabloYSubirArchivoYActualizar(manejador);
+	manejador->actualizarArchivo("pablo", filepathDefault, "hola pepe", 9, 2048, FIRST + 1);
+	string descarga = manejador->descargarArchivo("pablo", filepathDefault, FIRST);
+
+	char homeDirectory[1024];
+	getcwd(homeDirectory, sizeof(homeDirectory));
+	string pathAComparar(homeDirectory);
+	pathAComparar += "/" + pathFS + "/" + filepathDefault + RESERVED_FIRST;
+
+	EXPECT_EQ(pathAComparar, descarga);
+}
+
+TEST_F(ManejadorArchivosYMetadatosTest, deberiaPoderDescargarUltimaVersion){
+	crearUsuarioPabloYSubirArchivoYActualizar(manejador);
+	manejador->actualizarArchivo("pablo", filepathDefault, "hola pepe", 9, 2048, FIRST + 1);
+	string descarga = manejador->descargarArchivo("pablo", filepathDefault, LATEST);
+
+	char homeDirectory[1024];
+	getcwd(homeDirectory, sizeof(homeDirectory));
+	string pathAComparar(homeDirectory);
+	pathAComparar += "/" + pathFS + "/" + filepathDefault + RESERVED_STR + to_string(FIRST + 2);
+
+	EXPECT_EQ(pathAComparar, descarga);
+}
+
+//TODO Actualizar una version vieja
+//TEST_F(ManejadorArchivosYMetadatosTest, noDeberiaPoderActualizarUnaVersionVieja){
+//	crearUsuarioPabloYSubirArchivoYActualizar(manejador);
+//	manejador->actualizarArchivo("pablo", filepathDefault, "hola pepe", 9, 2048, FIRST + 1);
+//
+//	EXPECT_FALSE( manejador->actualizarArchivo("pablo", filepathDefault, "hola tobi", 9, 2048, FIRST) );
+//}
