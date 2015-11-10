@@ -67,6 +67,14 @@ public:
 	 */
 	bool carpetaVacia(string path);
 
+	/**
+	 * @brief Verifica si existe la key path en la base de datos.
+	 *
+	 * @param path				string con la ruta al archivo a verificar existencia.
+	 *
+	 * @retval true				si existe el metadato.
+	 * @retval false			si no existe la key en la base de datos.
+	 */
 	bool existeMetadato(const string& path) {return dbMetadatos->contains(path); }
 
 	/**

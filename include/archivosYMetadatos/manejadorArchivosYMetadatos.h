@@ -51,26 +51,42 @@ public:
 	 * @brief Se encarga crear un nuevo usuario, creandole una carpeta propia dentro del FileSystem.
 	 */
 	bool crearUsuario(string username);
+
 	/**
 	 * @brief Se encarga de crear una carpeta dentro del FileSystem de forma segura verificando los permisos.
 	 */
 	bool crearCarpetaSegura(string username, string path);
+
 	/**
 	 * @brief Se encarga de obtener la estructura interna de una determinada carpeta.
 	 */
 	string obtenerEstructuraCarpeta(string path);
+
 	/**
 	 * @brief Se encarga de eliminar tanto archivos como carpetas dentro del FileSystem.
 	 */
 	bool eliminar(string username, string path);
+
 	/**
 	 * @brief Se encarga de restaurar tanto archivos como carpetas que se encuentres en el trash.
 	 */
 	bool restaurar(string username, string path);
 
+	/**
+	 * @brief Se encarga de la subida de archivos físicos al FileSystem.
+	 */
 	bool subirArchivo (string username, string filepath, const char* data, int dataLen, string jsonMetadatos, int cuota,
 			int version = FIRST);
+
+	/**
+	 * @brief Se encarga de la descarga física de archivos que estén en el FileSystem.
+	 */
 	string descargarArchivo(string username, string filepath, int version = LATEST);
+
+	/**
+	 * @brief Se encarga de la actualización física de archivos que estén en el FileSystem.
+	 * Esto implica que se agregue una nueva versión al archivo.
+	 */
 	bool actualizarArchivo (string username, string filepath, const char* data, int dataLen, int cuota,
 			int versionAnterior = FIRST-1);	// TODO SACAR EL DEFAULT
 
@@ -78,26 +94,32 @@ public:
 	 * @brief Se encarga de actualizar la foto de perfil de los usuarios.
 	 */
 	bool actualizarFotoPerfil(string filepathViejo, string filepathNuevo, const char* data, int dataLen);
+
 	/**
 	 * @brief Se encarga de obtener los metadatos de un determinado archivo.
 	 */
 	string consultarMetadatosArchivo(string username, string filename);
+
 	/**
 	 * @brief Se encarga de actualizar los metadatos de un determinado archivo.
 	 */
 	bool actualizarMetadatos(string username, string filepath, string jsonNuevosMetadatos);
+
 	/**
 	 * @brief Se encarga de buscar por extensión dentro del FileSystem del usuario y los archivos que se le compartieron.
 	 */
 	string buscarPorExtension(string username, string extension);
+
 	/**
 	 * @brief Se encarga de buscar por etiqueta dentro del FileSystem del usuario y los archivos que se le compartieron.
 	 */
 	string buscarPorEtiqueta(string username, string etiqueta);
+
 	/**
 	 * @brief Se encarga de buscar por nombre de archivo dentro del FileSystem del usuario y los archivos que se le compartieron.
 	 */
 	string buscarPorNombre(string username, string nombre);
+
 	/**
 	 * @brief Se encarga de buscar por propietario dentro del FileSystem del usuario y los archivos que se le compartieron.
 	 */

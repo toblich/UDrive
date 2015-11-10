@@ -68,9 +68,16 @@ public:
 	 */
 	string buscarUsuariosCon(const string& substring);
 
+	/**
+	 * @brief Obtiene el perfil del username.
+	 */
 	string getPerfil(string username);
+
+	/**
+	 * @brief Modifica el perfil del username por el nuevo perfil y devuelve si pudo
+	 * lograr la operación.
+	 */
 	bool modifyPerfil(string username, string perfil);
-	bool esPerfilValido(const string& perfil);
 
 private:
 	BD* perfiles;	///< Base de datos de perfiles de usuario (y la lista de usuarios bajo la clave del atributo USERLIST)
@@ -81,6 +88,7 @@ private:
 	bool esUsernameValido(const string& username);
 	bool esPasswordValida(const string& password);
 	string usuariosConSubstring(const string& substring);
+	bool esPerfilValido(const string& perfil);
 
 	const string CHARS_INVALIDOS = "/ ~#?=&" + RESERVED_STR;	///< string que contiene todos los caracteres prohibidos en los usernames
 	const string USERLIST = RESERVED_STR + "users";	///< clave reservada para la lista de usuarios en la base de datos de perfiles
