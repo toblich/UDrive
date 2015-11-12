@@ -41,4 +41,21 @@ class InvalidDBAction : public exception {
     const char *what() const throw() { return ("InvalidDBAction: " + err_msg).c_str(); };
 };
 
+/**
+ * @brief Se encarga del manejo de la excepción InvalidVersion.
+ *
+ * Esta excepción es lanzada cuando se quiere subir (sin forzar) un archivo a partir de una versión que no es la última.
+ */
+class InvalidVersion : public exception {
+  private:
+	string err_msg;
+  public:
+	InvalidVersion() : err_msg("") {};
+	InvalidVersion(const char *msg) : err_msg(msg) {};
+	InvalidVersion(string msg) { err_msg = msg; };
+	InvalidVersion(const InvalidVersion& original) : err_msg(original.what()) {};
+	~InvalidVersion() throw() {};
+	const char *what() const throw() { return ("InvalidVersion: " + err_msg).c_str(); };
+};
+
 #endif /* EXCEPCIONES_H_ */

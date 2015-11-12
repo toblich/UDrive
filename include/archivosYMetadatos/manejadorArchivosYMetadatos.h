@@ -76,9 +76,11 @@ public:
 
 	/**
 	 * @brief Se encarga de la subida de archivos físicos al FileSystem.
+	 *
+	 * @throw InvalidVersion
 	 */
 	bool subirArchivo (string username, string filepath, const char* data, int dataLen, string jsonMetadatos, int cuota,
-			int version = FIRST);
+			int nuevaVersion = FIRST, bool force = false);
 
 	/**
 	 * @brief Se encarga de la descarga física de archivos que estén en el FileSystem.

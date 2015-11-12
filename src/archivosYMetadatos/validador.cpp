@@ -112,3 +112,9 @@ bool Validador::puedoRestaurarA (string pathEnPapeleraSinFS, string pathRealSinF
 
 	return true;
 }
+
+bool Validador::esVersionValida (const string& filepath, int nuevaVersion) {
+	string jsonMetadato = dbMetadatos->get(filepath);
+	int ultimaVersion = ParserJson::deserializarMetadatoArchivo(jsonMetadato).ultimaVersion;
+	return (nuevaVersion == ultimaVersion + 1) and not existeArchivo(filepath, nuevaVersion);
+}

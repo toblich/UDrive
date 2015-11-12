@@ -46,6 +46,7 @@ RealizadorDeEventos::DatosArchivo RealizadorDeEventos::getMultipartData(mg_conne
 		if (string(varName) == "email")    datosArch.email    = string(data, dataLength);
 		if (string(varName) == "latitud")  datosArch.latitud  = string(data, dataLength);
 		if (string(varName) == "longitud") datosArch.longitud = string(data, dataLength);
+		if (string(varName) == "force")    datosArch.force    = string(data, dataLength);
 	}
 
 	return datosArch;
@@ -147,4 +148,11 @@ void RealizadorDeEventos::responderResourceCreated(mg_connection* connection, st
 	mg_send_status(connection, CODESTATUS_RESOURCE_CREATED);
 	mg_send_header(connection, contentType.c_str(), jsonType.c_str());
 	printfData(connection, "{\"success\": \"%s\"}", msg.c_str());
+}
+
+void RealizadorDeEventos::responderConflict (mg_connection* connection, string msg) {
+	Logger::logInfo(msg);
+	mg_send_status(connection, CODESTATUS_CONFLICT);
+	mg_send_header(connection, contentType.c_str(), jsonType.c_str());
+	printfData(connection, "{\"error\": \"%s\"}", msg.c_str());
 }

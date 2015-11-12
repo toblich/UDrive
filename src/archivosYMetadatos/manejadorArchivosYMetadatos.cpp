@@ -117,16 +117,20 @@ bool ManejadorArchivosYMetadatos::actualizarFotoPerfil(string filepathViejo, str
 
 // En la base de datos se guarda el path sin la carpeta del FS
 bool ManejadorArchivosYMetadatos::subirArchivo (string username, string filepath, const char* data, int dataLen,
-		string jsonMetadatos, int cuota, int version) {
+		string jsonMetadatos, int cuota, int nuevaVersion, bool force) {
 	if (not validador.verificarPermisos(username, filepath))
 		return false;
 
 	string filepathCompleto = this->pathFileSystem + "/" + filepath;
 	if (validador.existeArchivo(filepathCompleto) and validador.existeMetadato(filepath)) {
+		if (not force and not validador.esVersionValida(filepath, nuevaVersion)) {
+			throw InvalidVersion("Se quiso subir " + filepath + " con version " + to_string(nuevaVersion));
+		}
+		if ( force )
+			nuevaVersion = getLatestVersion(filepath) + 1;
 		Logger::logDebug("Actualizando archivo con path: " + filepath);
-		return actualizarArchivo(username, filepath, data, dataLen, cuota, version - 1);
+		return actualizarArchivo(username, filepath, data, dataLen, cuota, nuevaVersion - 1);
 	}
-
 	if (not this->actualizarArchivo(username, filepath, data, dataLen, cuota, FIRST - 1)) {
 		Logger::logWarn("Fallo la subida del archivo " + filepath);
 		return false;

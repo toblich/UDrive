@@ -40,6 +40,7 @@ public:
 		CODESTATUS_UNAUTHORIZED_CLIENT = 401, 	///< Cliente no autorizado
 		CODESTATUS_RESOURCE_NOT_FOUND = 404, 	///< Recurso no encontrado
 		CODESTATUS_UNSUPPORTED_METHOD = 405, 	///< Metodo no implementado para esa clase
+		CODESTATUS_CONFLICT = 409,				///< Conflicto de versiones de archivo subido
 
 		// 5xx Error de Servidor
 		CODESTATUS_INTERNAL_SERVER_ERROR = 500  ///< Error interno del servidor al querer subir o bajar un archivo
@@ -58,6 +59,7 @@ public:
 		string email;  		  ///< Email del usuario que quiere actualizar su perfil
 		string latitud;		  ///< Latitud de la ubicación del usuario que quiere actualizar su ubicación
 		string longitud;	  ///< Longitud de la ubicación del usuario que quiere actualizar su ubicación
+		string force;		  ///< Para para saber si se fuerza o no la subida de un archivo
 	}DatosArchivo;
 
 	RealizadorDeEventos();
@@ -207,6 +209,15 @@ protected:
 	 *
 	 */
 	void responderResourceCreated(mg_connection* connection, string msg);
+
+	/**
+	 * @brief Función que se utiliza para enviarle un mensaje al Cliente
+	 * debido a un CONFLICT
+	 *
+	 * @param connection		mg_connection* con la conexion Cliente-Servidor.
+	 *
+	 */
+	void responderConflict(mg_connection* connection, string msg);
 
 };
 

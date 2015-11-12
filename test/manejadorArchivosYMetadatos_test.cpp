@@ -1508,9 +1508,8 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaPoderDescargarUltimaVersion){
 }
 
 //TODO Actualizar una version vieja
-//TEST_F(ManejadorArchivosYMetadatosTest, noDeberiaPoderActualizarUnaVersionVieja){
-//	crearUsuarioPabloYSubirArchivoYActualizar(manejador);
-//	manejador->actualizarArchivo("pablo", filepathDefault, "hola pepe", 9, 2048, FIRST + 1);
-//
-//	EXPECT_FALSE( manejador->actualizarArchivo("pablo", filepathDefault, "hola tobi", 9, 2048, FIRST) );
-//}
+TEST_F(ManejadorArchivosYMetadatosTest, noDeberiaPoderActualizarUnaVersionVieja){
+	crearUsuarioPabloYSubirArchivoYActualizar(manejador);
+	EXPECT_THROW(manejador->subirArchivo("pablo", filepathDefault, "hola tobi", 9, jsonArchOK, 2048, FIRST+1), InvalidVersion);
+	EXPECT_TRUE( manejador->subirArchivo("pablo", filepathDefault, "hola tobi", 9, jsonArchOK, 2048, FIRST+1, true) );
+}

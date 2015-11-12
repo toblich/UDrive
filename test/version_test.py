@@ -83,6 +83,9 @@ def definirConstantesGlobales():
 	global UNSUPPORTED_METHOD
 	UNSUPPORTED_METHOD = 405
 
+	global CONFLICT 
+	CONFLICT = 409
+
 
 def registrarYLoguear(username, password, profile):
 	requests.post(PROFILE, data={"user": username, "pass": password, "profile": profile})
@@ -176,6 +179,20 @@ class ServerTest(unittest.TestCase):
 		estructuraEsperada = {USER["user"] + "/NUEVO.NUEVA" : "NUEVO.NUEVA" + RESERVED_STR + "4", USER["user"] + "/!trash" : "!trash."+ FOLDER_TYPE}
 		expected = {"estructura" :  estructuraEsperada}
 		self.assertDictEqual(expected, estructuraReal)
+
+
+	def test_deberiaResponderConflictAnteConflictoDeVersiones(self):
+		logTest("deberiaResponderConflictAnteConflictoDeVersiones")
+		token = iniciar()	# sube la primera y la segunda version 
+
+		# actualiza la primera, existiendo la segunda
+		r = requests.put(FILE + PATH + RESERVED_SECOND, files={'file': open(FILENAME, 'rb'), "token" : token, "user" : USER["user"]}) 
+		self.assertEquals(r.status_code, CONFLICT)
+
+		# actualizo la tercera, pero no existe una tercera
+		s = requests.put(FILE + PATH + RESERVED_STR + "4", files={'file': open(FILENAME, 'rb'), "token" : token, "user" : USER["user"]}) 
+		self.assertEquals(s.status_code, CONFLICT)
+
 
 
 

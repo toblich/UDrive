@@ -99,21 +99,29 @@ void File::subirArchivo (const vector<string>& uris, const DatosArchivo& datosAr
 	MetadatoArchivo metArch = extractMetadataFrom(nombreYExtension, user, uris);
 	string jsonMetadata = ParserJson::serializarMetadatoArchivo(metArch);
 	Logger::logInfo("Se serializaron los metadatos del archivo correctamente.");
+	bool force = datosArch.force == "true";
+	Logger::logInfo("Se obtuvo la variable force con valor: " + force);
 
-	if (manejadorArchYMet->subirArchivo(user, filepath, datosArch.fileData, datosArch.dataLength, jsonMetadata, cuotaUsuario, version)) {
-		//Como el usuario subio un archivo se actualiza su ultima ubicacion
-		string latitud = datosArch.latitud;
-		Logger::logInfo("Se obtuvo la variable latitud con valor: " + latitud);
-		string longitud = datosArch.longitud;
-		Logger::logInfo("Se obtuvo la variable longitiud con valor: " + longitud);
-		//Si se reciben ambos, se actualiza
-		if (latitud != "" and longitud != "") actualizarUltimaUbicacion(user, latitud, longitud);
+	try {
+		if (manejadorArchYMet->subirArchivo(user, filepath, datosArch.fileData, datosArch.dataLength,
+				jsonMetadata, cuotaUsuario, version, force)) {
+			//Como el usuario subio un archivo se actualiza su ultima ubicacion
+			string latitud = datosArch.latitud;
+			Logger::logInfo("Se obtuvo la variable latitud con valor: " + latitud);
+			string longitud = datosArch.longitud;
+			Logger::logInfo("Se obtuvo la variable longitiud con valor: " + longitud);
+			//Si se reciben ambos, se actualiza
+			if (latitud != "" and longitud != "") actualizarUltimaUbicacion(user, latitud, longitud);
 
-		string mensaje = "Se subió el archivo: " + filepath + " correctamente.";
-		this->responderResourceCreated(connection, mensaje);
-	} else {
+			string mensaje = "Se subió el archivo: " + filepath + " correctamente.";
+			this->responderResourceCreated(connection, mensaje);
+		} else {
+			string mensaje = "ERROR, no se pudo subir el archivo: " + filepath;
+			this->responderInternalServerError(connection, mensaje);
+		}
+	} catch (InvalidVersion& e) {
 		string mensaje = "ERROR, no se pudo subir el archivo: " + filepath;
-		this->responderInternalServerError(connection, mensaje);
+		this->responderConflict(connection, mensaje);
 	}
 }
 

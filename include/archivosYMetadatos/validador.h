@@ -142,6 +142,11 @@ public:
 	 * con ese nombre.
 	 */
 	string obtenerNumeroSecuencia(string pathFileSystem, string propietario, string pathSinUsernameConReserved);
+
+	/**
+	 * @brief Valida que la version indicada sea la próxima versión.
+	 */
+	bool esVersionValida(const string& filepath, int nuevaVersion);
 };
 
 #endif /* INCLUDE_VALIDADOR_H_ */
