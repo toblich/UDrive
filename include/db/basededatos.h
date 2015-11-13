@@ -16,7 +16,8 @@ using rocksdb::WriteOptions;
 using rocksdb::ReadOptions;
 using rocksdb::WriteBatch;
 
-const std::string defaultPath = "DB";
+using std::string;
+const string defaultPath = "DB";
 
 /**
  * @brief Se encarga del manejo de la base de datos del servidor.
@@ -24,44 +25,59 @@ const std::string defaultPath = "DB";
 class BaseDeDatos : public BD {
 private:
 	DB* db;
-	std::string path;
+	string path;
 	Options options;
 
 	bool addActionToBatch(const DBAction& action,rocksdb::WriteBatch& writeBatch);
 
 public:
-	BaseDeDatos();									/* Throws: runtime_error */
+	/**
+	 * @brief Constructor: Crea una nueva base de datos.
+	 *
+	 * Los datos de la base de datos se guardaran en el path por default.
+	 *
+	 * @throw runtime_error
+	 */
+	BaseDeDatos();
 	/**
 	 * @brief Constructor: Crea una nueva base de datos
 	 *
 	 * @param path 		string con el path donde se guardaran los datos de la base de datos.
+	 * @throw runtime_error
 	 */
-	BaseDeDatos(std::string path);					/* Throws: runtime_error */
+	BaseDeDatos(string path);
 	~BaseDeDatos();
 	/**
 	 * @brief Función para ver si una key se encuentra en la base de datos.
 	 */
-	bool contains(std::string key);
+	bool contains(string key);
 	/**
 	 * @brief Función para agregar una key con un value a la base de datos.
+	 * @throw runtime_error
 	 */
-	bool put(std::string key, std::string value);	/* Throws: runtime_error */
+	bool put(string key, string value);
 	/**
 	 * @brief Función para obtener el value de una key de la base de datos.
+	 * @throw runtime_error
+	 * @throw KeyNotFound
 	 */
-	std::string get(std::string key);				/* Throws: runtime_error, KeyNotFound */
+	string get(string key);
 	/**
 	 * @brief Función para eliminar una key de la base de datos.
+	 * @throw runtime_error
+	 * @throw KeyNotFound
 	 */
-	void erase(std::string key);					/* Throws: runtime_error, KeyNotFound */
+	void erase(string key);
 	/**
 	 * @brief Función para modificar el value de una key en la base de datos.
+	 * @throw runtime_error
+	 * @throw KeyNotFound
 	 */
-	void modify(std::string key, std::string value); /* Throws: runtime_error, KeyNotFound */
+	void modify(string key, string value);
 	/**
 	 * @brief Función para escribir un batch en la base de datos.
 	 */
-	bool writeBatch(const Batch& batch);			/* No lanza excepciones */
+	bool writeBatch(const Batch& batch);
 	/**
 	 * @brief Elimina tanto la base de datos como los datos guardados en ella.
 	 */

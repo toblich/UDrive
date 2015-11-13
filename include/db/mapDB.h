@@ -23,12 +23,36 @@ private:
 public:
 	MapDB();
 	virtual ~MapDB();
+	/**
+	 * @brief Función para ver si una key se encuentra en el mapa.
+	 */
 	bool contains(string key);
+	/**
+	 * @brief Función para agregar una key con un value al mapa.
+	 */
 	bool put(string key, string value);
-	string get(string key);					/* Throws: KeyNotFound */
-	void erase(string key);					/* Throws: KeyNotFound */
-	void modify(string key, string value);	/* Throws: KeyNotFound */
+	/**
+	 * @brief Función para obtener el value de una key del mapa.
+	 * @throw KeyNotFound
+	 */
+	string get(string key);
+	/**
+	 * @brief Función para eliminar una key del mapa.
+	 * @throw KeyNotFound
+	 */
+	void erase(string key);
+	/**
+	 * @brief Función para modificar el value de una key en el mapa.
+	 * @throw KeyNotFound
+	 */
+	void modify(string key, string value);
+	/**
+	 * @brief Función para escribir un batch en el mapa.
+	 */
 	bool writeBatch(const Batch& batch);
+	/**
+	 * @brief Elimina todos los datos guardados en el mapa.
+	 */
 	void deleteBD();
 };
 
