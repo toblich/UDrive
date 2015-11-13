@@ -185,7 +185,11 @@ string ManejadorArchivosYMetadatos::consultarMetadatosArchivo (string username, 
 	if (filepath.find(TRASH) != string::npos)	// Los metadatos de la papelera son inaccesibles
 		return "";
 
-	return manejadorMetadatos.getJsonMetadatos(filepath);
+	if (not validador.existeMetadato(filepath)) {
+		Logger::logWarn("Se quiso consultar los metadatos del archivo " + filepath + " pero este no existe.");
+		return "";
+	}
+	return manejadorMetadatos.obtenerMetadato(filepath);
 }
 
 bool ManejadorArchivosYMetadatos::actualizarMetadatosChequeados (const string& filepath,

@@ -34,11 +34,6 @@ public:
 			const MetadatoArchivo& metadatosNuevos, const string& nuevoJson);
 
 	/**
-	 * @brief Se encarga de obtener los metadatos de un archivo con un determinado filepath.
-	 */
-	string getJsonMetadatos(const string& filepath);
-
-	/**
 	 * @brief Se encarga de borrar definitivamente los metadatos de un archivo en la base de datos.
 	 */
 	void eliminarDefinitivamente(const string& filepath);
