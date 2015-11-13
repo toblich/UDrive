@@ -97,7 +97,7 @@ protected:
 private:
 
 	void enviarArchivo(const string& completePath, mg_connection* connection);
-	MetadatoArchivo extractMetadataFrom(const vector<string>& nombreYExtension, const string& user, const vector<string>& uris);
+	MetadatoArchivo extractMetadataFrom(const string& filename, const string& user, const string& propietario);
 	void subirArchivo (const vector<string>& uris, const DatosArchivo& datosArch, const string& user, mg_connection* connection);
 	void actualizarUltimaUbicacion(string user, string latitud, string longitud);
 };

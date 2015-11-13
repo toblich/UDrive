@@ -45,15 +45,16 @@ mg_result File::GETHandler (mg_connection* connection) {
 	return MG_TRUE;
 }
 
-MetadatoArchivo File::extractMetadataFrom (const vector<string>& nombreYExtension, const string& user, const vector<string>& uris) {
+MetadatoArchivo File::extractMetadataFrom (const string& filename, const string& user, const string& propietario) {
 	MetadatoArchivo metArch;
-
+	vector<string> nombreYExtension = ParserURI::parsear(filename, NAME_DELIM);
+	Logger::logInfo("Se parseó el nombre del archivo correctamente.");
 	if (nombreYExtension.size() >= 2) {
 		metArch.nombre = ParserURI::join(nombreYExtension, NAME_DELIM, 0, nombreYExtension.size() - 1);
 		metArch.extension = nombreYExtension[nombreYExtension.size() - 1];
 	} else {
-		metArch.nombre = nombreYExtension[0];
 		metArch.extension = "none";
+		metArch.nombre = filename;
 	}
 
 	time_t fecha_sistema;
@@ -65,7 +66,7 @@ MetadatoArchivo File::extractMetadataFrom (const vector<string>& nombreYExtensio
 
 	metArch.fechaUltimaModificacion = to_string(dia) + "/" + to_string(mes) + "/" + to_string(anio);
 	metArch.usuarioUltimaModificacion = user;
-	metArch.propietario = uris[1];
+	metArch.propietario = propietario;
 	metArch.etiquetas = list<string>();
 	metArch.usuariosHabilitados.push_back(metArch.propietario);
 	metArch.ultimaVersion = FIRST;
@@ -90,13 +91,12 @@ void File::actualizarUltimaUbicacion(string user, string latitud, string longitu
 
 void File::subirArchivo (const vector<string>& uris, const DatosArchivo& datosArch, const string& user, mg_connection* connection) {
 	string filepath = ParserURI::join(uris, URI_DELIM, 1, uris.size());
-	vector<string> nombreYExtension = ParserURI::parsear(datosArch.fileName, NAME_DELIM);
-	Logger::logInfo("Se parseó el nombre del archivo correctamente.");
+	string propietario = uris[1];
 	int cuotaUsuario = ParserJson::deserializarMetadatoUsuario(manejadorUs->getPerfil(user)).cuota;
 	int version = ParserURI::obtenerNroVersion(filepath);
 	filepath = ParserURI::pathSinNroSecuencia(filepath);
 
-	MetadatoArchivo metArch = extractMetadataFrom(nombreYExtension, user, uris);
+	MetadatoArchivo metArch = extractMetadataFrom(datosArch.fileName, user, propietario);
 	string jsonMetadata = ParserJson::serializarMetadatoArchivo(metArch);
 	Logger::logInfo("Se serializaron los metadatos del archivo correctamente.");
 	bool force = datosArch.force == "true";
@@ -137,7 +137,7 @@ mg_result File::PUTHandler (mg_connection* connection) {
 	string user = datosArch.user;
 	Logger::logInfo("Se obtuvo la variable user con valor: " + user);
 
-	if (datosArch.dataLength == 0){
+	if (datosArch.dataLength == 0 and datosArch.fileName == ""){
 		string mensaje = "Error, no se paso ningun archivo para subir por parametro.";
 		this->responderBadRequest(connection, mensaje);
 		return MG_TRUE;
