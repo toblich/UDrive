@@ -18,9 +18,8 @@ string ParserJson::verificarString(string key, Value raiz) {
 	if (not parametro.isNull() and (parametro.isString() and parametro.asString() != "NO")){
 		value = parametro.asString();
 	} else {
-		Logger logger;
-		string error = "Parametro de tipo string  \"" + key + "\" invalido o inexistente en un Json. Se asigna el valor \"\" (vacio) para esta key.";
-		logger.loggear(error, WARN);
+		string warning = "Parametro de tipo string  \"" + key + "\" invalido o inexistente en un Json. Se asigna el valor \"\" (vacio) para esta key.";
+		Logger::logWarn(warning);
 		value = "";
 	}
 	return value;
@@ -32,9 +31,8 @@ double ParserJson::verificarDouble(string key, Value raiz){
 	if (not parametro.isNull() and parametro.isDouble()){
 		value = parametro.asDouble();
 	} else {
-		Logger logger;
-		string error = "Parametro de tipo double \"" + key + "\" invalido o inexistente en un Json. Se asigna el valor \"0\" (cero) para esta key.";
-		logger.loggear(error, WARN);
+		string warning = "Parametro de tipo double \"" + key + "\" invalido o inexistente en un Json. Se asigna el valor \"0\" (cero) para esta key.";
+		Logger::logWarn(warning);
 		value = 0;
 	}
 	return value;
@@ -46,9 +44,8 @@ int ParserJson::verificarInt(std::string key, Json::Value raiz, int porDefecto) 
 	if (not parametro.isNull() and parametro.isInt() and parametro.asInt() > 0){
 		value = parametro.asInt();
 	} else {
-		Logger logger;
 		string error = "Parametro de tipo int \"" + key + "\" invalido, inexistente o menor que 0 en un Json. Se asigna el valor " + to_string(porDefecto) + " para esta key.";
-		logger.loggear(error, WARN);
+		Logger::logWarn(error);
 		value = porDefecto;
 	}
 	return value;
@@ -95,8 +92,7 @@ string ParserJson::serializarMetadatoUsuario(MetadatoUsuario metadato) {
 	ubicacion["longitud"] = metadato.ultimaUbicacion.longitud;
 	archivo["ultima ubicacion"] = ubicacion;
 
-	string serializado = archivo.toStyledString();
-	return serializado;
+	return archivo.toStyledString();
 }
 
 string ParserJson::serializarMetadatoSesion(MetadatoSesion metadato){
@@ -151,9 +147,8 @@ MetadatoArchivo ParserJson::deserializarMetadatoArchivo(string json) {
 				etiquetas.push_back(etiq[i].asString());
 			}
 		} else {
-			Logger logger;
 			string error = "Parametro \"etiquetas\" de un metadato de archivo invalido o inexistente en un Json. No se le asignan etiquetas al mismo.";
-			logger.loggear(error, WARN);
+			Logger::logWarn(error);
 		}
 		metadatos.etiquetas = etiquetas;
 
@@ -167,15 +162,13 @@ MetadatoArchivo ParserJson::deserializarMetadatoArchivo(string json) {
 				usuarios.push_back(usu[i].asString());
 			}
 		} else {
-			Logger logger;
 			string error = "Parametro \"usuarios habilitados\" de un metadato de archivo invalido o inexistente en un Json. No se le asignan usuarios habilitados al mismo.";
-			logger.loggear(error, WARN);
+			Logger::logWarn(error);
 		}
 		metadatos.usuariosHabilitados = usuarios;
 	} else {
-		Logger logger;
 		string error = "Fallo el parseo de un Json metadato de archivo.";
-		logger.loggear(error, WARN);
+		Logger::logWarn(error);
 	}
 	return metadatos;
 }
@@ -197,16 +190,14 @@ MetadatoUsuario ParserJson::deserializarMetadatoUsuario(string json) {
 			metadatos.ultimaUbicacion.latitud = ParserJson::verificarDouble("latitud", ubicacion);
 			metadatos.ultimaUbicacion.longitud = ParserJson::verificarDouble("longitud", ubicacion);
 		} else {
-			Logger logger;
 			string error = "Parametro \"ultima ubicacion\" de un metadato de usuario invalido o inexistente en un Json. Se le asigna la ubicacion (0,0) al mismo.";
-			logger.loggear(error, WARN);
+			Logger::logWarn(error);
 			metadatos.ultimaUbicacion.latitud = 0;
 			metadatos.ultimaUbicacion.longitud = 0;
 		}
 	} else {
-		Logger logger;
 		string error = "Fallo el parseo de un Json metadato de usuario.";
-		logger.loggear(error, WARN);
+		Logger::logWarn(error);
 	}
 	return metadatos;
 }
@@ -222,9 +213,8 @@ MetadatoSesion ParserJson::deserializarMetadatoSesion(std::string json){
 		metadatos.password = ParserJson::verificarString("password", raiz);
 		metadatos.token = ParserJson::verificarString("token", raiz);
 	} else {
-		Logger logger;
 		string error = "Fallo el parseo de un Json metadato de sesion.";
-		logger.loggear(error, WARN);
+		Logger::logWarn(error);
 	}
 	return metadatos;
 }
@@ -244,9 +234,8 @@ std::map<std::string, std::string> ParserJson::deserializarMapa(std::string json
 	        }
 	    }
 	} else {
-		Logger logger;
 		string error = "Fallo el parseo de un Json metadato de mapa.";
-		logger.loggear(error, WARN);
+		Logger::logWarn(error);
 	}
 	return mapa;
 }
