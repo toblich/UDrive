@@ -49,13 +49,15 @@ class InvalidDBAction : public exception {
 class InvalidVersion : public exception {
   private:
 	string err_msg;
+	int ultimaVersion;
   public:
-	InvalidVersion() : err_msg("") {};
-	InvalidVersion(const char *msg) : err_msg(msg) {};
-	InvalidVersion(string msg) { err_msg = msg; };
-	InvalidVersion(const InvalidVersion& original) : err_msg(original.what()) {};
+	InvalidVersion() : InvalidVersion("", -1) {};
+	InvalidVersion(string msg, int ultimaVersion) : InvalidVersion(msg.c_str(), ultimaVersion) { };
+	InvalidVersion(const char *msg, int ultimaVersion) : err_msg(msg) {this->ultimaVersion = ultimaVersion;};
+	InvalidVersion(const InvalidVersion& original) : err_msg(original.what()) {ultimaVersion = original.ultimaVersion;};
 	~InvalidVersion() throw() {};
 	const char *what() const throw() { return ("InvalidVersion: " + err_msg).c_str(); };
+	int getUltimaVersion() { return ultimaVersion; };
 };
 
 #endif /* EXCEPCIONES_H_ */

@@ -21,7 +21,7 @@ void Profile::enviarFotoPerfil (mg_connection* connection, string filePath, stri
 	if (filePathCompleto != "") {
 		if (sendFile(connection, filePathCompleto)) {
 			string mensaje = "Se descargó el archivo: " + filePathCompleto + " correctamente.";
-			this->responderSucces(connection, mensaje);
+			this->responderSuccess(connection, mensaje);
 		} else {
 			string mensaje = "ERROR, no se pudo descargar el archivo: " + filePathCompleto;
 			this->responderInternalServerError(connection, mensaje);
@@ -161,7 +161,7 @@ mg_result Profile::PUTHandler (mg_connection* connection) {
 
 		if (manejadorUs->modifyPerfil(user, nuevoPerfil)) {
 			string mensaje = "Se modificó el perfil del usuario exitosamente.";
-			this->responderSucces(connection, mensaje);
+			this->responderSuccess(connection, mensaje);
 		} else {
 			string mensaje = "No se pudo modificar el perfil debido a que es inválido.";
 			this->responderBadRequest(connection, mensaje);

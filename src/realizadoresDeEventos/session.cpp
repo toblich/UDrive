@@ -38,7 +38,7 @@ mg_result Session::DELETEHandler (mg_connection* connection) {
 		string token = uris[1];
 		if (manejadorUs->cerrarSesion(token, username)) {
 			string mensaje = "La sesion se cerró correctamente.";
-			this->responderSucces(connection, mensaje);
+			this->responderSuccess(connection, mensaje);
 		} else {
 			string mensaje = "La sesion que se quizo cerrar ya no existe";
 			this->responderResourceNotFound(connection, mensaje);

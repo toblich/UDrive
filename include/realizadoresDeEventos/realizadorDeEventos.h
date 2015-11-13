@@ -200,7 +200,7 @@ protected:
 	 * @param connection		mg_connection* con la conexion Cliente-Servidor.
 	 *
 	 */
-	void responderSucces(mg_connection* connection, string msg);
+	void responderSuccess(mg_connection* connection, string msg);
 	/**
 	 * @brief Función que se utiliza para enviarle un mensaje al Cliente
 	 * debido a un RESOURCE_CREATED
@@ -217,7 +217,7 @@ protected:
 	 * @param connection		mg_connection* con la conexion Cliente-Servidor.
 	 *
 	 */
-	void responderConflict(mg_connection* connection, string msg);
+	void responderConflict(mg_connection* connection, string msg, int ultimaVersion);
 
 };
 

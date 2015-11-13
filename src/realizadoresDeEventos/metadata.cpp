@@ -101,7 +101,7 @@ mg_result Metadata::PUTHandler (mg_connection* connection) {
 		string filepath = ParserURI::join(uris, URI_DELIM, 1, uris.size());
 		if (manejadorArchYMet->actualizarMetadatos(user, filepath, nuevosMetadatos)) {
 			string mensaje = "Se actualizaron los metadatos del archivo: " + filepath + " correctamente.";
-			this->responderSucces(connection, mensaje);
+			this->responderSuccess(connection, mensaje);
 		} else {
 			string mensaje = "No se pudieron actualizar los metadatos del archivo: " + filepath;
 			this->responderBadRequest(connection, mensaje);

@@ -77,24 +77,6 @@ public:
 	}
 
 	/**
-	 * @brief Reemplaza todas las ocurrencias de un char en un string por otro.
-	 *
-	 * @param str				string al cual se le quieren reemplazar un caracter.
-	 * @param original			char que se quiere reemplazar.
-	 * @param nuevo				char por el cual se quiere reemplazar.
-	 *
-	 * @retval string			string con los caracteres correspondientes reemplazados.
-	 */
-	static string replaceAll(string str, char original, char nuevo) {
-		const size_t SIZE = str.size();
-		for (size_t i = 0; i < SIZE; i++) {
-			if (str[i] == original)
-				str[i] = nuevo;
-		}
-		return str;
-	}
-
-	/**
 	 * @brief Esta función sirve para cuando se renombra un archivo reemplaza
 	 * en el path interno del mismo el filename viejo por el nuevo.
 	 *
@@ -119,21 +101,27 @@ public:
 	 * @retval string			string sin el numero de secuencia.
 	 */
 	static string pathSinNroSecuencia (const string& filepath) {
+		if (filepath.find(RESERVED_CHAR) == string::npos)
+			return filepath;	// si no tenia nro secuencia, lo devuelve como estaba
 		vector<string> partes = ParserURI::parsear(filepath, RESERVED_CHAR);
 		string filepathSinSecuencia = ParserURI::join(partes, RESERVED_CHAR, 0, partes.size() - 1);
 		return filepathSinSecuencia;
 	}
 
 	/**
-	 * @brief Devuelve el numero de secuencia (o version) final en un filepath o URI.
+	 * @brief Devuelve el numero de secuencia o version final en un filepath o URI.
 	 *
 	 * @param filepath			string del que se obtendrá el nro de secuencia/version.
 	 *
 	 * @retval int				numero de secuencia/version.
 	 */
-	static int obtenerNroSecuencia (const string& filepath) {
+	static int obtenerNroVersion (const string& filepath) {
 		string version = parsear(filepath, RESERVED_CHAR).back();
-		return stoi(version);
+		try {
+			return stoi(version);
+		} catch (invalid_argument& e) {
+			return LATEST;
+		}
 	}
 };
 

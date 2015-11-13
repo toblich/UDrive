@@ -136,7 +136,7 @@ void RealizadorDeEventos::responderInternalServerError(mg_connection* connection
 	printfData(connection, "{\"error\": \"%s\"}", errMsg.c_str());
 }
 
-void RealizadorDeEventos::responderSucces(mg_connection* connection, string msg){
+void RealizadorDeEventos::responderSuccess(mg_connection* connection, string msg){
 	Logger::logInfo(msg);
 	mg_send_status(connection, CODESTATUS_SUCCESS);
 	mg_send_header(connection, contentType.c_str(), jsonType.c_str());
@@ -150,9 +150,9 @@ void RealizadorDeEventos::responderResourceCreated(mg_connection* connection, st
 	printfData(connection, "{\"success\": \"%s\"}", msg.c_str());
 }
 
-void RealizadorDeEventos::responderConflict (mg_connection* connection, string msg) {
+void RealizadorDeEventos::responderConflict (mg_connection* connection, string msg, int ultimaVersion) {
 	Logger::logInfo(msg);
 	mg_send_status(connection, CODESTATUS_CONFLICT);
 	mg_send_header(connection, contentType.c_str(), jsonType.c_str());
-	printfData(connection, "{\"error\": \"%s\"}", msg.c_str());
+	printfData(connection, "{\"error\": \"%s\", \"ultima version\": %i}", msg.c_str(), ultimaVersion);
 }

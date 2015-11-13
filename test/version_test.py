@@ -1,6 +1,7 @@
 import unittest
 import requests
 import json
+import os
 from subprocess import Popen
 from time import sleep
 from shutil import rmtree
@@ -108,11 +109,20 @@ def iniciar():
 	return token
 
 
+def printFS(pathFS):
+	for dirname, dirnames, filenames in os.walk(pathFS):
+	    for subdirname in dirnames:
+	        print(os.path.join(dirname, subdirname))
+
+	    for filename in filenames:
+	        print(os.path.join(dirname, filename))
+
 
 class ServerTest(unittest.TestCase):
 	def setUp(self):
 		print
 		if exists("FileSystem"):
+			printFS("FileSystem")
 			rmtree("FileSystem")
 		self.serverProcess = Popen(["./udrive", "&"])
 		sleep(0.05)
@@ -188,10 +198,22 @@ class ServerTest(unittest.TestCase):
 		# actualiza la primera, existiendo la segunda
 		r = requests.put(FILE + PATH + RESERVED_SECOND, files={'file': open(FILENAME, 'rb'), "token" : token, "user" : USER["user"]}) 
 		self.assertEquals(r.status_code, CONFLICT)
+		self.assertEquals(r.json().get("ultima version"), 2)
 
 		# actualizo la tercera, pero no existe una tercera
 		s = requests.put(FILE + PATH + RESERVED_STR + "4", files={'file': open(FILENAME, 'rb'), "token" : token, "user" : USER["user"]}) 
 		self.assertEquals(s.status_code, CONFLICT)
+		self.assertEquals(s.json().get("ultima version"), 2)
+
+
+	def test_deberiaDescargarUltimaVersionAlNoPasarNroDeVersion(self):
+		logTest("deberiaDescargarUltimaVersionAlNoPasarNroDeVersion")
+		token = iniciar()	# sube dos versiones
+
+		r = requests.get(FILE + PATH, data={"token" : token, "user" : USER["user"]})	# baja la ultima version
+		self.assertEquals(r.status_code, SUCCESS)
+		contenido = open(FILENAME2, 'rb').read()	# compara el archivo bajado con el original (2da version)
+		self.assertEquals(r.content, contenido)
 
 
 

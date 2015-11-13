@@ -75,7 +75,7 @@ mg_result Folder::DELETEHandler (mg_connection* connection) {
 		string filepath = ParserURI::join(uris, URI_DELIM, 1, uris.size());
 		if (manejadorArchYMet->eliminar(user, filepath)) {
 			string mensaje = "Se eliminó la carpeta: " + filepath + " correctamente.";
-			this->responderSucces(connection, mensaje);
+			this->responderSuccess(connection, mensaje);
 		} else {
 			string mensaje = "Path inválido, no se pudo eliminar la carpeta: " + filepath;
 			this->responderResourceNotFound(connection, mensaje);

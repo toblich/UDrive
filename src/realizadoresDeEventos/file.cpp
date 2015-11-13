@@ -12,13 +12,13 @@ void File::enviarArchivo (const string& completePath, mg_connection* connection)
 	if (completePath != "") {
 		if (sendFile(connection, completePath)) {
 			string mensaje = "Se descargó el archivo: " + completePath + " correctamente.";
-			this->responderSucces(connection, mensaje);
+			this->responderSuccess(connection, mensaje);
 		} else {
 			string mensaje = "ERROR, no se pudo descargar el archivo: " + completePath;
 			this->responderInternalServerError(connection, mensaje);
 		}
 	} else {
-		string mensaje = "Path inválido, no se encontró el archivo: " + completePath;
+		string mensaje = "Path inválido, no se encontró el archivo deseado.";
 		this->responderResourceNotFound(connection, mensaje);
 	}
 }
@@ -31,11 +31,11 @@ mg_result File::GETHandler (mg_connection* connection) {
 	Logger::logInfo("Se obtuvo la variable token con valor: " + token);
 	string user = getVar(connection, "user");
 	Logger::logInfo("Se obtuvo la variable user con valor: " + user);
-	int version = ParserURI::obtenerNroSecuencia(uri);
 
 	if (manejadorUs->autenticarToken(token, user)) {
 		Logger::logInfo("Se autenticó la sesión correctamente.");
 		string filepath = ParserURI::join(uris, URI_DELIM, 1, uris.size());
+		int version = ParserURI::obtenerNroVersion(uri);
 		filepath = ParserURI::pathSinNroSecuencia(filepath);
 		string completePath = manejadorArchYMet->descargarArchivo(user, filepath, version);
 		enviarArchivo(completePath, connection);
@@ -93,7 +93,7 @@ void File::subirArchivo (const vector<string>& uris, const DatosArchivo& datosAr
 	vector<string> nombreYExtension = ParserURI::parsear(datosArch.fileName, NAME_DELIM);
 	Logger::logInfo("Se parseó el nombre del archivo correctamente.");
 	int cuotaUsuario = ParserJson::deserializarMetadatoUsuario(manejadorUs->getPerfil(user)).cuota;
-	int version = ParserURI::obtenerNroSecuencia(filepath);
+	int version = ParserURI::obtenerNroVersion(filepath);
 	filepath = ParserURI::pathSinNroSecuencia(filepath);
 
 	MetadatoArchivo metArch = extractMetadataFrom(nombreYExtension, user, uris);
@@ -121,7 +121,7 @@ void File::subirArchivo (const vector<string>& uris, const DatosArchivo& datosAr
 		}
 	} catch (InvalidVersion& e) {
 		string mensaje = "ERROR, no se pudo subir el archivo: " + filepath;
-		this->responderConflict(connection, mensaje);
+		this->responderConflict(connection, mensaje, e.getUltimaVersion());
 	}
 }
 
@@ -170,7 +170,7 @@ mg_result File::DELETEHandler (mg_connection* connection) {
 		if (restore == "true"){
 			if (manejadorArchYMet->restaurar(user, filepath)){
 				string mensaje = "Se restauró el archivo: " + filepath + " correctamente.";
-				this->responderSucces(connection, mensaje);
+				this->responderSuccess(connection, mensaje);
 			} else {
 				string mensaje = "Path inválido, no se encontró el archivo: " + filepath;
 				this->responderResourceNotFound(connection, mensaje);
@@ -178,7 +178,7 @@ mg_result File::DELETEHandler (mg_connection* connection) {
 		} else {
 			if (manejadorArchYMet->eliminar(user, filepath)) {
 				string mensaje = "Se eliminó el archivo: " + filepath + " correctamente.";
-				this->responderSucces(connection, mensaje);
+				this->responderSuccess(connection, mensaje);
 			} else {
 				string mensaje = "Path inválido, no se encontró el archivo: " + filepath;
 				this->responderResourceNotFound(connection, mensaje);

@@ -124,7 +124,8 @@ bool ManejadorArchivosYMetadatos::subirArchivo (string username, string filepath
 	string filepathCompleto = this->pathFileSystem + "/" + filepath;
 	if (validador.existeArchivo(filepathCompleto) and validador.existeMetadato(filepath)) {
 		if (not force and not validador.esVersionValida(filepath, nuevaVersion)) {
-			throw InvalidVersion("Se quiso subir " + filepath + " con version " + to_string(nuevaVersion));
+			throw InvalidVersion("Se quiso subir " + filepath + " con version " + to_string(nuevaVersion),
+					getLatestVersion(filepath));
 		}
 		if ( force )
 			nuevaVersion = getLatestVersion(filepath) + 1;
@@ -292,6 +293,7 @@ string ManejadorArchivosYMetadatos::descargarArchivo (string username, string fi
 	}
 
 	if (not validador.verificarPermisos(username, filepath) or not validador.existeArchivo(filepathCompleto, FIRST) ) {
+		Logger::logDebug("Sin permisos o no existe archivo al descargar " + filepath + " en version " + to_string(version));
 		return "";
 	}
 
