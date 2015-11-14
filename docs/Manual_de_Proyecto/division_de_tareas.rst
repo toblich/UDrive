@@ -2,6 +2,7 @@ División de tareas
 ============================
 
 Dentro de la división de tareas, se plantearon 3 entregas, 2 intermedias y una final, para ir mostrando el avance del trabajo práctico. Éstas son:
+
  * `Checkpoint 1 - 8/10/2015`_
  * `Checkpoint 2 - 29/10/2015`_
  * `Entrega Final - 19/11/2015`_
