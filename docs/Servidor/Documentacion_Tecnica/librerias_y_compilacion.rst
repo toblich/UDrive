@@ -9,6 +9,8 @@ en otras versiones de Linux.
 Dependencias
 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
+.. _gpp:
+
 G++ 4.9
 ------------------------------------------------------------------------------------------------------------
 .. code-block:: bash
@@ -19,6 +21,8 @@ G++ 4.9
 	sudo apt-get upgrade
 
 
+.. _cmake:
+
 CMake
 ------------------------------------------------------------------------------------------------------------
 .. code-block:: bash
@@ -26,6 +30,8 @@ CMake
 	sudo apt-get update
 	sudo apt-get install cmake
 
+
+.. _rocks:
 
 RocksDB
 ------------------------------------------------------------------------------------------------------------
@@ -35,10 +41,12 @@ Ver `RocksDB <https://github.com/facebook/rocksdb>`_ y su guía de instalación
 Compilar con ``make static_lib && make install``
 
 Alternativamente, ejecutar el script ``docker/rocksdb.sh`` habiendo instalado previamente
-*g++-4.9*, *libsnappy-dev*, *zlib1g-dev* y *libbz2-dev*.
+:ref:`gpp`, *libsnappy-dev*, *zlib1g-dev* y *libbz2-dev*.
 
 
-GTest (para ejecutar los tests)
+.. _gtest:
+
+GTest (para ejecutar los tests) 
 ------------------------------------------------------------------------------------------------------------
 .. code-block:: bash
 
@@ -48,15 +56,12 @@ GTest (para ejecutar los tests)
 	make
 	cp *.a /usr/lib
 
-Alternativamente, ejecutar el script ``docker/gtest.sh`` habiendo instalado previamente *CMake*
+Alternativamente, ejecutar el script ``docker/gtest.sh`` habiendo instalado previamente :ref:`cmake`
 
-LCOV (para analizar coverage)
-------------------------------------------------------------------------------------------------------------
-.. code-block:: bash
 
-	sudo apt-get install lcov
+.. _requests:
 
-Requests (para tests de integración y coverage)
+Requests (para tests de integración y coverage) 
 ------------------------------------------------------------------------------------------------------------
 Con **pip** instalado, ejecutar:
 
@@ -70,8 +75,19 @@ De no tener pip, instalarlo anteriormente con:
 
 	sudo apt-get install python-pip
 
+
+.. _lcov:
+
+LCOV (para analizar coverage) 
+------------------------------------------------------------------------------------------------------------
+.. code-block:: bash
+
+	sudo apt-get install lcov
+
+
 Compilación
 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
 Con ejecución inmediata
 ------------------------------------------------------------------------------------------------------------
 
@@ -79,6 +95,7 @@ Ejecutar ``build.sh -h`` para ver las distintas opciones de compilación.
 Habiendo instalado previamente todas las dependencias necesarias para la opción elegida,
 ejecutar el script ``build.sh`` desde la raíz del proyecto
 con las opciones en cuestión.
+
 
 Sin ejecución inmediata
 ------------------------------------------------------------------------------------------------------------

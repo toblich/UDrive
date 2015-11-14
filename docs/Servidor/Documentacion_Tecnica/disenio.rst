@@ -19,6 +19,7 @@ Así se llegó al siguiente diseño de alto nivel:
 A continuación se irán mostrando más en detalle las clases y los paquetes mostrados. Cabe remarcar que los diagramas solo muestran las relaciones principales, pudiendo haber algunas relaciones más entre clases, más débiles. Asimismo, no siempre incluyen todos los métodos y atributos, excluyéndose ocasionalmente los menos relevantes.
 
 
+.. _server:
 
 Servidor
 -------------------------------------------------------------------------------
@@ -34,6 +35,7 @@ Particularmente, el servidor tiene internamente la información y las responsabi
 También guarda punteros a las distintas bases de datos y manejadores de mayor nivel, únicamente para liberar la memoria usada una sola vez al cerrarse el servidor (e inmediatamente el programa).
 
 
+.. _realizadores:
 
 Realizadores de Eventos
 -------------------------------------------------------------------------------
@@ -58,6 +60,7 @@ Para los pedidos más relacionados al *filesystem* (o sea sobre archivos propios
 	Realizadores de Eventos que usan intensamente al ManejadorArchivosYMetadatos
 
 
+.. _archivosymetadatos:
 
 Archivos y Metadatos
 -------------------------------------------------------------------------------
@@ -71,6 +74,8 @@ El siguiente diagrama resume las clases del paquete ``archivosYMetadatos``. El `
 	Subsistema de archivos y metadatos (paquete archivosYMetadatos)
 
 
+.. _basesdedatos:
+
 Bases de Datos
 -------------------------------------------------------------------------------
 
@@ -82,6 +87,8 @@ Con una interfaz común (``BD``), se hicieron dos implementaciones de las bases 
 
 	Paquete db
 
+
+.. _clasesutilitarias:
 
 Clases utilitarias
 -------------------------------------------------------------------------------
@@ -96,6 +103,8 @@ ParserURI         MetadatoUsuario  InvalidDBAction
 Logger            MetadatoSesion   InvalidVersion
 ================= ================ ================
 
+
+.. _libreriasconcodigo:
 
 Librerías con código fuente
 -------------------------------------------------------------------------------

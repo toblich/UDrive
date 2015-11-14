@@ -1,7 +1,8 @@
 Bienvenido a la documentación técnica del servidor de UDrive
 =============================================================
 
-Contenido:
+Contenido
+*************************************************************
 
 .. toctree::
    :maxdepth: 2
