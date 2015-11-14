@@ -92,12 +92,13 @@ Luego, desde allí ejecutar
 	make <target>
 
 Donde los *flags* pueden ser:
+
 + *rocksdb* - usar bases de datos persistentes en vez de mapas (volátiles) en memoria
 + *test* - habilita target **unitTest**
-+ *coverage* - realizar análisis de coverage (habilita targets **unitTest** y **coverage**)
-	+ Esta opción desactiva RocksDB y activa los tests unitarios. Prepara la compilación el servidor con mapas en memoria y de los tests unitarios.
++ *coverage* - realizar análisis de coverage (habilita targets **unitTest** y **coverage**).    Esta opción desactiva RocksDB y activa los tests unitarios. Prepara la compilación el servidor con mapas en memoria y de los tests unitarios.
 
 Los *targets* pueden ser:
+
 + *udrive* - compila el servidor
 + *unitTets* - compila los tests unitarios
 + *coverage* - compila el servidor y los tests unitarios; ejecuta estos últimos y los de integración, guardando los resultados del análisis de coverage en la carpeta ``coverage`` dentro de la carpeta ``build``.

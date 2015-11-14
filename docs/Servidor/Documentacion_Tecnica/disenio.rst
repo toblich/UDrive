@@ -11,7 +11,7 @@ Inicialmente, se planteó definir un servidor que se apoyara en dos manejadores,
 Así se llegó al siguiente diseño de alto nivel:
 
 .. figure:: _static/Paquetes.png
-	:scale: 60%
+	:scale: 65%
 	:align: center
 
 	Relaciones entre clases principales y paquetes
@@ -26,7 +26,7 @@ Servidor
 Particularmente, el servidor tiene internamente la información y las responsabilidades que se pueden ver en el siguiente diagrama:
 
 .. figure:: _static/Server.png
-	:scale: 70%
+	:scale: 75%
 	:align: center
 
 	Clase Server y su relación con los RealizadorDeEventos
@@ -43,7 +43,7 @@ Para cada tipo de recurso que puede pedir el cliente, hay un tipo de ``Realizado
 A continuación se muestran aquellos relizadores de eventos relacionados al manejo de los usuarios, procesando todos los pedidos de registro o búsqueda de usuarios y lo relacionado a la sesión y los perfiles. El realizador de eventos ``Profile`` se asocia también con el ``ManejadorArchivosYMetadatos`` para el manejo de las fotos de perfil.
 
 .. figure:: _static/RealizadoresUsuarios.png
-	:scale: 75%
+	:scale: 80%
 	:align: center
 
 	Realizadores de Eventos que usan intensamente al ManejadorDeUsuarios
@@ -77,7 +77,7 @@ Bases de Datos
 Con una interfaz común (``BD``), se hicieron dos implementaciones de las bases de datos: una que encapsula el uso de la librería RocksDB (``BaseDeDatos``) y otra que otorga la misma funcionalidad pero en memoria y sin uso de librerías (``MapDB``), ampliamente usada para *testing*. Se vio entonces la necesidad de representar tambien un *batch* de manera independiente a la base de datos usada, por lo que se creó la clase ``Batch`` con los datos estructurados y enumerados necesarios. 
 
 .. figure:: _static/BD.png
-	:scale: 75%
+	:scale: 80%
 	:align: center
 
 	Paquete db
