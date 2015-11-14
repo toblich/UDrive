@@ -9,7 +9,6 @@ Contenido:
    ambiente_de_desarrollo
    api_rest
    disenio
-   clases
    codigo
    librerias_y_compilacion
    pruebas
