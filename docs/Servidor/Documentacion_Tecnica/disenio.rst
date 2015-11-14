@@ -74,7 +74,7 @@ El siguiente diagrama resume las clases del paquete ``archivosYMetadatos``. El `
 Bases de Datos
 -------------------------------------------------------------------------------
 
-Con una interfaz común (``BD``), se hicieron dos implementaciones de las bases de datos: una que encapsula el uso de la librería RocksDB (``BaseDeDatos``) y otra que otorga la misma funcionalidad pero en memoria y sin uso de librerías (``MapDB``), ampliamente usada para *testing*. Se vio entonces la necesidad de representar tambien un *batch* de manera independiente a la base de datos usada, por lo que se creó la clase ``Batch`` con los datos estructurados y enumerados necesarios. 
+Con una interfaz común (``BD``), se hicieron dos implementaciones de las bases de datos: una que encapsula el uso de la librería RocksDB (``BaseDeDatos``) y otra que otorga la misma funcionalidad pero en memoria y sin uso de librerías (``MapDB``, ampliamente usada para *testing*). Se vio entonces la necesidad de representar tambien un *batch* de manera independiente a la base de datos usada, por lo que se creó la clase ``Batch`` con los datos estructurados y enumerados necesarios. 
 
 .. figure:: _static/BD.png
 	:scale: 80%
@@ -100,4 +100,4 @@ Logger            MetadatoSesion   InvalidVersion
 Librerías con código fuente
 -------------------------------------------------------------------------------
 
-El paquete ``libs`` simplemente contiene los códigos fuente de aquellas librerías usadas no prcompiladas. En particular, contiene los códigos de ``mongoose`` (para el servidor) y ``jsoncpp`` (para serializar y deserializar).
+El paquete ``libs`` simplemente contiene los códigos fuente de aquellas librerías usadas no precompiladas. En particular, contiene los códigos de ``mongoose`` (para el servidor) y ``jsoncpp`` (para serializar y deserializar).
