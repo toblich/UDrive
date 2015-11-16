@@ -207,14 +207,6 @@ void ManejadorMetadatos::actualizarPermisosPorRenombrado (const string& filepath
 	dbMetadatos->writeBatch(batch);
 }
 
-string ManejadorMetadatos::getJsonMetadatos (const string& filepath) {
-	if (not validador->existeMetadato(filepath)) {
-		Logger::logWarn("Se quiso consultar los metadatos del archivo " + filepath + " pero este no existe.");
-		return "";
-	}
-	return dbMetadatos->get(filepath);
-}
-
 void ManejadorMetadatos::eliminarDefinitivamente (const string& filepath) {
 	// Las validaciones de existencia se hacen antes de llamarlo
 	dbMetadatos->erase(filepath);

@@ -3,15 +3,14 @@
 const char* NOMBRE_ARCH_LOG = "files/log.txt";
 
 Logger::Logger() {
-	nivelLogger = NIVEL_LOGGER;
 }
 
 Logger::~Logger() {
 
 }
 
-void Logger::loggear(string texto, int tipoDeError){
-	if (this->nivelLogger <= tipoDeError){
+void Logger::loggear(const string& texto, int tipoDeError){
+	if (NIVEL_LOGGER <= tipoDeError){
         ofstream log(NOMBRE_ARCH_LOG, ios_base::app | ios::binary);	
 
         switch (tipoDeError){
@@ -66,7 +65,7 @@ void Logger::escribirHoraEnElLog(){
     int hora = tiempo->tm_hour;
     int min = tiempo->tm_min;
     int seg = tiempo->tm_sec;
-    this->verificarTamanioDelLog();
+    Logger::verificarTamanioDelLog();
     ofstream log(NOMBRE_ARCH_LOG, ios_base::app | ios::binary);
 	log << "===============EJECUCION DEL DIA ";
 	if (dia <= 9){
@@ -99,22 +98,22 @@ void Logger::escribirHoraEnElLog(){
 	log.close();
 }
 
-void Logger::logInfo (string texto) {
-	Logger().loggear(texto, INFO);
+void Logger::logInfo (const string& texto) {
+	loggear(texto, INFO);
 }
 
-void Logger::logWarn (string texto) {
-	Logger().loggear(texto, WARN);
+void Logger::logWarn (const string& texto) {
+	loggear(texto, WARN);
 }
 
-void Logger::logTrace (string texto) {
-	Logger().loggear(texto, TRACE);
+void Logger::logTrace (const string& texto) {
+	loggear(texto, TRACE);
 }
 
-void Logger::logError (string texto) {
-	Logger().loggear(texto, ERROR);
+void Logger::logError (const string& texto) {
+	loggear(texto, ERROR);
 }
 
-void Logger::logDebug (string texto) {
-	Logger().loggear(texto, DEBUG);
+void Logger::logDebug (const string& texto) {
+	loggear(texto, DEBUG);
 }

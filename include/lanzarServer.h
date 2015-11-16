@@ -13,8 +13,7 @@ using namespace std;
  * @brief Se encarga de lanzar el servidor y cerrarlo en caso de que reciba alguna señal.
  */
 void lanzarServer(BD* perfiles, BD* sesiones, BD* passwords, BD* metadatos) {
-	Logger logger;
-	logger.escribirHoraEnElLog();
+	Logger::escribirHoraEnElLog();
 
 	signal(SIGTERM, Server::close);
 	signal(SIGINT, Server::close);
@@ -24,7 +23,7 @@ void lanzarServer(BD* perfiles, BD* sesiones, BD* passwords, BD* metadatos) {
 	Server server(puerto, perfiles, sesiones, passwords, metadatos);
 
 	while (server.isRunning()) {
-		usleep(10000);
+		usleep(1000);
 	}
 
 	Logger::logDebug("Cerrando servidor");

@@ -24,10 +24,9 @@ const int TRACE = 0;
 class Logger {
 
 private:
-	int nivelLogger;
-	void verificarTamanioDelLog();
-public:
+	static void verificarTamanioDelLog();
 	Logger();
+public:
 	/**
 	 * @brief Función que se utiliza para escribir en el log un determinado mensaje
 	 * para un determinado tipo de error
@@ -36,8 +35,8 @@ public:
 	 * @param tipoDeError   int con el nivel de error que se quiere escribir
 	 *
 	 */
-	void loggear(string texto, int tipoDeError);
-	void escribirHoraEnElLog();
+	static void loggear(const string& texto, int tipoDeError);
+	static void escribirHoraEnElLog();
 	~Logger();
 	/**
 	 * @brief Función que se utiliza para escribir en el log un determinado mensaje como INFO
@@ -45,35 +44,35 @@ public:
 	 * @param texto			string con el mensaje que se quiere loggear
 	 *
 	 */
-	static void logInfo(string texto);
+	static void logInfo(const string& texto);
 	/**
 	 * @brief Función que se utiliza para escribir en el log un determinado mensaje como WARN
 	 *
 	 * @param texto			string con el mensaje que se quiere loggear
 	 *
 	 */
-	static void logWarn(string texto);
+	static void logWarn(const string& texto);
 	/**
 	 * @brief Función que se utiliza para escribir en el log un determinado mensaje como TRACE
 	 *
 	 * @param texto			string con el mensaje que se quiere loggear
 	 *
 	 */
-	static void logTrace(string texto);
+	static void logTrace(const string& texto);
 	/**
 	 * @brief Función que se utiliza para escribir en el log un determinado mensaje como ERROR
 	 *
 	 * @param texto			string con el mensaje que se quiere loggear
 	 *
 	 */
-	static void logError(string texto);
+	static void logError(const string& texto);
 	/**
 	 * @brief Función que se utiliza para escribir en el log un determinado mensaje como DEBUG
 	 *
 	 * @param texto			string con el mensaje que se quiere loggear
 	 *
 	 */
-	static void logDebug(string texto);
+	static void logDebug(const string& texto);
 };
 
 #endif /* LOGGER_H_ */
