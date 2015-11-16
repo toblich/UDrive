@@ -6,6 +6,7 @@ Contenido:
 .. toctree::
    :maxdepth: 2
 
+   get_started
    instalacion_y_configuracion
    forma_de_uso
    mantenimiento

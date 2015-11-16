@@ -136,8 +136,9 @@ mg_result File::PUTHandler (mg_connection* connection) {
 	Logger::logInfo("Se obtuvo la variable token con valor: " + token);
 	string user = datosArch.user;
 	Logger::logInfo("Se obtuvo la variable user con valor: " + user);
+	bool hayArchivoParaSubir = (datosArch.fileName != "");
 
-	if (datosArch.dataLength == 0 and datosArch.fileName == ""){
+	if (not hayArchivoParaSubir){
 		string mensaje = "Error, no se paso ningun archivo para subir por parametro.";
 		this->responderBadRequest(connection, mensaje);
 		return MG_TRUE;

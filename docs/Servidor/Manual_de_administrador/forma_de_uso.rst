@@ -8,7 +8,8 @@ o de forma automática.
 Compilación y Ejecución de forma Manual (del servidor, los tests unitarios y el code coverage)
 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-Habiendo instalado previamente todas las dependencias necesarias, indicadas en la sección `Instalación y configuración <instalacion_y_configuracion.html>`_ , ejecutar el script ``build.sh -h`` desde la raíz del proyecto.
+Habiendo instalado previamente todas las dependencias necesarias, indicadas en la sección `Instalación y configuración <instalacion_y_configuracion.html>`_ , ejecutar el script ``build.sh -h`` desde la raíz del proyecto. Este comando desplagará
+las distintas opciones 
 
 
 Compilación y Ejecución de forma automática con Docker (del servidor y los tests unitarios)
@@ -33,4 +34,4 @@ donde ``<containerID>`` es el ID del container obtenido en el primer comando.
 
 Finalmente con la IP obtenida en el último comando se podrá interactuar con el servidor (considerando que se lanza en el puerto 8080).
 
-Para saber como interactuar con el Servidor ver el Manual de la API REST dentro de la Documentación Técnica del Serivor.
+Para saber como interactuar con el Servidor ver el Manual de la API REST dentro de la Documentación Técnica del Servidor.

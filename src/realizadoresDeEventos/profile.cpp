@@ -104,7 +104,7 @@ mg_result Profile::PUTHandler (mg_connection* connection) {
 	string user = uris[1];
 	string varFile = "picture";
 	DatosArchivo datosArch = getMultipartData(connection, varFile);
-	bool hayNuevaFotoPerfil = (datosArch.dataLength != 0) ? true : false;
+	bool hayNuevaFotoPerfil = (datosArch.fileName != "");
 
 	if(hayNuevaFotoPerfil){
 		token = datosArch.token;
