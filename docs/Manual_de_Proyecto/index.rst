@@ -7,14 +7,6 @@ Contenido:
    :maxdepth: 2
 
    introduccion
-   gestion_y_division
+   gestion
+   division_de_tareas
    conclusion
-   
-
-Indices y tablas
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
-
