@@ -82,6 +82,13 @@ string Buscador::obtenerEstructuraCompartidos (string path) {
 	return ParserJson::serializarMapa(mapa);
 }
 
+bool Buscador::match (string original, string patron) {
+	transform(original.begin(), original.end(), original.begin(), ::tolower);
+	transform(patron.begin(), patron.end(), patron.begin(), ::tolower);
+
+	return original.find(patron) != string::npos;
+}
+
 map<string, string> Buscador::buscar (string username, function<bool (MetadatoArchivo&)> predicate) {
 	string permisos = PERMISOS + "/" + username;
 	string archivosPermitidos = dbMetadatos->get(permisos);
@@ -103,16 +110,18 @@ map<string, string> Buscador::buscar (string username, function<bool (MetadatoAr
 }
 
 string Buscador::buscarPorExtension(string username, string extension) {
-	auto predicate = [&] (MetadatoArchivo& metadato) -> bool {return metadato.extension == extension;};
+	auto predicate = [&] (MetadatoArchivo& metadato) -> bool {return match(metadato.extension, extension);};
 	map<string, string> estructuraPermisos = buscar(username, predicate);
 	string jsonEstructuraFileSystem = obtenerEstructuraCarpeta(username, true, predicate);
 	return ParserJson::estructurasMerge(estructuraPermisos, jsonEstructuraFileSystem);
 }
 
-string Buscador::buscarPorEtiqueta(string username, string etiqueta) {
+string Buscador::buscarPorEtiqueta(string username, string etiquetaBuscada) {
 	auto predicate = [&] (MetadatoArchivo& metadato) -> bool {
-		list<string>& etiquetas = metadato.etiquetas;
-		return find(etiquetas.begin(), etiquetas.end(), etiqueta) != etiquetas.end();
+		for (auto& etiqueta : metadato.etiquetas)
+			if (match(etiqueta, etiquetaBuscada))
+				return true;
+		return false;
 	};
 	map<string, string> estructuraPermisos = buscar(username, predicate);
 	string jsonEstructuraFileSystem = obtenerEstructuraCarpeta(username, true, predicate);
@@ -120,18 +129,17 @@ string Buscador::buscarPorEtiqueta(string username, string etiqueta) {
 }
 
 string Buscador::buscarPorNombre(string username, string nombre) {
-	auto predicate = [&] (MetadatoArchivo& metadato) -> bool {return (metadato.nombre.find(nombre) != string::npos);};
+	auto predicate = [&] (MetadatoArchivo& metadato) -> bool {return match(metadato.nombre, nombre);};
 	map<string, string> estructuraPermisos = buscar(username, predicate);
 	string jsonEstructuraFileSystem = obtenerEstructuraCarpeta(username, true, predicate);
 	return ParserJson::estructurasMerge(estructuraPermisos, jsonEstructuraFileSystem);
 }
 
 string Buscador::buscarPorPropietario(string username, string propietario) {
-	auto predicate = [&] (MetadatoArchivo& metadato) -> bool {return metadato.propietario == propietario;};
+	auto predicate = [&] (MetadatoArchivo& metadato) -> bool {return match(metadato.propietario, propietario);};
 	if ( username != propietario ) {
 		map<string, string> estructuraPermisos = buscar(username, predicate);
 		return ParserJson::serializarMapa(estructuraPermisos);
 	}
 	return obtenerEstructuraCarpeta(username, true, predicate);
 }
-

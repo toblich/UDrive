@@ -51,11 +51,11 @@ public:
 	 * @brief Se encarga de buscar por etiqueta dentro del FileSystem del usuario y los archivos que se le compartieron.
 	 *
 	 * @param user 			string con el nombre de usuario que está realizando la busqueda
-	 * @param etiqueta		string con la etiqueta que se quiere buscar
+	 * @param etiquetaBuscada		string con la etiqueta que se quiere buscar
 	 *
 	 * @retval string con el resultado de la busqueda en formato json
 	 */
-	string buscarPorEtiqueta(string username, string etiqueta);
+	string buscarPorEtiqueta(string username, string etiquetaBuscada);
 	/**
 	 * @brief Se encarga de buscar por nombre de archivo dentro del FileSystem del usuario y los archivos que se le compartieron.
 	 *
@@ -82,6 +82,8 @@ private:
 	BD* dbMetadatos;
 	Validador validador;
 	const string pathFileSystem;
+
+	static bool match(string original, string patron);
 };
 
 
