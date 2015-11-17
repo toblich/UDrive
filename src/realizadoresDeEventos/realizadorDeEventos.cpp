@@ -26,7 +26,7 @@ string RealizadorDeEventos::getVar(mg_connection* connection, string varName){
 
 RealizadorDeEventos::DatosArchivo RealizadorDeEventos::getMultipartData(mg_connection* connection, string variable){
 	DatosArchivo datosArch;
-	datosArch.dataLength = 0;
+	datosArch.fileName = "";
 	const char* data;
 	char varName[MAX_LENGTH], fileName[MAX_LENGTH];
 	int dataLength, n1 = 0, n2 = 0;
@@ -34,8 +34,7 @@ RealizadorDeEventos::DatosArchivo RealizadorDeEventos::getMultipartData(mg_conne
 	while ((n2 = mg_parse_multipart(connection->content + n1, connection->content_len - n1,
 			varName, sizeof(varName), fileName, sizeof(fileName), &data, &dataLength)) > 0) {
 		n1 += n2;
-		string varNameStr = string(varName);
-		if (varNameStr == variable){
+		if (string(varName) == variable){
 			datosArch.fileData = data;
 			datosArch.dataLength = dataLength;
 			datosArch.fileName = string(fileName);

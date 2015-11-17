@@ -170,7 +170,7 @@ class ServerTest(unittest.TestCase):
 		token = iniciar()
 		otroToken = registrarYLoguear("PABLO", "password", PERFIL)
 
-		metadatosPermiso = '{"propietario" : "' +  USER["user"] + '" , "extension" : "none", "nombre" : "Makefile", "etiquetas" : [], "usuarios" : ["tobi", "PABLO"], ' \
+		metadatosPermiso = '{"propietario" : "' +  USER["user"] + '" , "extension" : "", "nombre" : "Makefile", "etiquetas" : [], "usuarios" : ["tobi", "PABLO"], ' \
 			+ '"usuario ultima modificacion" : "' + USER["user"] + '" , "fecha ultima modificacion" : "23/10/2015"}'
 		r = requests.put(METADATA + PATH, data={"user" : USER["user"], "token" : token, "metadatos" : metadatosPermiso})	# le da permiso a PABLO
 		self.assertEquals(r.status_code, SUCCESS)

@@ -62,7 +62,7 @@ public:
 	/**
 	 * @brief Se encarga de, en caso que haya fallado el restaurado, volver al estado anterior.
 	 */
-	void deshacerRestaurado (const string& pathRealSinFS, const string& pathEnPapeleraSinFS);
+	void deshacerRestaurado (const string& pathRealSinFS, const string& pathEnPapeleraSinFS, int ultimaVersion);
 
 	/**
 	 * @brief Se encarga de eliminar un archivo definitivamente, junto con todas sus versiones

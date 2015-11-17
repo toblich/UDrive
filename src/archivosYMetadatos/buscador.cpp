@@ -46,7 +46,7 @@ string Buscador::obtenerEstructuraCarpeta (string path, bool esRecursivo, functi
 			string jsonMetadatos = this->dbMetadatos->get(pathInterno);
 			MetadatoArchivo metadato = ParserJson::deserializarMetadatoArchivo(jsonMetadatos);
 			string nombre = metadato.nombre;
-			if (metadato.extension != "none")
+			if (metadato.extension != "")
 				nombre += "." + metadato.extension;
 			nombre += RESERVED_STR + to_string(metadato.ultimaVersion);
 
@@ -74,7 +74,7 @@ string Buscador::obtenerEstructuraCompartidos (string path) {
 		string jsonMetadatoArchivoCompartido = dbMetadatos->get(archivoCompartido);
 		MetadatoArchivo metadatoArchivoCompartido = ParserJson::deserializarMetadatoArchivo(jsonMetadatoArchivoCompartido);
 		string nombre = metadatoArchivoCompartido.nombre;
-		if (metadatoArchivoCompartido.extension != "none")
+		if (metadatoArchivoCompartido.extension != "")
 			nombre += "." + metadatoArchivoCompartido.extension;
 		nombre += RESERVED_STR + to_string(metadatoArchivoCompartido.ultimaVersion);
 		mapa.insert(pair<string, string>(archivoCompartido, nombre));
@@ -93,7 +93,7 @@ map<string, string> Buscador::buscar (string username, function<bool (MetadatoAr
 		MetadatoArchivo metadatoArchivoCompartido = ParserJson::deserializarMetadatoArchivo(jsonMetadato);
 		if ( predicate(metadatoArchivoCompartido) ) {
 			string nombre = metadatoArchivoCompartido.nombre;
-			if (metadatoArchivoCompartido.extension != "none")
+			if (metadatoArchivoCompartido.extension != "")
 				nombre += "." + metadatoArchivoCompartido.extension;
 			nombre += RESERVED_STR + to_string(metadatoArchivoCompartido.ultimaVersion);
 			estructura.insert(pair<string, string>(archivoCompartido, nombre));

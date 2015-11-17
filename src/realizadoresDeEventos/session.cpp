@@ -15,12 +15,12 @@ mg_result Session::POSTHandler (mg_connection* connection) {
 
 	if (manejadorUs->validarLogin(user, pass)) {
 		string token = manejadorUs->iniciarSesion(user);
-		Logger::logInfo("Se inicio la sesion con token: " + token);
+		Logger::logInfo("Se inició la sesión con token: " + token);
 		mg_send_status(connection, CODESTATUS_RESOURCE_CREATED);
 		mg_send_header(connection, contentType.c_str(), jsonType.c_str());
 		printfData(connection, "{\"token\": \"%s\"}", token.c_str());
 	} else {
-		string mensaje = "No se pudo inicia sesion, usuario y/o contraseña incorrecto/s.";
+		string mensaje = "No se pudo iniciar sesión, usuario y/o contraseña incorrecto/s.";
 		this->responderBadRequest(connection, mensaje);
 	}
 
@@ -37,10 +37,10 @@ mg_result Session::DELETEHandler (mg_connection* connection) {
 	if (uris.size() == 2) {
 		string token = uris[1];
 		if (manejadorUs->cerrarSesion(token, username)) {
-			string mensaje = "La sesion se cerró correctamente.";
+			string mensaje = "La sesión se cerró correctamente.";
 			this->responderSuccess(connection, mensaje);
 		} else {
-			string mensaje = "La sesion que se quizo cerrar ya no existe";
+			string mensaje = "La sesión que se quizo cerrar ya no existe";
 			this->responderResourceNotFound(connection, mensaje);
 		}
 	} else {

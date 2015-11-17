@@ -62,6 +62,7 @@ protected:
 	 * @param file				archivo que se quiere subir
 	 * @param latitud			string con la latitud de la ubicación del usuario en caso de que se quiera actualizar
 	 * @param longitud			string con la longitud de la ubicación del usuario en caso de que se quiera actualizar
+	 * @param force				string para saber si hay que forzar o no la subida de un archivo
 	 *
 	 * @retval CODESTATUS		int con el codigo de estado de la operación
 	 * @retval respuesta		respuesta de la operación
@@ -97,7 +98,7 @@ protected:
 private:
 
 	void enviarArchivo(const string& completePath, mg_connection* connection);
-	MetadatoArchivo extractMetadataFrom(const vector<string>& nombreYExtension, const string& user, const vector<string>& uris);
+	MetadatoArchivo extractMetadataFrom(const string& filename, const string& user, const string& propietario);
 	void subirArchivo (const vector<string>& uris, const DatosArchivo& datosArch, const string& user, mg_connection* connection);
 	void actualizarUltimaUbicacion(string user, string latitud, string longitud);
 };

@@ -6,14 +6,8 @@ Contenido:
 .. toctree::
    :maxdepth: 2
 
-   docker
-   manual
-
-
-Indices y tablas
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
-
+   get_started
+   instalacion_y_configuracion
+   forma_de_uso
+   mantenimiento
+   known_issues_y_troubleshooting

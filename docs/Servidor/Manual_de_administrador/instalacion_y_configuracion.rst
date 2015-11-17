@@ -1,6 +1,7 @@
 ============================================================================================================
-Compilación y ejecución manual
+Instalación y configuración
 ============================================================================================================
+
 El servidor en cuestión requiere tener los algunos programas y librerías instalados previamente.
 Esta guía de instalación está pensada para Ubuntu 14.04, aunque debería ser funcionar también
 con otras versiones de Ubuntu y ser análoga (con los manejadores de paquetes correspondientes) 
@@ -50,11 +51,24 @@ GTest (para ejecutar los tests)
 
 Alternativamente, ejecutar el script ``docker/gtest.sh`` habiendo instalado previamente *CMake*
 
+
 LCOV (para analizar coverage)
 ------------------------------------------------------------------------------------------------------------
 .. code-block:: bash
 
 	sudo apt-get install lcov
+
+
+Python (para tests de integración y coverage)
+------------------------------------------------------------------------------------------------------------
+Para los test de integración se utilizó la versión 2.7 de python.
+
+Para saber la versión que tiene instalada en su computadora puede ejecutar:
+
+.. code-block:: bash
+
+	python --version
+
 
 Requests (para tests de integración y coverage)
 ------------------------------------------------------------------------------------------------------------
@@ -70,12 +84,11 @@ De no tener pip, instalarlo anteriormente con:
 
 	sudo apt-get install python-pip
 
-Compilación y Ejecución (del servidor, los tests unitarios y coverage)
-<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-Ejecutar ``build.sh -h`` para ver las distintas opciones de compilación. 
-Habiendo instalado previamente todas las dependencias necesarias para la opción elegida,
-ejecutar el script ``build.sh`` desde la raíz del proyecto
-con las opciones en cuestión.
+Docker (para compilar y ejecutar el servidor automáticamente)
+------------------------------------------------------------------------------------------------------------
+Instalar docker ejecutando:
 
+.. code-block:: bash
 
+	wget -qO- https://get.docker.com/ | sh
