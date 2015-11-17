@@ -117,5 +117,5 @@ Donde los *flags* pueden ser:
 Los *targets* pueden ser:
 
 + *udrive* - compila el servidor
-+ *unitTets* - compila los tests unitarios
++ *unitTests* - compila los tests unitarios
 + *coverage* - compila el servidor y los tests unitarios; ejecuta estos últimos y los de integración, guardando los resultados del análisis de coverage en la carpeta ``coverage`` dentro de la carpeta ``build``.
