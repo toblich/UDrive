@@ -103,9 +103,12 @@ Batch ManejadorMetadatos::armarBatchEliminarArchivo (const string& jsonMetadatos
 			Logger::logWarn("No existe en dbMetadatos " + permisosUsuario + " al armar batch de eliminar archivo");
 		}
 	}
+	metadatoConFechaModif.usuariosHabilitados.clear();
+	metadatoConFechaModif.usuariosHabilitados.push_back(metadatoConFechaModif.propietario);
+	string nuevoJson = ParserJson::serializarMetadatoArchivo(metadatoConFechaModif);
 
 	batch.erase(filepath);
-	batch.put(pathCompletoPapelera, jsonMetadatosConFechaModif);
+	batch.put(pathCompletoPapelera, nuevoJson);
 	return batch;
 }
 
