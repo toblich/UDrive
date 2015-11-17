@@ -396,7 +396,7 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaTenerCarpetaTamanioIgualASumaDeAr
 	manejador->subirArchivo("pablo", filepath, "hola pablo", 10, jsonArchOK, 2048);
 	MetadatoArchivo metadatoJsonOK = ParserJson::deserializarMetadatoArchivo(jsonArchOK);
 	metadatoJsonOK.nombre = "juan";
-	metadatoJsonOK.extension = "none";
+	metadatoJsonOK.extension = "";
 	string nuevoJsonMetadato = ParserJson::serializarMetadatoArchivo(metadatoJsonOK);
 	manejador->subirArchivo("pablo", filepath2, "hola tobi", 9, nuevoJsonMetadato, 2048);
 	manejador->subirArchivo("pablo", filepath3, "hola pancho", 11, jsonArchOK, 2048);
@@ -447,7 +447,7 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaObtenerBienLaEstructuraDeLasCarpe
 	string filepath2 = "pablo/como estas/bien/juan";
 	MetadatoArchivo metadato2;
 	metadato2.nombre = "juan";
-	metadato2.extension = "none";
+	metadato2.extension = "";
 	metadato2.ultimaVersion = FIRST;
 	string metadatos2 = ParserJson::serializarMetadatoArchivo(metadato2);
 

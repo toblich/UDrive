@@ -62,6 +62,7 @@ protected:
 	 * @param file				archivo que se quiere subir
 	 * @param latitud			string con la latitud de la ubicación del usuario en caso de que se quiera actualizar
 	 * @param longitud			string con la longitud de la ubicación del usuario en caso de que se quiera actualizar
+	 * @param force				string para saber si hay que forzar o no la subida de un archivo
 	 *
 	 * @retval CODESTATUS		int con el codigo de estado de la operación
 	 * @retval respuesta		respuesta de la operación

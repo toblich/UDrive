@@ -10,5 +10,4 @@ Contenido:
    instalacion_y_configuracion
    forma_de_uso
    mantenimiento
-   known_issues
-   troubleshooting
+   known_issues_y_troubleshooting

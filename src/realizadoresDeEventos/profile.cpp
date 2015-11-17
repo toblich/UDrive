@@ -151,7 +151,7 @@ mg_result Profile::PUTHandler (mg_connection* connection) {
 
 			//Si se cambio el path de la foto, la actualizo en el perfil del usuario. Sino queda como antes.
 			if (manejadorAyM->actualizarFotoPerfil(pathFotoViejo, pathFotoNuevo, datosArch.fileData, datosArch.dataLength)) {
-				Logger::logInfo("Se actualizo la foto de perfil y cambio el path.");
+				Logger::logInfo("Se actualizó la foto de perfil y cambio el path.");
 				viejoPerfil.pathFotoPerfil = pathFotoNuevo;
 			}
 		}
@@ -195,7 +195,7 @@ mg_result Profile::POSTHandler (mg_connection* connection) {
 		string mensaje = "Se registro la cuenta con usuario: " + username + " y pass: " + password + " exitosamente.";
 		this->responderResourceCreated(connection, mensaje);
 	} else {
-		string mensaje = "No se pudo registrar, el username/password/perfil es invalido.";
+		string mensaje = "No se pudo registrar, username, password y/o perfil inválido.";
 		this->responderBadRequest(connection, mensaje);
 	}
 	return MG_TRUE;

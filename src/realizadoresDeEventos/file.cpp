@@ -53,7 +53,7 @@ MetadatoArchivo File::extractMetadataFrom (const string& filename, const string&
 		metArch.nombre = ParserURI::join(nombreYExtension, NAME_DELIM, 0, nombreYExtension.size() - 1);
 		metArch.extension = nombreYExtension[nombreYExtension.size() - 1];
 	} else {
-		metArch.extension = "none";
+		metArch.extension = "";
 		metArch.nombre = filename;
 	}
 
