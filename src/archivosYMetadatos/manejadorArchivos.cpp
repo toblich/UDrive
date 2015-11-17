@@ -136,14 +136,19 @@ bool ManejadorArchivos::restaurarArchivo(const string& pathRealSinFS, const stri
 	return true;
 }
 
-// TODO: actualizar a que sea con todas las versiones que se hayan llegado a borrar
-void ManejadorArchivos::deshacerRestaurado(const string& pathRealSinFS, const string& pathEnPapeleraSinFS) {
+void ManejadorArchivos::deshacerRestaurado(const string& pathRealSinFS, const string& pathEnPapeleraSinFS, int ultimaVersion) {
 	string pathRealConFS = pathFileSystem + "/" + pathRealSinFS;
 	string pathEnPapeleraConFS = pathFileSystem + "/" + pathEnPapeleraSinFS;
 
-	rename(pathRealConFS.c_str(), pathEnPapeleraConFS.c_str());	// deshace la eliminacion
+	for (int i = 1; i <= ultimaVersion; i++) {
+		string versionSuffix = RESERVED_STR + to_string(i);
+		string realConVersion = pathRealConFS + versionSuffix;
+		string papeleraConVersion = pathEnPapeleraConFS + versionSuffix;
+		rename(realConVersion.c_str(), papeleraConVersion.c_str());	// deshace la eliminacion
+	}
+
 	Logger::logWarn("No se ha podido escribir el batch de eliminacion del archivo "
-			+ pathEnPapeleraSinFS + ", por lo que no fue restaurado");
+			+ pathEnPapeleraSinFS + ", por lo que se deshizo la restauracion");
 }
 
 bool ManejadorArchivos::deleteFileSystem() {

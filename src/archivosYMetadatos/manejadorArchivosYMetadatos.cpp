@@ -59,7 +59,7 @@ bool ManejadorArchivosYMetadatos::restaurar(string username, string pathEnPapele
 	if (manejadorMetadatos.restaurarMetadatos(pathEnPapeleraSinFS, username, filepathRealSinFS))
 		return true;
 
-	manejadorArchivos.deshacerRestaurado(filepathRealSinFS, pathEnPapeleraSinFS);
+	manejadorArchivos.deshacerRestaurado(filepathRealSinFS, pathEnPapeleraSinFS, metadato.ultimaVersion);
 	return false;
 }
 

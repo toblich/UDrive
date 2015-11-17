@@ -1507,7 +1507,6 @@ TEST_F(ManejadorArchivosYMetadatosTest, deberiaPoderDescargarUltimaVersion){
 	EXPECT_EQ(pathAComparar, descarga);
 }
 
-//TODO Actualizar una version vieja
 TEST_F(ManejadorArchivosYMetadatosTest, noDeberiaPoderActualizarUnaVersionVieja){
 	crearUsuarioPabloYSubirArchivoYActualizar(manejador);
 	EXPECT_THROW(manejador->subirArchivo("pablo", filepathDefault, "hola tobi", 9, jsonArchOK, 2048, FIRST+1), InvalidVersion);
