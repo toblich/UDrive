@@ -36,6 +36,7 @@ Archivos
 	+ *file* - archivo
 	+ *latitud* - latitud de la ubicación actual
 	+ *longitud* - longitud de la ubicación actual
+	+ *force* - con valor *"true"* para forzar una actualización [#true]_ 
 - Restaurar:  ``DELETE`` a ``/file/<username_de_propietario>/<path>``
 	+ *restore* - con valor "true"
 - Eliminar:  ``DELETE`` a ``/file/<username_de_propietario>/<path>``
@@ -61,3 +62,8 @@ Carpetas
 - Crear:  ``PUT`` a ``/folder/<username_de_propietario>/<path>``
 - Obtener estructura:  ``GET`` a ``/folder/<username_de_propietario>/<path>``
 - Eliminar:  ``DELETE`` a ``/folder/<username_de_propietario>/<path>``
+
+
+.. rubric:: Footnote
+
+.. [#true] Todo otro valor o vacío implica no forzarla.
