@@ -60,6 +60,11 @@ public:
 	bool crearCarpetaSegura(string username, string path);
 
 	/**
+	 * @brief Indica si un usuario tiene permisos sobre un filepath.
+	 */
+	bool tienePermisos(const string& username, const string& filepath);
+
+	/**
 	 * @brief Se encarga de obtener la estructura interna de una determinada carpeta.
 	 */
 	string obtenerEstructuraCarpeta(string path);

@@ -46,12 +46,12 @@ def definirConstantesGlobales():
 	global PERFIL 
 	PERFIL = '{ "nombre": "Tobias", "email": "santi@pancho.pablo"}' # TODO: completar
 	
-	global USER_SIMPLE 
-	USER_SIMPLE = {"user":"tobi", "pass" : "masdeocholetras", "profile": PERFIL}
+	global USER 
+	USER = {"user":"tobi", "pass" : "masdeocholetras", "profile": PERFIL}
 	
-	global LOG_USER_SIMPLE 
-	LOG_USER_SIMPLE = USER_SIMPLE.copy()
-	del LOG_USER_SIMPLE["profile"]
+	global LOG_USER 
+	LOG_USER = USER.copy()
+	del LOG_USER["profile"]
 
 	global BAD_REQUEST
 	BAD_REQUEST = 400
@@ -102,15 +102,15 @@ class ServerTest(unittest.TestCase):
 
 	def test_registroYLogueoValido(self):
 		logTest("Registro y Logueo Valido")
-		r = requests.post(PROFILE, data=USER_SIMPLE)
+		r = requests.post(PROFILE, data=USER)
 		self.assertEquals(r.status_code, RESOURCE_CREATED)
-		s = requests.post(SESSION, LOG_USER_SIMPLE)
+		s = requests.post(SESSION, LOG_USER)
 		self.assertEquals(s.status_code, RESOURCE_CREATED)
 
 
 	def test_registrarUsuarioConPasswordInvalida(self):
 		logTest("Registrar Usuario con Password Invalida")
-		userCroto = USER_SIMPLE.copy()
+		userCroto = USER.copy()
 		userCroto['pass'] = "corta"
 		r = requests.post(PROFILE, data=userCroto)
 		self.assertEquals(r.status_code, BAD_REQUEST)
@@ -118,8 +118,8 @@ class ServerTest(unittest.TestCase):
 
 	def test_logueoInvalido(self):
 		logTest("Logueo Invalido")
-		requests.post(PROFILE, data=USER_SIMPLE) #registro
-		log_erroneo = LOG_USER_SIMPLE.copy()
+		requests.post(PROFILE, data=USER) #registro
+		log_erroneo = LOG_USER.copy()
 		log_erroneo["pass"] = "equivocada"
 		r = requests.post(SESSION, log_erroneo)
 		self.assertEquals(r.status_code, BAD_REQUEST)
@@ -127,26 +127,26 @@ class ServerTest(unittest.TestCase):
 
 	def test_loguearYDesloguearMultiplesSesiones(self):
 		logTest("Loguear y Desloguear Multiples Sesiones")
-		r = requests.post(PROFILE, data=USER_SIMPLE)	# registro
+		r = requests.post(PROFILE, data=USER)	# registro
 		self.assertEquals(r.status_code, RESOURCE_CREATED)
 
-		s = requests.post(SESSION, LOG_USER_SIMPLE)		# 1er log
+		s = requests.post(SESSION, LOG_USER)		# 1er log
 		self.assertEquals(s.status_code, RESOURCE_CREATED)
 		s.token = str(s.json().get('token'))
 
-		t = requests.post(SESSION, LOG_USER_SIMPLE)		# 2do log
+		t = requests.post(SESSION, LOG_USER)		# 2do log
 		self.assertEquals(t.status_code, RESOURCE_CREATED)
 		t.token = str(t.json().get('token'))
 
 		self.assertNotEquals(s.token, t.token)	# tokens distintos por ser sesiones distintas
 		
-		u = requests.delete(SESSION + s.token, data={"user" : USER_SIMPLE["user"]})	# 1er logout
+		u = requests.delete(SESSION + s.token, data={"user" : USER["user"]})	# 1er logout
 		self.assertEquals(u.status_code, SUCCESS)
 		
-		v = requests.delete(SESSION + s.token, data={"user" : USER_SIMPLE["user"]})	# 1er logout repetido
+		v = requests.delete(SESSION + s.token, data={"user" : USER["user"]})	# 1er logout repetido
 		self.assertEquals(v.status_code, NOT_FOUND)
 		
-		w = requests.delete(SESSION + t.token, data={"user" : USER_SIMPLE["user"]})	# 2do logout
+		w = requests.delete(SESSION + t.token, data={"user" : USER["user"]})	# 2do logout
 		self.assertEquals(w.status_code, SUCCESS)
 
 
@@ -186,31 +186,31 @@ class ServerTest(unittest.TestCase):
 
 	def test_subirBajarYBorrarArchivoTextoActualizandoUltimaUbicacion(self):
 		logTest("Subir, Bajar y Borrar Archivo actualizando Ultima Ubicacion")
-		token = registrarYLoguearUser(USER_SIMPLE)
+		token = registrarYLoguearUser(USER)
 		FILENAME = "Makefile"
 
-		uri = FILE + USER_SIMPLE["user"] + "/" + FILENAME
+		uri = FILE + USER["user"] + "/" + FILENAME
 		uriConVersion = uri + RESERVED_STR + FIRST
-		r = requests.put(uriConVersion, files={'file': open(FILENAME, 'rb'), "token": token, "user": USER_SIMPLE["user"], 
+		r = requests.put(uriConVersion, files={'file': open(FILENAME, 'rb'), "token": token, "user": USER["user"], 
 							"latitud": "10.5", "longitud":"20.0"})	# lo sube pasandole la ubicacion para que la actualice
 		self.assertEquals(r.status_code, RESOURCE_CREATED)
 
-		s = requests.get(uriConVersion, data={"user": USER_SIMPLE["user"], "token": token})	# lo baja
+		s = requests.get(uriConVersion, data={"user": USER["user"], "token": token})	# lo baja
 		self.assertEquals(s.status_code, SUCCESS)
 
 		contenido = open(FILENAME, 'rb').read()	# compara el archivo bajado con el original
 		self.assertEquals(s.content, contenido)
 
-		t = requests.delete(uri, data={"user": USER_SIMPLE["user"], "token": token}) # lo borra
+		t = requests.delete(uri, data={"user": USER["user"], "token": token}) # lo borra
 		self.assertEquals(t.status_code, SUCCESS)
 
-		u = requests.delete(uri, data={"user": USER_SIMPLE["user"], "token": token}) # trata de borrar otra vez
+		u = requests.delete(uri, data={"user": USER["user"], "token": token}) # trata de borrar otra vez
 		self.assertEquals(u.status_code, NOT_FOUND)
 
-		v = requests.get(uriConVersion, data={"user": USER_SIMPLE["user"], "token": token})	# trata de bajarlo
+		v = requests.get(uriConVersion, data={"user": USER["user"], "token": token})	# trata de bajarlo
 		self.assertEquals(v.status_code, NOT_FOUND)
 
-		w = requests.get(PROFILE + USER_SIMPLE["user"], data={"token": token, "user": USER_SIMPLE["user"]})
+		w = requests.get(PROFILE + USER["user"], data={"token": token, "user": USER["user"]})
 		self.assertEquals(w.status_code, SUCCESS)
 		perfilObtenido = w.json().get("perfil")
 		ultimaUbicacion = perfilObtenido.get("ultima ubicacion")
@@ -220,100 +220,100 @@ class ServerTest(unittest.TestCase):
 
 	def test_obtenerYActualizarMetadatos(self):
 		logTest("Obtener y Actualizar Metadatos")
-		token = registrarYLoguearUser(USER_SIMPLE)
+		token = registrarYLoguearUser(USER)
 		FILENAME = "../src/db/batch.cpp"
 
-		internalUri = USER_SIMPLE["user"] + FILENAME[2:] # saca los '..'
+		internalUri = USER["user"] + FILENAME[2:] # saca los '..'
 		uriConVersion = internalUri + RESERVED_STR + FIRST
-		requests.put(FILE + uriConVersion, files={'file': open(FILENAME, 'rb'), "token": token, "user": USER_SIMPLE["user"]})	# sube archivo
+		requests.put(FILE + uriConVersion, files={'file': open(FILENAME, 'rb'), "token": token, "user": USER["user"]})	# sube archivo
 
-		r = requests.get(METADATA + internalUri, data={"user": USER_SIMPLE["user"], "token": token})	# consulta metadatos
+		r = requests.get(METADATA + internalUri, data={"user": USER["user"], "token": token})	# consulta metadatos
 		self.assertEquals(r.status_code, SUCCESS)
 
 		metadata = r.json().get("metadatos")
-		self.assertEquals(metadata.get("propietario"), USER_SIMPLE["user"])
+		self.assertEquals(metadata.get("propietario"), USER["user"])
 		self.assertEquals(metadata.get("nombre"), "batch")
-		self.assertEquals(metadata.get("usuario ultima modificacion"), USER_SIMPLE["user"])
+		self.assertEquals(metadata.get("usuario ultima modificacion"), USER["user"])
 		self.assertEquals(metadata.get("extension"), "cpp")
 		self.assertEquals(metadata.get("etiquetas"), [])
-		self.assertEquals(metadata.get("usuarios"), [USER_SIMPLE["user"]])
+		self.assertEquals(metadata.get("usuarios"), [USER["user"]])
 
-		nuevosMetadatos = '{"propietario" : "' +  USER_SIMPLE["user"] + '" , "extension" : "cpp", "nombre" : "batch", "etiquetas" : ["nuevaEtiqueta"], "usuarios" : [], ' \
-			+ '"usuario ultima modificacion" : "' + USER_SIMPLE["user"] + '" , "fecha ultima modificacion" : "23/10/2015"}'
+		nuevosMetadatos = '{"propietario" : "' +  USER["user"] + '" , "extension" : "cpp", "nombre" : "batch", "etiquetas" : ["nuevaEtiqueta"], "usuarios" : [], ' \
+			+ '"usuario ultima modificacion" : "' + USER["user"] + '" , "fecha ultima modificacion" : "23/10/2015"}'
 
-		s = requests.put(METADATA + internalUri, data={"token" : token, "user": USER_SIMPLE["user"], "metadatos" : nuevosMetadatos})
+		s = requests.put(METADATA + internalUri, data={"token" : token, "user": USER["user"], "metadatos" : nuevosMetadatos})
 		self.assertEquals(s.status_code, SUCCESS)
 
-		t = requests.get(METADATA + internalUri, data={"user": USER_SIMPLE["user"], "token": token})
+		t = requests.get(METADATA + internalUri, data={"user": USER["user"], "token": token})
 		self.assertEquals(t.status_code, SUCCESS)
 		nuevaMetadata = t.json().get("metadatos")
-		self.assertEquals(nuevaMetadata.get("propietario"), USER_SIMPLE["user"])
+		self.assertEquals(nuevaMetadata.get("propietario"), USER["user"])
 		self.assertEquals(nuevaMetadata.get("nombre"), "batch")
-		self.assertEquals(nuevaMetadata.get("usuario ultima modificacion"), USER_SIMPLE["user"])
+		self.assertEquals(nuevaMetadata.get("usuario ultima modificacion"), USER["user"])
 		self.assertEquals(nuevaMetadata.get("extension"), "cpp")
 		self.assertEquals(nuevaMetadata.get("etiquetas"), ["nuevaEtiqueta"])	# este se actualizo
-		self.assertEquals(nuevaMetadata.get("usuarios"), [USER_SIMPLE["user"]])
+		self.assertEquals(nuevaMetadata.get("usuarios"), [USER["user"]])
 
-		u = requests.delete(FILE + internalUri, data={"user": USER_SIMPLE["user"], "token": token}) # lo borra
+		u = requests.delete(FILE + internalUri, data={"user": USER["user"], "token": token}) # lo borra
 		self.assertEquals(u.status_code, SUCCESS)
 
 
 	def test_obtenerEstructuraDeCarpetaYBorrarCarperta(self):
 		logTest("Obtener Estructura de carpeta y Borrar carpeta")
-		token = registrarYLoguearUser(USER_SIMPLE)
+		token = registrarYLoguearUser(USER)
 		FILENAME = "../src/db/batch.cpp"
-		BASE_FOLDER = FOLDER + USER_SIMPLE["user"] + "/src/"
+		BASE_FOLDER = FOLDER + USER["user"] + "/src/"
 
-		internalUri = USER_SIMPLE["user"] + FILENAME[2:] # saca los '..'
+		internalUri = USER["user"] + FILENAME[2:] # saca los '..'
 		uriConVersion = internalUri + RESERVED_STR + FIRST
-		requests.put(FILE + uriConVersion, files={'file': open(FILENAME, 'rb'), "token": token, "user": USER_SIMPLE["user"]})	# sube archivo
+		requests.put(FILE + uriConVersion, files={'file': open(FILENAME, 'rb'), "token": token, "user": USER["user"]})	# sube archivo
 
-		r = requests.put(BASE_FOLDER + "subcarpeta", data={"token": token, "user": USER_SIMPLE["user"]})
+		r = requests.put(BASE_FOLDER + "subcarpeta", data={"token": token, "user": USER["user"]})
 		self.assertEquals(r.status_code, RESOURCE_CREATED)
 
-		s = requests.get(BASE_FOLDER, data={"token": token, "user": USER_SIMPLE["user"]})	#obtiene la estructura de /CMakeFiles
+		s = requests.get(BASE_FOLDER, data={"token": token, "user": USER["user"]})	#obtiene la estructura de /CMakeFiles
 		self.assertEquals(s.status_code, SUCCESS)
 
 		estructura = literal_eval(s.content)
-		estructuraEsperada = {USER_SIMPLE["user"] + "/src/db" : "db." + FOLDER_TYPE, USER_SIMPLE["user"] + "/src/subcarpeta": "subcarpeta." + FOLDER_TYPE}
+		estructuraEsperada = {USER["user"] + "/src/db" : "db." + FOLDER_TYPE, USER["user"] + "/src/subcarpeta": "subcarpeta." + FOLDER_TYPE}
 		expected = {"estructura" : estructuraEsperada }
 		self.assertDictEqual(expected, estructura) 
 
-		t = requests.delete(BASE_FOLDER, data={"token": token, "user": USER_SIMPLE["user"]})
+		t = requests.delete(BASE_FOLDER, data={"token": token, "user": USER["user"]})
 		self.assertEquals(t.status_code, SUCCESS)
 
-		u = requests.delete(BASE_FOLDER, data={"token": token, "user": USER_SIMPLE["user"]})
+		u = requests.delete(BASE_FOLDER, data={"token": token, "user": USER["user"]})
 		self.assertEquals(u.status_code, NOT_FOUND)
 
-		v = requests.delete(BASE_FOLDER, data={"token": 1234567890, "user": USER_SIMPLE["user"]})
+		v = requests.delete(BASE_FOLDER, data={"token": 1234567890, "user": USER["user"]})
 		self.assertEquals(v.status_code, UNAUTHORIZED)
 
 
 	def test_DeberiaCambiarEstructuraCarpetaAlRenombrar(self):
 		logTest("Deberia cambiar la estructura de carpeta al renombrar")
-		token = registrarYLoguearUser(USER_SIMPLE)
+		token = registrarYLoguearUser(USER)
 		FILENAME = "../src/db/batch.cpp"
-		internalUri = USER_SIMPLE["user"] + FILENAME[2:] # saca los '..'
+		internalUri = USER["user"] + FILENAME[2:] # saca los '..'
 		uriConVersion = internalUri + RESERVED_STR + FIRST
-		requests.put(FILE + uriConVersion, files={'file': open(FILENAME, 'rb'), "token": token, "user": USER_SIMPLE["user"]})	# sube archivo
+		requests.put(FILE + uriConVersion, files={'file': open(FILENAME, 'rb'), "token": token, "user": USER["user"]})	# sube archivo
 
-		nuevosMetadatos = '{"propietario" : "' +  USER_SIMPLE["user"] + '" , "extension" : "nuevaExtension", "nombre" : "nuevoNombre", ' \
-			+ '"etiquetas" : ["nuevaEtiqueta"], "usuarios" : [], "usuario ultima modificacion" : "' + USER_SIMPLE["user"] + '" , ' \
+		nuevosMetadatos = '{"propietario" : "' +  USER["user"] + '" , "extension" : "nuevaExtension", "nombre" : "nuevoNombre", ' \
+			+ '"etiquetas" : ["nuevaEtiqueta"], "usuarios" : [], "usuario ultima modificacion" : "' + USER["user"] + '" , ' \
 			+ '"fecha ultima modificacion" : "23/10/2015"}'
 
-		s = requests.put(METADATA + internalUri, data={"token" : token, "user": USER_SIMPLE["user"], "metadatos" : nuevosMetadatos})
+		s = requests.put(METADATA + internalUri, data={"token" : token, "user": USER["user"], "metadatos" : nuevosMetadatos})
 		self.assertEquals(s.status_code, SUCCESS)
 
-		t = requests.get(METADATA + internalUri, data={"token": token, "user": USER_SIMPLE["user"]})
+		t = requests.get(METADATA + internalUri, data={"token": token, "user": USER["user"]})
 		self.assertEquals(t.status_code, NOT_FOUND)	# como se renombro, existe pero bajo otra uri
 
-		newInternalUri = USER_SIMPLE["user"] + "/src/db/nuevoNombre.nuevaExtension"
-		u = requests.get(METADATA + newInternalUri, data={"token": token, "user": USER_SIMPLE["user"]})
+		newInternalUri = USER["user"] + "/src/db/nuevoNombre.nuevaExtension"
+		u = requests.get(METADATA + newInternalUri, data={"token": token, "user": USER["user"]})
 		self.assertEquals(u.status_code, SUCCESS)
 
-		estructuraEsperada = {USER_SIMPLE["user"] + "/src/db/nuevoNombre.nuevaExtension" : "nuevoNombre.nuevaExtension" + RESERVED_STR + FIRST}
+		estructuraEsperada = {USER["user"] + "/src/db/nuevoNombre.nuevaExtension" : "nuevoNombre.nuevaExtension" + RESERVED_STR + FIRST}
 		expected = {"estructura" : estructuraEsperada}
-		v = requests.get(FOLDER + USER_SIMPLE["user"] + "/src/db", data={"token" : token, "user": USER_SIMPLE["user"]})
+		v = requests.get(FOLDER + USER["user"] + "/src/db", data={"token" : token, "user": USER["user"]})
 		estructuraRecibida = literal_eval(v.content)
 		self.assertDictEqual(expected, estructuraRecibida)
 
@@ -345,42 +345,42 @@ class ServerTest(unittest.TestCase):
 
 	def test_DeberiaDarErrorAlAccederConTokenErroneo(self):
 		logTest("Deberia dar error al acceder con token erroneo")
-		token = registrarYLoguearUser(USER_SIMPLE)
-		r = requests.get(PROFILE + USER_SIMPLE["user"], data={"user": USER_SIMPLE["user"], "token": "123456789"})
+		token = registrarYLoguearUser(USER)
+		r = requests.get(PROFILE + USER["user"], data={"user": USER["user"], "token": "123456789"})
 		self.assertEquals(r.status_code, UNAUTHORIZED)
 
 
 	def test_SubirBorrarYRestaurarUnArchivo(self):
 		logTest("Subir, Borrar y Restaurar Archivo")
-		token = registrarYLoguearUser(USER_SIMPLE)
+		token = registrarYLoguearUser(USER)
 		FILENAME = "Makefile"
 
-		uri = FILE + USER_SIMPLE["user"] + "/" + FILENAME
-		r = requests.put(uri + RESERVED_STR + FIRST, files={'file': open(FILENAME, 'rb'), "token": token, "user": USER_SIMPLE["user"]})	# lo sube
+		uri = FILE + USER["user"] + "/" + FILENAME
+		r = requests.put(uri + RESERVED_STR + FIRST, files={'file': open(FILENAME, 'rb'), "token": token, "user": USER["user"]})	# lo sube
 		self.assertEquals(r.status_code, RESOURCE_CREATED)
 
-		s = requests.delete(uri, data={"user": USER_SIMPLE["user"], "token": token}) # lo borra
+		s = requests.delete(uri, data={"user": USER["user"], "token": token}) # lo borra
 		self.assertEquals(s.status_code, SUCCESS)
 
-		uri = FILE + USER_SIMPLE["user"] + "/" + TRASH_TYPE + FILENAME + RESERVED_STR + "0"
-		t = requests.delete(uri, data={"user": USER_SIMPLE["user"], "token": token, "restore": "true"}) # lo restaura
+		uri = FILE + USER["user"] + "/" + TRASH_TYPE + FILENAME + RESERVED_STR + "0"
+		t = requests.delete(uri, data={"user": USER["user"], "token": token, "restore": "true"}) # lo restaura
 		self.assertEquals(t.status_code, SUCCESS)
 
 
 	def test_SubirBorrarYEliminarDefinitivamenteUnArchivo(self):	
 		logTest("Subir, Borrar y Eliminar Definitivamente un Archivo")
-		token = registrarYLoguearUser(USER_SIMPLE)
+		token = registrarYLoguearUser(USER)
 		FILENAME = "Makefile"
 
-		uri = FILE + USER_SIMPLE["user"] + "/" + FILENAME
-		r = requests.put(uri + RESERVED_STR + FIRST, files={'file': open(FILENAME, 'rb'), "token": token, "user": USER_SIMPLE["user"]})	# lo sube
+		uri = FILE + USER["user"] + "/" + FILENAME
+		r = requests.put(uri + RESERVED_STR + FIRST, files={'file': open(FILENAME, 'rb'), "token": token, "user": USER["user"]})	# lo sube
 		self.assertEquals(r.status_code, RESOURCE_CREATED)
 
-		s = requests.delete(uri, data={"user": USER_SIMPLE["user"], "token": token}) # lo borra
+		s = requests.delete(uri, data={"user": USER["user"], "token": token}) # lo borra
 		self.assertEquals(s.status_code, SUCCESS)
 
-		uri = FILE + USER_SIMPLE["user"] + "/" + TRASH_TYPE + FILENAME + RESERVED_STR + "0"
-		t = requests.delete(uri, data={"user": USER_SIMPLE["user"], "token": token, "restore": "false"}) # lo borra de la papelera
+		uri = FILE + USER["user"] + "/" + TRASH_TYPE + FILENAME + RESERVED_STR + "0"
+		t = requests.delete(uri, data={"user": USER["user"], "token": token, "restore": "false"}) # lo borra de la papelera
 		self.assertEquals(t.status_code, SUCCESS)
 
 
@@ -439,36 +439,36 @@ class ServerTest(unittest.TestCase):
 
 	def test_deberiaBuscarBienArchivosPorExtensionYNombre(self):
 		logTest("Deberia buscar bine archivos por extension y nombre")
-		token = registrarYLoguearUser(USER_SIMPLE)
+		token = registrarYLoguearUser(USER)
 		
 		TXT_FILENAME_ROOT = 'CMakeCache.txt'
 		JPG_FILENAME_ROOT = 'default.jpg'
 		TXT_FILENAME_SUBFOLDER = 'files/log.txt'
 
-		requests.put(FILE + USER_SIMPLE["user"] + "/" + TXT_FILENAME_ROOT + RESERVED_STR + FIRST, \
-			files={'file': open(TXT_FILENAME_ROOT, 'rb'), "token": token, "user": USER_SIMPLE["user"]})
-		requests.put(FILE + USER_SIMPLE["user"] + "/" + JPG_FILENAME_ROOT + RESERVED_STR + FIRST, \
-			files={'file': open(JPG_FILENAME_ROOT, 'rb'), "token": token, "user": USER_SIMPLE["user"]})
-		requests.put(FILE + USER_SIMPLE["user"] + "/" + TXT_FILENAME_SUBFOLDER + RESERVED_STR + FIRST, \
-			files={'file': open(TXT_FILENAME_SUBFOLDER, 'rb'), "token": token, "user": USER_SIMPLE["user"]})
+		requests.put(FILE + USER["user"] + "/" + TXT_FILENAME_ROOT + RESERVED_STR + FIRST, \
+			files={'file': open(TXT_FILENAME_ROOT, 'rb'), "token": token, "user": USER["user"]})
+		requests.put(FILE + USER["user"] + "/" + JPG_FILENAME_ROOT + RESERVED_STR + FIRST, \
+			files={'file': open(JPG_FILENAME_ROOT, 'rb'), "token": token, "user": USER["user"]})
+		requests.put(FILE + USER["user"] + "/" + TXT_FILENAME_SUBFOLDER + RESERVED_STR + FIRST, \
+			files={'file': open(TXT_FILENAME_SUBFOLDER, 'rb'), "token": token, "user": USER["user"]})
 
 		# Busco por extension txt
-		r = requests.get(METADATA, data={"user": USER_SIMPLE["user"], "token": token, "extension": "txt"})
+		r = requests.get(METADATA, data={"user": USER["user"], "token": token, "extension": "txt"})
 		self.assertEquals(r.status_code, SUCCESS)
 		resultado = r.json().get("busqueda")
-		esperado = { USER_SIMPLE["user"] +"/"+ TXT_FILENAME_ROOT : TXT_FILENAME_ROOT + RESERVED_STR + FIRST, \
-			USER_SIMPLE["user"] + "/" + TXT_FILENAME_SUBFOLDER : TXT_FILENAME_SUBFOLDER.split("/")[-1] + RESERVED_STR + FIRST}	# CMakeCache.txt y el log
+		esperado = { USER["user"] +"/"+ TXT_FILENAME_ROOT : TXT_FILENAME_ROOT + RESERVED_STR + FIRST, \
+			USER["user"] + "/" + TXT_FILENAME_SUBFOLDER : TXT_FILENAME_SUBFOLDER.split("/")[-1] + RESERVED_STR + FIRST}	# CMakeCache.txt y el log
 		self.assertDictEqual(resultado, esperado)
 
 		# Busco por nombre con g -> no busca sobre la extension, asi que no toma al jpg
-		s = requests.get(METADATA, data={"user": USER_SIMPLE["user"], "token": token, "nombre": "g"})
+		s = requests.get(METADATA, data={"user": USER["user"], "token": token, "nombre": "g"})
 		self.assertEquals(s.status_code, SUCCESS)
 		resultado = s.json().get("busqueda")
-		esperado = { USER_SIMPLE["user"] + "/" + TXT_FILENAME_SUBFOLDER : TXT_FILENAME_SUBFOLDER.split("/")[-1] + RESERVED_STR + FIRST} # el log
+		esperado = { USER["user"] + "/" + TXT_FILENAME_SUBFOLDER : TXT_FILENAME_SUBFOLDER.split("/")[-1] + RESERVED_STR + FIRST} # el log
 		self.assertDictEqual(resultado, esperado)
 
 		# Busco por nombre con s -> no busca sobre el path (las carpetas), asi que no toma al log
-		t = requests.get(METADATA, data={"user": USER_SIMPLE["user"], "token": token, "nombre": "s"})
+		t = requests.get(METADATA, data={"user": USER["user"], "token": token, "nombre": "s"})
 		self.assertEquals(t.status_code, SUCCESS)
 		resultado = t.json().get("busqueda")
 		esperado = { } # ninguno
@@ -477,20 +477,63 @@ class ServerTest(unittest.TestCase):
 
 	def test_DeberiaRestaurarArchivoHabiendoBorradoSuCarpetaOriginal(self):
 		logTest("Deberia Restaurar Archivo Habiendo Borrado Su Carpeta Original")
-		token = registrarYLoguearUser(USER_SIMPLE)
+		token = registrarYLoguearUser(USER)
 
 		TXT_FILENAME_SUBFOLDER = 'files/log.txt'
 
-		r = requests.put(FILE + USER_SIMPLE["user"] + "/" + TXT_FILENAME_SUBFOLDER + RESERVED_STR + FIRST, \
-			files={'file': open(TXT_FILENAME_SUBFOLDER, 'rb'), "token": token, "user": USER_SIMPLE["user"]})	# sube 'log.txt' en carpeta 'files'
+		r = requests.put(FILE + USER["user"] + "/" + TXT_FILENAME_SUBFOLDER + RESERVED_STR + FIRST, \
+			files={'file': open(TXT_FILENAME_SUBFOLDER, 'rb'), "token": token, "user": USER["user"]})	# sube 'log.txt' en carpeta 'files'
 		self.assertEquals(r.status_code, RESOURCE_CREATED)
 
-		s = requests.delete(FOLDER + USER_SIMPLE["user"] + "/files", data = {"token" : token, "user": USER_SIMPLE["user"]})
+		s = requests.delete(FOLDER + USER["user"] + "/files", data = {"token" : token, "user": USER["user"]})
 		self.assertEquals(s.status_code, SUCCESS)
 
-		restaurarUri = FILE + USER_SIMPLE["user"] + "/" + TRASH_TYPE + "files" + RESERVED_STR + "log.txt" + RESERVED_STR + "0"
-		t = requests.delete(restaurarUri, data={"restore" : "true", "token" : token, "user" : USER_SIMPLE["user"]})
+		restaurarUri = FILE + USER["user"] + "/" + TRASH_TYPE + "files" + RESERVED_STR + "log.txt" + RESERVED_STR + "0"
+		t = requests.delete(restaurarUri, data={"restore" : "true", "token" : token, "user" : USER["user"]})
 		self.assertEquals(t.status_code, SUCCESS)
+
+
+	# def test_alRenombrarNoDeberiaAgregarseACompartidos(self):
+	# 	logTest("test_alRenombrarNoDeberiaAgregarseACompartidos")
+	# 	token = registrarYLoguearUser(USER)
+	# 	FILENAME = 'files/log.txt'
+	# 	r = requests.put(FILE + USER["user"] + "/" + FILENAME + RESERVED_STR + FIRST, \
+	# 		files={'file': open(FILENAME, 'rb'), "token": token, "user": USER["user"]})	# sube 'log.txt' en carpeta 'files'
+	# 	self.assertEquals(r.status_code, RESOURCE_CREATED)
+
+	# 	nuevosMetadatos = '{"propietario" : "' +  USER["user"] + '" , "extension" : "nuevaExtension", "nombre" : "nuevoNombre", ' \
+	# 		+ '"etiquetas" : ["nuevaEtiqueta"], "usuarios" : ["' + USER["user"] + '"], "usuario ultima modificacion" : "' + USER["user"] + '" , ' \
+	# 		+ '"fecha ultima modificacion" : "23/10/2015"}'
+
+	# 	# Renombra a nuevoNombre.nuevaExtension
+	# 	s = requests.put(METADATA + USER["user"] + "/" + FILENAME, data={"token" : token, "user": USER["user"], "metadatos" : nuevosMetadatos})
+	# 	self.assertEquals(s.status_code, SUCCESS)
+
+	# 	t = requests.get(FOLDER + RESERVED_STR + "permisos/" + USER["user"], data={"token" : token, "user" : USER["user"]})
+	# 	estructuraReal = literal_eval(t.content)
+		
+		
+
+	def test_NoDeberiaSubirArchivoEnCarpetaCompartidosQueNoSeaActualizacion(self):
+		logTest("test_NoDeberiaSubirArchivoEnCarpetaCompartidosQueNoSeaActualizacion")
+		tokenA = registrarYLoguear("A", "ocholetras", PERFIL)
+		tokenB = registrarYLoguear("B", "ocholetras", PERFIL)
+
+		FILENAME = 'files/log.txt'
+		r = requests.put(FILE +"A/" + FILENAME + RESERVED_STR + FIRST, \
+			files={'file': open(FILENAME, 'rb'), "token": tokenA, "user": "A"})	# sube 'log.txt' en carpeta 'files'
+		self.assertEquals(r.status_code, RESOURCE_CREATED)
+
+		nuevosMetadatos = '{"propietario" : "A" , "extension" : "txt", "nombre" : "log", ' \
+			+ '"etiquetas" : [], "usuarios" : ["A", "B"], "usuario ultima modificacion" : "A" , ' \
+			+ '"fecha ultima modificacion" : "23/10/2015"}'
+
+		s = requests.put(METADATA + "A/" + FILENAME, data={"token" : tokenA, "user": "A", "metadatos" : nuevosMetadatos})
+		self.assertEquals(s.status_code, SUCCESS)
+
+		t = requests.put(FILE +"A/files/otro" + RESERVED_STR + FIRST, \
+			files={'file': open(FILENAME, 'rb'), "token": tokenB, "user": "B"})	# sube B otro archivo en carpeta 'files'
+		self.assertEquals(t.status_code, UNAUTHORIZED)
 
 
 if __name__ == '__main__':

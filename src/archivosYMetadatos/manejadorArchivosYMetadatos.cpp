@@ -115,6 +115,10 @@ bool ManejadorArchivosYMetadatos::actualizarFotoPerfil(string filepathViejo, str
 	return ( filepathViejo != filepathNuevo );
 }
 
+bool ManejadorArchivosYMetadatos::tienePermisos(const string& username, const string& filepath) {
+	return validador.verificarPermisos(username, filepath);
+}
+
 // En la base de datos se guarda el path sin la carpeta del FS
 bool ManejadorArchivosYMetadatos::subirArchivo (string username, string filepath, const char* data, int dataLen,
 		string jsonMetadatos, int cuota, int nuevaVersion, bool force) {

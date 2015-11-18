@@ -102,6 +102,7 @@ void File::subirArchivo (const vector<string>& uris, const DatosArchivo& datosAr
 	bool force = datosArch.force == "true";
 	Logger::logInfo("Se obtuvo la variable force con valor: " + force);
 
+
 	try {
 		if (manejadorArchYMet->subirArchivo(user, filepath, datosArch.fileData, datosArch.dataLength,
 				jsonMetadata, cuotaUsuario, version, force)) {
@@ -116,8 +117,12 @@ void File::subirArchivo (const vector<string>& uris, const DatosArchivo& datosAr
 			string mensaje = "Se subió el archivo: " + filepath + " correctamente.";
 			this->responderResourceCreated(connection, mensaje);
 		} else {
-			string mensaje = "ERROR, no se pudo subir el archivo: " + filepath;
-			this->responderInternalServerError(connection, mensaje);
+			if (not manejadorArchYMet->tienePermisos(user, filepath))
+				this->responderAutenticacionFallida(connection);
+			else {
+				string mensaje = "ERROR, no se pudo subir el archivo: " + filepath;
+				this->responderInternalServerError(connection, mensaje);
+			}
 		}
 	} catch (InvalidVersion& e) {
 		string mensaje = "ERROR, no se pudo subir el archivo: " + filepath;
