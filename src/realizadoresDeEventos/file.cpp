@@ -117,7 +117,7 @@ void File::subirArchivo (const vector<string>& uris, const DatosArchivo& datosAr
 			string mensaje = "Se subió el archivo: " + filepath + " correctamente.";
 			this->responderResourceCreated(connection, mensaje);
 		} else {
-			if (not manejadorArchYMet->tienePermisos(user, filepath))
+			if (not manejadorArchYMet->tienePermisos(user, filepath))	// No mover a anter del manejador->subirArchivo
 				this->responderAutenticacionFallida(connection);
 			else {
 				string mensaje = "ERROR, no se pudo subir el archivo: " + filepath;
