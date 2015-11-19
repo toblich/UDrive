@@ -10,11 +10,3 @@ Contenido:
    seccion2
    etc
 
-
-Indices y tablas
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
-
