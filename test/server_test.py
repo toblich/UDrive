@@ -493,24 +493,25 @@ class ServerTest(unittest.TestCase):
 		self.assertEquals(t.status_code, SUCCESS)
 
 
-	# def test_alRenombrarNoDeberiaAgregarseACompartidos(self):
-	# 	logTest("test_alRenombrarNoDeberiaAgregarseACompartidos")
-	# 	token = registrarYLoguearUser(USER)
-	# 	FILENAME = 'files/log.txt'
-	# 	r = requests.put(FILE + USER["user"] + "/" + FILENAME + RESERVED_STR + FIRST, \
-	# 		files={'file': open(FILENAME, 'rb'), "token": token, "user": USER["user"]})	# sube 'log.txt' en carpeta 'files'
-	# 	self.assertEquals(r.status_code, RESOURCE_CREATED)
+	def test_alRenombrarNoDeberiaAgregarseACompartidos(self):
+		logTest("test_alRenombrarNoDeberiaAgregarseACompartidos")
+		token = registrarYLoguearUser(USER)
+		FILENAME = 'files/log.txt'
+		r = requests.put(FILE + USER["user"] + "/" + FILENAME + RESERVED_STR + FIRST, \
+			files={'file': open(FILENAME, 'rb'), "token": token, "user": USER["user"]})	# sube 'log.txt' en carpeta 'files'
+		self.assertEquals(r.status_code, RESOURCE_CREATED)
 
-	# 	nuevosMetadatos = '{"propietario" : "' +  USER["user"] + '" , "extension" : "nuevaExtension", "nombre" : "nuevoNombre", ' \
-	# 		+ '"etiquetas" : ["nuevaEtiqueta"], "usuarios" : ["' + USER["user"] + '"], "usuario ultima modificacion" : "' + USER["user"] + '" , ' \
-	# 		+ '"fecha ultima modificacion" : "23/10/2015"}'
+		nuevosMetadatos = '{"propietario" : "' +  USER["user"] + '" , "extension" : "nuevaExtension", "nombre" : "nuevoNombre", ' \
+			+ '"etiquetas" : ["nuevaEtiqueta"], "usuarios" : ["' + USER["user"] + '"], "usuario ultima modificacion" : "' + USER["user"] + '" , ' \
+			+ '"fecha ultima modificacion" : "23/10/2015"}'
 
-	# 	# Renombra a nuevoNombre.nuevaExtension
-	# 	s = requests.put(METADATA + USER["user"] + "/" + FILENAME, data={"token" : token, "user": USER["user"], "metadatos" : nuevosMetadatos})
-	# 	self.assertEquals(s.status_code, SUCCESS)
+		# Renombra a nuevoNombre.nuevaExtension
+		s = requests.put(METADATA + USER["user"] + "/" + FILENAME, data={"token" : token, "user": USER["user"], "metadatos" : nuevosMetadatos})
+		self.assertEquals(s.status_code, SUCCESS)
 
-	# 	t = requests.get(FOLDER + RESERVED_STR + "permisos/" + USER["user"], data={"token" : token, "user" : USER["user"]})
-	# 	estructuraReal = literal_eval(t.content)
+		t = requests.get(FOLDER + RESERVED_STR + "permisos/" + USER["user"], data={"token" : token, "user" : USER["user"]})
+		estructuraReal = t.json().get("estructura")
+		self.assertDictEqual(estructuraReal, {})	# deberia estar vacia (nadie le compartio nada a el)
 		
 		
 
