@@ -5,7 +5,7 @@ Compilación y ejecución
 Tanto la compilación como la ejecución del Servidor de UDrive se pueden realizar de forma manual
 o de forma automática.
 
-Compilación y Ejecución de forma Manual (del servidor, los tests unitarios y el code coverage)
+Compilación y Ejecución Manual (servidor, tests unitarios y code coverage)
 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 Con ejecución inmediata
@@ -41,7 +41,7 @@ Los *targets* pueden ser:
  + *coverage* - compila el servidor y los tests unitarios; ejecuta estos últimos y los de integración, guardando los resultados del análisis de coverage en la carpeta ``coverage`` dentro de la carpeta ``build``.
 
 
-Compilación y Ejecución de forma automática con Docker (del servidor y los tests unitarios)
+Compilación y Ejecución con Docker (servidor)
 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 Una vez que se tiene instalado Docker, tal como se indicada en la sección `Instalación y configuración <instalacion_y_configuracion.html>`_, copiar el archivo ``Dockerfile`` a una carpeta vacía. Desde esa carpeta, ejecutar:
 
@@ -65,7 +65,8 @@ donde ``<containerID>`` es el ID del container obtenido en el primer comando.
 
 Finalmente con la IP obtenida en el último comando se podrá interactuar con el servidor (considerando que se lanza en el puerto 8080).
 
-Para saber como interactuar con el Servidor ver el Manual de la API REST dentro de la Documentación Técnica del Servidor.
+.. note::
+	Para saber como interactuar con el Servidor ver el `Manual de la API REST <../../../Documentacion_Tecnica/_build/html/api_rest.html>`_ dentro de la `Documentación Técnica del Servidor. <../../../Documentacion_Tecnica/_build/html/index.html>`_
 
 
 Para ver el log o el filesystem, o interactuar de cualquier otra forma con el contenedor que ejecuta el servidor, se sugiere iniciar una terminal del container de la siguiente manera::
@@ -74,3 +75,4 @@ Para ver el log o el filesystem, o interactuar de cualquier otra forma con el co
 	sudo docker exec <containerID> /bin/bash
 
 donde ``<containerID>`` es el ID del container obtenido en el primer comando.
+
