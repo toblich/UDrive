@@ -8,7 +8,7 @@ Known Issues
 * El tamaño del path que abarca desde el root hasta la ubicación física del archivo no puede tener mas de 1024 caracteres.
 * El tamaño del nombre de archivos no puede tener mas de 1024 caracteres.
 * El valor (string) que tienen los parámetros de la conexión que maneja la API REST no puede tener mas de 1024 caracteres.
-* El campo "Nombre" dento del perfil de un usuario no acepta acentos ni caracteres restringidos.
+* El campo "nombre" dentro del perfil de un usuario no acepta acentos ni caracteres restringidos.
 * El campo "mail" dentro del perfil solo puede tener 1 o mas puntos al final, no en la parte que está a la izquierda del @.
 * No se pueden subir archivos o carpetas con espacios.
 
