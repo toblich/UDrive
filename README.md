@@ -15,3 +15,6 @@ Para ver cómo instalar, configurar y ejecutar el servidor, vaya al Manual del A
 > Para instalar `pip` si no lo tuviera, ejecutar `sudo apt-get install python-pip`.
 >
 > Para instalar `Doxygen` ejecutar `sudo apt-get install doxygen`.
+
+## Repositorio cliente
+Por comodidad, el cliente de Android de esta aplicación está en [su propio repositorio](https://github.com/plandino/clienteUdrive).
