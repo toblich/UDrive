@@ -113,6 +113,7 @@ Repositorio del servidor
 
 Repositorio del cliente
 ~~~~~~~~~~~~~~~~~~~~~~~
+ * `Generar documentacion <https://github.com/plandino/clienteUdrive/issues/15>`_ Realizado por `Francisco <https://github.com/plandino>`_
  * `Versionado de archivos <https://github.com/plandino/clienteUdrive/issues/14>`_ Realizado por `Francisco <https://github.com/plandino>`_
  * `Hacer que la sesion persista si no cierro sesion <https://github.com/plandino/clienteUdrive/issues/13>`_ Realizado por `Francisco <https://github.com/plandino>`_
  * `Ordenar codigo y repositorio. <https://github.com/plandino/clienteUdrive/issues/12>`_ Realizado por `Francisco <https://github.com/plandino>`_

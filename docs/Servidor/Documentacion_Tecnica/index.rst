@@ -14,10 +14,3 @@ Contenido
    librerias_y_compilacion
    pruebas
 
-
-Índices y tablas
-==================
-
-* :ref:`genindex`
-* :ref:`search`
-
