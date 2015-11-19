@@ -72,7 +72,7 @@ Finalmente con la IP obtenida en el último comando se podrá interactuar con el
 Para ver el log o el filesystem, o interactuar de cualquier otra forma con el contenedor que ejecuta el servidor, se sugiere iniciar una terminal del container de la siguiente manera::
 
 	sudo docker ps | grep udrive
-	sudo docker exec <containerID> /bin/bash
+	sudo docker exec -it <containerID> /bin/bash
 
 donde ``<containerID>`` es el ID del container obtenido en el primer comando.
 
