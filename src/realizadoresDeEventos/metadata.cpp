@@ -23,8 +23,6 @@ void Metadata::GETMetadatos(mg_connection* connection, vector<string> uris, stri
 }
 
 void Metadata::busquedaEtiqueta(mg_connection* connection, string user, string etiqueta) {
-	//TODO: queda la version para buscar de a una etiqueta por vez
-	//despues si termina siendo una lista hay que ver como cambiarlo.
 	string resultado = manejadorArchYMet->buscarPorEtiqueta(user, etiqueta);
 	responderBusqueda(connection, resultado);
 }

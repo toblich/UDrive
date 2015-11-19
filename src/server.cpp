@@ -51,11 +51,10 @@ Server::~Server () {
 		mg_destroy_server(&server);
 	}
 
-	//TODO: Sacar estas instrucciones para que despues persistan los datos.
-	perfiles->deleteBD(); //
-	sesiones->deleteBD(); //
-	passwords->deleteBD(); //
-	metadatos->deleteBD(); //
+//	perfiles->deleteBD(); //
+//	sesiones->deleteBD(); //
+//	passwords->deleteBD(); //
+//	metadatos->deleteBD(); //
 	//BDs
 	delete perfiles;
 	delete sesiones;
