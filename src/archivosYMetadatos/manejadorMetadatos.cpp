@@ -203,7 +203,9 @@ void ManejadorMetadatos::actualizarPermisosPorRenombrado (const string& filepath
 	string nuevoFilepath = ParserURI::pathConNuevoFilename(filepath, nuevoFilename);
 	list<string> usuariosHabilitados = (metadatosNuevos.usuariosHabilitados.empty()) ?
 			metadatosViejos.usuariosHabilitados : metadatosNuevos.usuariosHabilitados;
-	actualizarPermisosPathArchivo(filepath, nuevoFilepath, usuariosHabilitados);	// actualiza el path del archivo en quienes tienen permiso
+	usuariosHabilitados.remove(metadatosNuevos.propietario);
+	if ( not usuariosHabilitados.empty() ) //Si estaba compartido
+		actualizarPermisosPathArchivo(filepath, nuevoFilepath, usuariosHabilitados);	// actualiza el path del archivo en quienes tienen permiso
 	Batch batch;
 	batch.erase(filepath);
 	batch.put(nuevoFilepath, nuevoJson);

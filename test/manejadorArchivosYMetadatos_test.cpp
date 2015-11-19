@@ -1512,3 +1512,24 @@ TEST_F(ManejadorArchivosYMetadatosTest, noDeberiaPoderActualizarUnaVersionVieja)
 	EXPECT_THROW(manejador->subirArchivo("pablo", filepathDefault, "hola tobi", 9, jsonArchOK, 2048, FIRST+1), InvalidVersion);
 	EXPECT_TRUE( manejador->subirArchivo("pablo", filepathDefault, "hola tobi", 9, jsonArchOK, 2048, FIRST+1, true) );
 }
+
+TEST_F(ManejadorArchivosYMetadatosTest, noDeberiaObtenerPermisosElPropietarioAlRenombrar) {
+	string filepath = "pablo/archivos/saludo.txt";
+	inic(manejador, filepath);	// sube el archivo con metadatos jsonArchOK
+
+	MetadatoArchivo metadatos = ParserJson::deserializarMetadatoArchivo(jsonArchOK); //Ojo con esto, por eso hago el clear
+	metadatos.nombre = "nuevoNombre";
+	metadatos.extension = "nuevaExtension";
+	metadatos.usuariosHabilitados.clear();
+	string nuevoFilepath = "pablo/archivos/nuevoNombre.nuevaExtension";
+	string jsonNuevo = ParserJson::serializarMetadatoArchivo(metadatos);
+	manejador->actualizarMetadatos("pablo", filepath, jsonNuevo);
+
+	string estructura = manejador->obtenerEstructuraCarpeta(PERMISOS + "/pablo");
+	map<string, string> mapa = ParserJson::deserializarMapa(estructura);
+	EXPECT_TRUE( mapa.empty() );
+
+	string estructura2 = manejador->obtenerEstructuraCarpeta(PERMISOS + "/juan");
+	map<string, string> mapa2 = ParserJson::deserializarMapa(estructura2);
+	EXPECT_FALSE( mapa2.empty() );
+}
