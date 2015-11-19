@@ -95,3 +95,4 @@ Se detallan a continuación los bugs que hemos encontrado, y que no han sido sol
 ### Cliente
 - Cuando la lista de versiones anteriores es muy grande (Es decir, hay muchas versiones anteriores), deforma y tapa los botones y el mensaje en la ventana emergente.
 - A veces, que la primera vez que se accede al perfil, no carga la foto de perfil.
+- No se pueden subir archivos que estén almacenados en otras aplicaciones como GoogleDrive o Dropbox.
