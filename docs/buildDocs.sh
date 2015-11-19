@@ -1,6 +1,6 @@
 #!/bin/bash
 
-directories=("Manual_de_Proyecto/" "Servidor/*/" "Cliente/*/")
+directories=("Manual_de_Proyecto/" "Servidor/*/")
 
 for dir in ${directories[@]}
 do
