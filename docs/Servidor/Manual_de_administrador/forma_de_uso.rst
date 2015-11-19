@@ -63,4 +63,4 @@ donde ``<containerID>`` es el ID del container obtenido en el primer comando.
 
 Finalmente con la IP obtenida en el último comando se podrá interactuar con el servidor (considerando que se lanza en el puerto 8080).
 
-Para saber como interactuar con el Servidor ver el Manual de la API REST dentro de la Documentación Técnica del Servidor.
+Para saber como interactuar con el Servidor ver el `Manual de la API REST <../../../Documentacion_Tecnica/_build/html/api_rest.html>`_ dentro de la `Documentación Técnica del Servidor. <../../../Documentacion_Tecnica/_build/html/index.html>`_
