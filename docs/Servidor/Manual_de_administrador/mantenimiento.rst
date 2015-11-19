@@ -18,7 +18,8 @@ La carpeta *FileSystem* es la encargada de almacenar tanto los archivos y carpet
 
 Bases de Datos
 <<<<<<<<<<<<<<<<
-Para el correcto manejo tanto de usuarios como de archivos y metadatos el *Servidor* de *UDrive* cuenta con 4 base de datos:
+Para el correcto manejo tanto de usuarios como de archivos y metadatos el *Servidor* de *UDrive* cuenta con 4 bases de datos:
+
  + Metadatos: Esta BD es la mas compleja ya que no solo almacena los metadatos asociados a cada uno de los archivos que se encuentren alojados en el *Servidor* sino que también maneja todo el control de permisos y versiones sobre los mismos.
  + Sesiones: Esta BD almacena los tokens relacionados a las distintas sesiones que pueden tener los usuarios de *UDrive*.
  + Passwords: Esta BD almecena las contraseñas que utilizan cada uno de los usuarios de *UDrive*.
