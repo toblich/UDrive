@@ -5,11 +5,9 @@
 #include <iostream>
 #include <fstream>
 #include <ctime>
+#include "metadatosYConstantes.h"
 
 using namespace std;
-
-const int NIVEL_LOGGER = 0;
-const int UN_MB = 1048576;
 
 const int ERROR = 4;
 const int WARN 	= 3;
@@ -26,6 +24,10 @@ class Logger {
 private:
 	static void verificarTamanioDelLog();
 	Logger();
+
+	static int nivelLogger;
+	static int tamanoMaximo;
+
 public:
 	/**
 	 * @brief Función que se utiliza para escribir en el log un determinado mensaje
@@ -73,6 +75,14 @@ public:
 	 *
 	 */
 	static void logDebug(const string& texto);
+
+	static void setNivelLogger(int nivel) {
+		nivelLogger = nivel;
+	}
+
+	static void setTamanoMaximo(int tamano) {
+		tamanoMaximo = tamano;
+	}
 };
 
 #endif /* LOGGER_H_ */

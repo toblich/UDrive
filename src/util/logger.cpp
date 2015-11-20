@@ -1,6 +1,8 @@
 #include "logger.h"
 
-const char* NOMBRE_ARCH_LOG = "files/log.txt";
+int Logger::nivelLogger = NIVEL_LOG_DEFAULT;
+int Logger::tamanoMaximo = TAM_MAX_LOG_DEFAULT;
+const char* NOMBRE_ARCH_LOG = (FILES + DEFAULT_LOG).c_str();
 
 Logger::Logger() {
 }
@@ -10,8 +12,8 @@ Logger::~Logger() {
 }
 
 void Logger::loggear(const string& texto, int tipoDeError){
-	if (NIVEL_LOGGER <= tipoDeError){
-        ofstream log(NOMBRE_ARCH_LOG, ios_base::app | ios::binary);	
+	if (nivelLogger <= tipoDeError){
+        ofstream log(NOMBRE_ARCH_LOG, ios_base::app | ios::binary);
 
         switch (tipoDeError){
 
@@ -47,7 +49,7 @@ void Logger::verificarTamanioDelLog(){
     ifstream log(NOMBRE_ARCH_LOG, ios_base::in);
 	log.seekg(0, ios::end);
 	int size = static_cast <int> (log.tellg());
-	if (size > UN_MB){
+	if (size > tamanoMaximo){
 		ofstream borrar(NOMBRE_ARCH_LOG, ios::trunc);
 		borrar.close();
 	}

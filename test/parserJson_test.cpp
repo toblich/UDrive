@@ -1,5 +1,6 @@
 #include "parserJson.h"
 #include <gtest/gtest.h>
+#include <fstream>
 
 using namespace std;
 
@@ -30,6 +31,16 @@ const string jsonSesOK = "{\n"
 		"\t\"password\" : \"pancho123\",\n"
 		"\t\"token\" : \"asg371ns812ssk\"\n"
 		"}";
+
+const string jsonConf = "{\n"
+		"\t\"Nivel Log\" : 3,\n"
+		"\t\"Tamano max Log\" : 512,\n"
+		"\t\"FileSystem\" : \"FS\",\n"
+		"\t\"Base de datos\" : \"database\",\n"
+		"\t\"Cantidad threads\" : 5,\n"
+		"\t\"Tiempo Poll Server\" : 2\n"
+		"}";
+
 
 bool sonListasIguales(const list<string>& expected, const list<string>& actual) {
 	list<string>::const_iterator exp = expected.cbegin();
@@ -159,7 +170,7 @@ TEST(ParserJsonTest, deberiaDeserializarBienCuotaIncorrectaMetadatoUsuario){
 			"\t}\n"
 			"}";
 	MetadatoUsuario pruebaUsu = ParserJson::deserializarMetadatoUsuario(jsonUsu);
-	EXPECT_EQ(CUOTA, pruebaUsu.cuota);
+	EXPECT_EQ(CUOTA_DEFAULT, pruebaUsu.cuota);
 }
 
 TEST(ParserJsonTest, deberiaDeserializarBienCuotaMenorACeroMetadatoUsuario){
@@ -174,7 +185,7 @@ TEST(ParserJsonTest, deberiaDeserializarBienCuotaMenorACeroMetadatoUsuario){
 			"\t}\n"
 			"}";
 	MetadatoUsuario pruebaUsu = ParserJson::deserializarMetadatoUsuario(jsonUsu);
-	EXPECT_EQ(CUOTA, pruebaUsu.cuota);
+	EXPECT_EQ(CUOTA_DEFAULT, pruebaUsu.cuota);
 }
 
 TEST(ParserJsonTest, deberiaDeserializarBienUltimaUbicacionCorrectaMetadatoUsuario){
@@ -194,7 +205,7 @@ TEST(ParserJsonTest, deberiaDeserializarBienCuotaInexistenteMetadatoUsuario){
 			"\t}\n"
 			"}";
 	MetadatoUsuario pruebaUsu = ParserJson::deserializarMetadatoUsuario(jsonUsu);
-	EXPECT_EQ(CUOTA, pruebaUsu.cuota);
+	EXPECT_EQ(CUOTA_DEFAULT, pruebaUsu.cuota);
 }
 
 TEST(ParserJsonTest, deberiaDeserializarBienUltimaUbicacionLatitudInvalidaMetadatoUsuario){
@@ -331,4 +342,50 @@ TEST(ParserJsonTest, deberiaObtenerLoMismoAlSerializarYDeserializarMapa){
 	EXPECT_EQ(original.at("chau"), deserializado.at("chau"));
 	EXPECT_EQ(original.at("hola"), deserializado.at("hola"));
 	EXPECT_EQ(original.at("juan"), deserializado.at("juan"));
+}
+
+
+
+TEST(ParserJsonTest, deberiaParsearBienArchivoDeConfiguracion) {
+	string pathArchConf = "pruebaArchConf.txt";
+	ofstream arch(pathArchConf, ios::binary);
+    arch << jsonConf << endl;
+    arch.close();
+
+    Configuracion conf = ParserJson::leerArchivoConfiguracion(pathArchConf.c_str());
+
+    EXPECT_EQ("FS", conf.pathFS);
+    EXPECT_EQ("database", conf.pathDB);
+    EXPECT_EQ(3, conf.nivelLog);
+    EXPECT_EQ(512*1024, conf.tamMaxLog);
+    EXPECT_EQ(5, conf.cantThreads);
+    EXPECT_EQ(2, conf.tiempoPollServer);
+
+	string command = "exec rm '" + pathArchConf + "'";
+	system(command.c_str());
+}
+
+TEST(ParserJsonTest, deberiaParsearBienArchivoDeConfiguracionInvalido) {
+	string jsonConf2 = "{\n"
+			"\t\"Nivel Log\" : 7,\n"
+			"\t\"Base de datos\" : \"hola/database\",\n"
+			"\t\"Cantidad threads\" : \"juan\",\n"
+			"\t\"Tiempo Poll Server\" : 1\n"
+			"}";
+	string pathArchConf = "pruebaArchConf.txt";
+	ofstream arch(pathArchConf, ios::binary);
+    arch << jsonConf2 << endl;
+    arch.close();
+
+    Configuracion conf = ParserJson::leerArchivoConfiguracion(pathArchConf.c_str());
+
+    EXPECT_EQ(DEFAULT_FS, conf.pathFS);
+    EXPECT_EQ(DEFAULT_DB, conf.pathDB);
+    EXPECT_EQ(NIVEL_LOG_DEFAULT, conf.nivelLog);
+    EXPECT_EQ(TAM_MAX_LOG_DEFAULT*1024, conf.tamMaxLog);
+    EXPECT_EQ(CANT_THREADS_DEFAULT, conf.cantThreads);
+    EXPECT_EQ(1, conf.tiempoPollServer);
+
+	string command = "exec rm '" + pathArchConf + "'";
+	system(command.c_str());
 }

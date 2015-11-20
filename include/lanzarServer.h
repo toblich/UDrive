@@ -12,15 +12,13 @@ using namespace std;
 /**
  * @brief Se encarga de lanzar el servidor y cerrarlo en caso de que reciba alguna señal.
  */
-void lanzarServer(BD* perfiles, BD* sesiones, BD* passwords, BD* metadatos) {
-	Logger::escribirHoraEnElLog();
-
+void lanzarServer(BD* perfiles, BD* sesiones, BD* passwords, BD* metadatos, Configuracion conf) {
 	signal(SIGTERM, Server::close);
 	signal(SIGINT, Server::close);
 
 	string puerto = "8080";
 	cout << "Lanzando servidor en el puerto " << puerto << endl;
-	Server server(puerto, perfiles, sesiones, passwords, metadatos);
+	Server server(puerto, perfiles, sesiones, passwords, metadatos, conf);
 
 	while (server.isRunning()) {
 		usleep(1000);

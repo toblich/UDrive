@@ -3,8 +3,9 @@
 using namespace std;
 
 bool Server::running = true;
+int Server::pollMilisec = POLL_SERVER_DEFAULT;
 
-Server::Server (string listeningPort, BD* perfiles, BD* sesiones, BD* passwords, BD* metadatos) {
+Server::Server (string listeningPort, BD* perfiles, BD* sesiones, BD* passwords, BD* metadatos, Configuracion conf) {
 
 	//BDs
 	this->perfiles = perfiles;
@@ -14,7 +15,7 @@ Server::Server (string listeningPort, BD* perfiles, BD* sesiones, BD* passwords,
 
 	//Manejadores
 	manejadorUsuarios = new ManejadorDeUsuarios(perfiles, sesiones, passwords);
-	manejadorAYM = new ManejadorArchivosYMetadatos(metadatos);
+	manejadorAYM = new ManejadorArchivosYMetadatos(metadatos, conf.pathFS);
 
 	//API REST
 	mapaURI.insert(pair<string, RealizadorDeEventos*>("profile", new Profile(manejadorUsuarios, manejadorAYM)));
@@ -23,11 +24,15 @@ Server::Server (string listeningPort, BD* perfiles, BD* sesiones, BD* passwords,
 	mapaURI.insert(pair<string, RealizadorDeEventos*>("metadata", new Metadata(manejadorUsuarios, manejadorAYM)));
 	mapaURI.insert(pair<string, RealizadorDeEventos*>("folder", new Folder(manejadorUsuarios, manejadorAYM)));
 
+	//Atributos
+	this->cantThreads = conf.cantThreads;
+	pollMilisec = conf.tiempoPollServer;
+
 	//Servers
 	mg_server* primerServer = mg_create_server((void *) this, Server::mgEventHandler);
 	mg_set_option(primerServer, "listening_port", listeningPort.c_str());
 	servers.push_back(primerServer);
-	for (int i = 1; i < CANT_THREADS; i++) {
+	for (int i = 1; i < this->cantThreads; i++) {
 		mg_server* server = mg_create_server((void *) this, Server::mgEventHandler);
 		mg_copy_listeners(primerServer, server);
 		servers.push_back(server);
@@ -107,7 +112,7 @@ mg_result Server::closeHandler (mg_connection* connection) {
 
 void Server::pollServer (mg_server* server) {
 	while (running) {
-		mg_poll_server(server, POLL_MILLISEC);
+		mg_poll_server(server, pollMilisec);
 	}
 }
 

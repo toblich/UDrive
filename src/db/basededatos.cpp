@@ -2,10 +2,10 @@
 
 using std::string;
 
-BaseDeDatos::BaseDeDatos() : BaseDeDatos(defaultPath) {}
+BaseDeDatos::BaseDeDatos() : BaseDeDatos(defaultPath, DEFAULT_DB) {}
 
-BaseDeDatos::BaseDeDatos(string path) {
-	this->path = "db/" + path;
+BaseDeDatos::BaseDeDatos(string path, string carpeta) {
+	this->path = carpeta + "/" + path;
 	// Para optimizar RocksDB.
 	options.IncreaseParallelism();
 	options.OptimizeLevelStyleCompaction();
@@ -19,7 +19,6 @@ BaseDeDatos::BaseDeDatos(string path) {
 		Logger::logInfo("Se creo satisfactoriamente la Base de Datos con path " + this->path);
 	}
 }
-
 
 BaseDeDatos::~BaseDeDatos(){
 	delete db;

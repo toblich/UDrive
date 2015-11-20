@@ -18,7 +18,7 @@ using std::string;
 class ParserJson {
 
 private:
-	static string verificarString(string key, Json::Value raiz);
+	static string verificarString(string key, Json::Value raiz, string porDefecto = "");
 	static double verificarDouble(string key, Json::Value raiz);
 	static int verificarInt(string key, Json::Value raiz, int porDefecto);
 	ParserJson() {}
@@ -37,6 +37,7 @@ public:
 	 * @retval string			string con el metadato transformado en Json.
 	 */
 	static string serializarMetadatoArchivo(MetadatoArchivo metadato);
+
 	/**
 	 * @brief Lleva de un tipo MetadatoUsuario a su correspondiente representación en
 	 * un formato Json.
@@ -48,6 +49,7 @@ public:
 	 * @retval string			string con el metadato transformado en Json.
 	 */
 	static string serializarMetadatoUsuario(MetadatoUsuario metadato);
+
 	/**
 	 * @brief Lleva de un tipo MetadatoSesion a su correspondiente representación en
 	 * un formato Json.
@@ -59,6 +61,7 @@ public:
 	 * @retval string			string con el metadato transformado en Json.
 	 */
 	static string serializarMetadatoSesion(MetadatoSesion metadato);
+
 	/**
 	 * @brief Lleva de un tipo map<string, string> a su correspondiente representación en
 	 * un formato Json.
@@ -83,6 +86,7 @@ public:
 	 * @retval MetadatoArchivo	MetadatoArchivo vacío si el string no era de formato Json.
 	 */
 	static MetadatoArchivo deserializarMetadatoArchivo(string json);
+
 	/**
 	 * @brief Lleva de un tipo string con el formato Json a un MetadatoUsuario.
 	 *
@@ -95,6 +99,7 @@ public:
 	 * @retval MetadatoUsuario	MetadatoUsuario vacío si el string no era de formato Json.
 	 */
 	static MetadatoUsuario deserializarMetadatoUsuario(string json);
+
 	/**
 	 * @brief Lleva de un tipo string con el formato Json a un MetadatoSesion.
 	 *
@@ -107,6 +112,7 @@ public:
 	 * @retval MetadatoSesion	MetadatoSesion vacío si el string no era de formato Json.
 	 */
 	static MetadatoSesion deserializarMetadatoSesion(string json);
+
 	/**
 	 * @brief Lleva de un tipo string con el formato Json a un map<string, string>.
 	 *
@@ -118,6 +124,19 @@ public:
 	 * formato Json.
 	 */
 	static std::map<string, string> deserializarMapa(string json);
+
+	/**
+	 * @brief Lleva de un tipo string con el formato Json a un Configuracion.
+	 *
+	 * En caso de no tener algún atributo (clave dentro del Json), se asume el parametro por
+	 * defecto.
+	 *
+	 * @param pathArchConf		char* con la ruta al archivo de configuracion Json.
+	 *
+	 * @retval Configuracion	Configuracion con los campos llenos según el Json.
+	 * @retval Configuracion	Configuracion por defecto si el string no era de formato Json.
+	 */
+	static Configuracion leerArchivoConfiguracion(const char* pathArchConf);
 
 	/**
 	 * @brief Genera un solo Json a partir de un map<string, string> y un string de

@@ -12,15 +12,15 @@ using namespace Json;
 //
 //}
 
-string ParserJson::verificarString(string key, Value raiz) {
+string ParserJson::verificarString(string key, Value raiz, string porDefecto) {
 	Value parametro = raiz.get(key, "NO");
 	string value;
 	if (not parametro.isNull() and (parametro.isString() and parametro.asString() != "NO")){
 		value = parametro.asString();
 	} else {
-		string warning = "Parametro de tipo string  \"" + key + "\" invalido o inexistente en un Json. Se asigna el valor \"\" (vacio) para esta key.";
+		string warning = "Parametro de tipo string  \"" + key + "\" invalido o inexistente en un Json. Se asigna el valor \"" + porDefecto + "\" para esta key.";
 		Logger::logWarn(warning);
-		value = "";
+		value = porDefecto;
 	}
 	return value;
 }
@@ -183,7 +183,7 @@ MetadatoUsuario ParserJson::deserializarMetadatoUsuario(string json) {
 		metadatos.nombre = ParserJson::verificarString("nombre", raiz);
 		metadatos.email = ParserJson::verificarString("email", raiz);
 		metadatos.pathFotoPerfil = ParserJson::verificarString("path foto de perfil", raiz);
-		metadatos.cuota = ParserJson::verificarInt("cuota", raiz, CUOTA);
+		metadatos.cuota = ParserJson::verificarInt("cuota", raiz, CUOTA_DEFAULT);
 
 		Value ubicacion = raiz.get("ultima ubicacion", "NO");
 		if (not ubicacion.isNull() and ubicacion.isObject()){
@@ -238,6 +238,48 @@ std::map<std::string, std::string> ParserJson::deserializarMapa(std::string json
 		Logger::logWarn(error);
 	}
 	return mapa;
+}
+
+Configuracion ParserJson::leerArchivoConfiguracion(const char* pathArchConf) {
+	// Asumo los valores por defecto, sino se cambiaran cuando se parsee correctamente
+	Configuracion config;
+	config.nivelLog = NIVEL_LOG_DEFAULT;
+	config.tamMaxLog = TAM_MAX_LOG_DEFAULT * 1024;
+	config.pathFS = DEFAULT_FS;
+	config.pathDB = DEFAULT_DB;
+	config.cantThreads = CANT_THREADS_DEFAULT;
+	config.tiempoPollServer = POLL_SERVER_DEFAULT;
+
+	//Seteo por ahora para que el logger pueda loguear
+	Logger::setNivelLogger(config.nivelLog);
+	Logger::setTamanoMaximo(config.tamMaxLog);
+	Logger::escribirHoraEnElLog();
+
+	ifstream entrada(pathArchConf, ios::binary );
+	if ( not entrada.good() ) {
+		Logger::logWarn("El archivo de configuracion no existe. Se asumen los valores por defecto.");
+		return config;
+	}
+
+	Value raiz;
+	Features f = Features::strictMode();
+	Reader reader(f);
+	bool parseadoExitoso = reader.parse(entrada, raiz);
+	if (parseadoExitoso) {
+		int nivelLog = verificarInt("Nivel Log", raiz, NIVEL_LOG_DEFAULT);
+		config.nivelLog = (nivelLog <= 4) ? nivelLog : NIVEL_LOG_DEFAULT;
+		config.tamMaxLog = verificarInt("Tamano max Log", raiz, TAM_MAX_LOG_DEFAULT) * 1024;
+		config.cantThreads = verificarInt("Cantidad threads", raiz, CANT_THREADS_DEFAULT);
+		config.tiempoPollServer = verificarInt("Tiempo Poll Server", raiz, POLL_SERVER_DEFAULT);
+
+		string pathFS = verificarString("FileSystem", raiz, DEFAULT_FS);
+		config.pathFS = (pathFS.find('/') == string::npos) ? pathFS : DEFAULT_FS;
+		string pathDB = verificarString("Base de datos", raiz, DEFAULT_DB);
+		config.pathDB = (pathDB.find('/') == string::npos) ? pathDB : DEFAULT_DB;
+	} else {
+		Logger::logWarn("Fallo el parseo del archivo de configuración. Se asumen todos los valores por defecto.");
+	}
+	return config;
 }
 
 string ParserJson::estructurasMerge(map<string, string> estructuraPermisos, string jsonEstructuraFileSystem) {

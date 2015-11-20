@@ -5,6 +5,30 @@ Compilación y ejecución
 Tanto la compilación como la ejecución del Servidor de UDrive se pueden realizar de forma manual
 o de forma automática.
 
+De todas formas, para ambos casos se precisa tener un archivo *server.conf* dentro de donde se vaya a ejecutar *udrive*. Éste permite configurar algunos aspectos del servidor. El formato del mismo debe ser de tipo Json y debe contener los siguientes campos:
+
+ * "Nivel Log" : Indica con qué nivel de log se quiere ejecutar. Éste es un número entre 0 y 4, siendo 0 el nivel más bajo (Se logueará todo tipo de ) y 4 el nivel más alto (Se loguearán sólo errores graves), donde el resto de los niveles van en escala ascendente. Por defecto, el valor es 0.
+ * "Tamano max Log" : Indica qué tamaño, expresado en KB, será el máximo que soporte el Log. Una vez que supere esta capacidad, el Log se vacía y vuelve a comenzar. Por defecto, el valor es 1024 (Un MB).
+ * "FileSystem" : Indica cuál será la carpeta raíz del FileSystem. Por defecto, el valor es "FileSystem".
+ * "Base de datos" : Indica cuál será la carpeta raíz de las bases de datos. Por defecto, el valor es "db".
+ * "Cantidad threads" : Indica cuál es la cantidad de threads que se quiere que contenga el servidor. Su valor por defecto es 10.
+ * "Tiempo Poll Server" : Indica cuál es el tiempo que el server espera hasta leer próximos eventos. Su valor está en milisegundos, y por defecto es 1.
+
+ A continuación mostramos un ejemplo de cómo quedaría el archivo *server.conf*:
+
+ .. code-block:: bash
+
+	{
+		"Nivel Log" : 4, 
+		"Tamano max Log" : 1024,
+		"FileSystem" : "FileSystem",
+		"Base de datos" : "db",
+		"Log" : "log.txt",
+		"Cantidad threads" : 10,
+		"Tiempo Poll Server" : 1
+	}
+
+
 Compilación y Ejecución Manual (servidor, tests unitarios y code coverage)
 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 

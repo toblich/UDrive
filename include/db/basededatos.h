@@ -43,9 +43,10 @@ public:
 	 * @brief Constructor: Crea una nueva base de datos
 	 *
 	 * @param path 		string con el path donde se guardaran los datos de la base de datos.
+	 * @param carpeta	string con el nombre de la carpeta donde se guardara la base de datos.
 	 * @throw runtime_error
 	 */
-	BaseDeDatos(string path);
+	BaseDeDatos(string path, string carpeta);
 	~BaseDeDatos();
 	/**
 	 * @brief Función para ver si una key se encuentra en la base de datos.

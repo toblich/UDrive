@@ -23,9 +23,6 @@
 
 using namespace std;
 
-#define POLL_MILLISEC 1
-#define CANT_THREADS 10
-
 /**
  * @brief Se encarga del manejo del Servidor y de la redirección de los request hacia las clases de la API REST.
  */
@@ -40,9 +37,10 @@ public:
 	 * @param sesiones			BD* a una base de datos de sesiones.
 	 * @param passwords			BD* a una base de datos de passwords.
 	 * @param metadatos			BD* a una base de datos de metadatos.
+	 * @param conf				Configuracion con los datos de configuracion leidos del archivo.
 	 *
 	 */
-	Server(string portNumber, BD* perfiles, BD* sesiones, BD* passwords, BD* metadatos);
+	Server(string portNumber, BD* perfiles, BD* sesiones, BD* passwords, BD* metadatos, Configuracion conf);
 	virtual ~Server();
 
 	/**
@@ -88,6 +86,9 @@ private:
 
 	mg_result closeHandler(mg_connection* connection);
 	mg_result requestHandler(mg_connection* connection);
+
+	int cantThreads;
+	static int pollMilisec;
 };
 
 #endif /* SERVER_H_ */
