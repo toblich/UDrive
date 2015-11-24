@@ -25,7 +25,6 @@ Para compilarlos y ejecutarlos manualmente, ejecutar en cambio desde una carpeta
 .. code-block:: bash
 	
 	mkdir files
-	mkdir db                    # si se usa rocksdb
 	cmake -Dtest=ON ../         # agregar el flag "-Drocksdb=ON" para usar RocksDB
 	make unitTest               # compila los tests unitarios
 	./unitTest                  # ejecuta los tests unitarios
@@ -46,7 +45,7 @@ Desde la raíz del proyecto, ejecutar:
 	python ../test/server_test.py    # ejecuta los tests de integración sin versionado de archivos
 	python ../test/version_test.py   # ejecuta aquellos tests de integración con versionado
 
-La carpeta ``build/FileSystem`` será el *filesystem* del último test que se haya ejecutado. Al igual que en los test unitario, también estará el archivo ``build/files/log.txt`` con un log con información sobre todo lo ocurrido dentro del servidor durante la ejecución de los tests.
+La carpeta ``build/FileSystem`` [#conf]_ será el *filesystem* del último test que se haya ejecutado. Al igual que en los test unitario, también estará el archivo ``build/files/log.txt`` con un log con información sobre todo lo ocurrido dentro del servidor durante la ejecución de los tests.
 
 
 .. _coverage:
@@ -78,4 +77,6 @@ Haga click `aquí`_ para ver su último reporte de coverage. [#reportecoverage]_
 
 .. rubric:: Footnotes
 
+.. [#conf] En caso de utilizar la configuración por default. Ésta puede ser modificada haciendo uso de un archivo de configuración, tal como se explica en el `Manual del Administrador <../../../Manual_de_administrador/_build/html/forma_de_uso.html>`_
 .. [#reportecoverage] Si el link está roto, regenere su reporte de coverage ejecutando cualquiera de las alternativas de la sección :ref:`coverage`.
+

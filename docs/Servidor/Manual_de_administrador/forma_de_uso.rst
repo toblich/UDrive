@@ -23,7 +23,6 @@ De todas formas, para ambos casos se precisa tener un archivo *server.conf* dent
 		"Tamano max Log" : 1024,
 		"FileSystem" : "FileSystem",
 		"Base de datos" : "db",
-		"Log" : "log.txt",
 		"Cantidad threads" : 10,
 		"Tiempo Poll Server" : 1
 	}

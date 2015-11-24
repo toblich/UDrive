@@ -2,7 +2,7 @@
 
 int Logger::nivelLogger = NIVEL_LOG_DEFAULT;
 int Logger::tamanoMaximo = TAM_MAX_LOG_DEFAULT;
-const char* NOMBRE_ARCH_LOG = (FILES + DEFAULT_LOG).c_str();
+const char* DEFAULT_LOG_PATH = "files/log.txt";
 
 Logger::Logger() {
 }
@@ -13,7 +13,7 @@ Logger::~Logger() {
 
 void Logger::loggear(const string& texto, int tipoDeError){
 	if (nivelLogger <= tipoDeError){
-        ofstream log(NOMBRE_ARCH_LOG, ios_base::app | ios::binary);
+        ofstream log(DEFAULT_LOG_PATH, ios_base::app | ios::binary);
 
         switch (tipoDeError){
 
@@ -46,11 +46,11 @@ void Logger::loggear(const string& texto, int tipoDeError){
 }
 
 void Logger::verificarTamanioDelLog(){
-    ifstream log(NOMBRE_ARCH_LOG, ios_base::in);
+    ifstream log(DEFAULT_LOG_PATH, ios_base::in);
 	log.seekg(0, ios::end);
 	int size = static_cast <int> (log.tellg());
 	if (size > tamanoMaximo){
-		ofstream borrar(NOMBRE_ARCH_LOG, ios::trunc);
+		ofstream borrar(DEFAULT_LOG_PATH, ios::trunc);
 		borrar.close();
 	}
 	log.close();
@@ -68,7 +68,7 @@ void Logger::escribirHoraEnElLog(){
     int min = tiempo->tm_min;
     int seg = tiempo->tm_sec;
     Logger::verificarTamanioDelLog();
-    ofstream log(NOMBRE_ARCH_LOG, ios_base::app | ios::binary);
+    ofstream log(DEFAULT_LOG_PATH, ios_base::app | ios::binary);
 	log << "===============EJECUCION DEL DIA ";
 	if (dia <= 9){
 		log << "0" << dia << "/";

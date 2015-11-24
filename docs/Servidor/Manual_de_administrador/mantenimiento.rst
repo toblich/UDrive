@@ -14,7 +14,7 @@ Si en algun momento se quiere volver a cero el *Servidor* se puede recompilar ta
 
 FileSystem
 <<<<<<<<<<<<
-La carpeta *FileSystem* es la encargada de almacenar tanto los archivos y carpetas de los usuarios de *UDrive* como la foto de perfil de los mismos. Para realizar estas tareas existe una única carpeta dentro del *FileSystem* llamada *fotos* donde se guardarán las fotos de perfil de los usuarios de la siguiente forma ``usuario.extension`` y, para el almacenamiento de los archivos y carpetas, se cuenta con una carpeta en el *FileSystem* para cada uno de los usuarios de la aplicación.
+La carpeta *FileSystem* [#conf]_ es la encargada de almacenar tanto los archivos y carpetas de los usuarios de *UDrive* como la foto de perfil de los mismos. Para realizar estas tareas existe una única carpeta dentro del *FileSystem* llamada *fotos* donde se guardarán las fotos de perfil de los usuarios de la siguiente forma ``usuario.extension`` y, para el almacenamiento de los archivos y carpetas, se cuenta con una carpeta en el *FileSystem* para cada uno de los usuarios de la aplicación.
 
 Bases de Datos
 <<<<<<<<<<<<<<<<
@@ -29,3 +29,7 @@ Log
 <<<<<<<<
 Dentro de la carpeta *build* existe una carpeta llamada *files* que es en donde se guarda el *log* del *Servidor* de *UDrive*, dentro de éste se registran todas las activades que realiza el mismo. Estas actividades pueden ser desde requests que le llegan al *Servidor*, como las tareas que realizan los manejadores tanto de usuarios como de archivos y metadatos y las que realizan las diferentes bases de datos.
 Si en algún momento de la ejecución del *Servidor* ocurre algún error o falla, se puede mirar el *log* para saber en donde se encuentra el problema.
+
+.. rubric:: Footnotes
+
+.. [#conf] En caso de utilizar la configuración por default. Ésta puede ser modificada haciendo uso de un archivo de configuración, tal como se explica en el la parte de `Compilación y Ejecución <forma_de_uso.html>`_

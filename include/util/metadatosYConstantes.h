@@ -21,9 +21,6 @@ const std::string FOLDER = RESERVED_STR + "folder";
 const std::string FOTOS = RESERVED_STR + "fotos";
 const std::string PATH_DEFAULT_FOTO_PERFIL = "default.jpg";
 
-const std::string FILES = "files/";
-const std::string DEFAULT_LOG = "log.txt";
-
 const std::string DEFAULT_FS = "FileSystem";
 const std::string DEFAULT_DB = "db";
 const int NIVEL_LOG_DEFAULT = 0; // TRACE

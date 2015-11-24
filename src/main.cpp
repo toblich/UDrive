@@ -8,11 +8,7 @@ using namespace std;
 int main(int argc, const char** argv) {
 	if (argv[1] and string(argv[1]) == "--no-action") return 0;
 
-	char* pathArchConf;
-	if ( argv[1] )
-		pathArchConf = argv[1];
-	else
-		pathArchConf = "";
+	const char* pathArchConf = (argv[1]) ? argv[1] : "";
 
 	Configuracion conf = ParserJson::leerArchivoConfiguracion(pathArchConf);
 	Logger::setNivelLogger(conf.nivelLog);
