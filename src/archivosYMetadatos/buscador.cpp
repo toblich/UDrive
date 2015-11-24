@@ -22,7 +22,7 @@ string Buscador::obtenerEstructuraCarpeta (string path, bool esRecursivo, functi
 	struct dirent* ent;
 	while ((ent = readdir(dir)) != NULL) {
 		string dirName(ent->d_name);
-		if (dirName == "." or dirName == "..")
+		if ( dirName == "." or dirName == ".." or (esRecursivo and dirName == TRASH) )
 			continue;
 
 		string pathInterno = path + "/" + ent->d_name;
