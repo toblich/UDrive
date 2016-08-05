@@ -1,0 +1,252 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Mantenimiento &mdash; documentación de UDrive - 1.0</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="documentación de UDrive - 1.0" href="index.html"/>
+        <link rel="next" title="Known Issues y Troubleshooting" href="known_issues_y_troubleshooting.html"/>
+        <link rel="prev" title="Compilación y ejecución" href="forma_de_uso.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> UDrive
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="get_started.html">Get Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="instalacion_y_configuracion.html">Instalación y configuración</a></li>
+<li class="toctree-l1"><a class="reference internal" href="forma_de_uso.html">Compilación y ejecución</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Mantenimiento</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#filesystem">FileSystem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#bases-de-datos">Bases de Datos</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#log">Log</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="known_issues_y_troubleshooting.html">Known Issues y Troubleshooting</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">UDrive</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>Mantenimiento</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/mantenimiento.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="mantenimiento">
+<h1>Mantenimiento<a class="headerlink" href="#mantenimiento" title="Enlazar permanentemente con este título">¶</a></h1>
+<dl class="docutils">
+<dt>Para el correcto mantenimiento del <em>Servidor</em> de <em>UDrive</em> existen tres aspectos a tener en cuenta:</dt>
+<dd><ul class="first last simple">
+<li>El FileSystem</li>
+<li>Las Bases de Datos</li>
+<li>El Log</li>
+</ul>
+</dd>
+</dl>
+<p>Las <em>Bases de Datos</em> y el <em>FileSystem</em> son las partes más importantes del <em>Servidor</em> ya que es en donde se guarda toda la información
+de los usuarios. Por lo tanto, ambos dos mantienen una consistencia entre si y por ningun motivo se debe modificar manualmente, o sea sin comunicarse a través del servidor, alguno de los archivos que se encuentras en esas carpetas ya que ésto provocaría una inconsistencia en el <em>Servidor</em> y desencadenaría en un mal funcionamiento del mismo.</p>
+<p>Si en algun momento se quiere volver a cero el <em>Servidor</em> se puede recompilar tal como se indica en la sección <a class="reference external" href="forma_de_uso.html">Compilación y ejecución</a> o se pueden borrar tanto la carpeta del <em>FileSystem</em> como la carpeta <em>db</em> dentro de la carpeta <em>build</em> del <em>Servidor</em>.</p>
+<div class="section" id="filesystem">
+<h2>FileSystem<a class="headerlink" href="#filesystem" title="Enlazar permanentemente con este título">¶</a></h2>
+<p>La carpeta <em>FileSystem</em> <a class="footnote-reference" href="#conf" id="id1">[1]</a> es la encargada de almacenar tanto los archivos y carpetas de los usuarios de <em>UDrive</em> como la foto de perfil de los mismos. Para realizar estas tareas existe una única carpeta dentro del <em>FileSystem</em> llamada <em>fotos</em> donde se guardarán las fotos de perfil de los usuarios de la siguiente forma <code class="docutils literal"><span class="pre">usuario.extension</span></code> y, para el almacenamiento de los archivos y carpetas, se cuenta con una carpeta en el <em>FileSystem</em> para cada uno de los usuarios de la aplicación.</p>
+</div>
+<div class="section" id="bases-de-datos">
+<h2>Bases de Datos<a class="headerlink" href="#bases-de-datos" title="Enlazar permanentemente con este título">¶</a></h2>
+<p>Para el correcto manejo tanto de usuarios como de archivos y metadatos el <em>Servidor</em> de <em>UDrive</em> cuenta con 4 bases de datos:</p>
+<blockquote>
+<div><ul class="simple">
+<li>Metadatos: Esta BD es la mas compleja ya que no solo almacena los metadatos asociados a cada uno de los archivos que se encuentren alojados en el <em>Servidor</em> sino que también maneja todo el control de permisos y versiones sobre los mismos.</li>
+<li>Sesiones: Esta BD almacena los tokens relacionados a las distintas sesiones que pueden tener los usuarios de <em>UDrive</em>.</li>
+<li>Passwords: Esta BD almecena las contraseñas que utilizan cada uno de los usuarios de <em>UDrive</em>.</li>
+<li>Perfiles: Esta BD almacena los perfiles(nombre, email, cuota, ultima ubicación , etc.) que tiene cada uno de los usuarios de <em>UDrive</em>.</li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="log">
+<h2>Log<a class="headerlink" href="#log" title="Enlazar permanentemente con este título">¶</a></h2>
+<p>Dentro de la carpeta <em>build</em> existe una carpeta llamada <em>files</em> que es en donde se guarda el <em>log</em> del <em>Servidor</em> de <em>UDrive</em>, dentro de éste se registran todas las activades que realiza el mismo. Estas actividades pueden ser desde requests que le llegan al <em>Servidor</em>, como las tareas que realizan los manejadores tanto de usuarios como de archivos y metadatos y las que realizan las diferentes bases de datos.
+Si en algún momento de la ejecución del <em>Servidor</em> ocurre algún error o falla, se puede mirar el <em>log</em> para saber en donde se encuentra el problema.</p>
+<p class="rubric">Footnotes</p>
+<table class="docutils footnote" frame="void" id="conf" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[1]</a></td><td>En caso de utilizar la configuración por default. Ésta puede ser modificada haciendo uso de un archivo de configuración, tal como se explica en el la parte de <a class="reference external" href="forma_de_uso.html">Compilación y Ejecución</a></td></tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="known_issues_y_troubleshooting.html" class="btn btn-neutral float-right" title="Known Issues y Troubleshooting" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="forma_de_uso.html" class="btn btn-neutral" title="Compilación y ejecución" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2015, Pablo Ciruzzi, Santiago Fernandez, Francisco Landino, Tobias Lichtig.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'1.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="_static/translations.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

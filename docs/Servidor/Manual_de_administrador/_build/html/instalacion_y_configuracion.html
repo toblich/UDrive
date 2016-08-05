@@ -1,0 +1,294 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Instalación y configuración &mdash; documentación de UDrive - 1.0</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="documentación de UDrive - 1.0" href="index.html"/>
+        <link rel="next" title="Compilación y ejecución" href="forma_de_uso.html"/>
+        <link rel="prev" title="Get Started" href="get_started.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> UDrive
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="get_started.html">Get Started</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Instalación y configuración</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#dependencias">Dependencias</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#g-4-9">G++ 4.9</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#cmake">CMake</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rocksdb">RocksDB</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gtest-para-ejecutar-los-tests">GTest (para ejecutar los tests)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#lcov-para-analizar-coverage">LCOV (para analizar coverage)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#python-para-tests-de-integracion-y-coverage">Python (para tests de integración y coverage)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#requests-para-tests-de-integracion-y-coverage">Requests (para tests de integración y coverage)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#docker-para-compilar-y-ejecutar-el-servidor-automaticamente">Docker (para compilar y ejecutar el servidor automáticamente)</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="forma_de_uso.html">Compilación y ejecución</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mantenimiento.html">Mantenimiento</a></li>
+<li class="toctree-l1"><a class="reference internal" href="known_issues_y_troubleshooting.html">Known Issues y Troubleshooting</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">UDrive</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>Instalación y configuración</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/instalacion_y_configuracion.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="instalacion-y-configuracion">
+<h1>Instalación y configuración<a class="headerlink" href="#instalacion-y-configuracion" title="Enlazar permanentemente con este título">¶</a></h1>
+<p>El servidor en cuestión requiere tener los algunos programas y librerías instalados previamente.
+Esta guía de instalación está pensada para Ubuntu 14.04, aunque debería ser funcionar también
+con otras versiones de Ubuntu y ser análoga (con los manejadores de paquetes correspondientes)
+en otras versiones de Linux.</p>
+<div class="section" id="dependencias">
+<h2>Dependencias<a class="headerlink" href="#dependencias" title="Enlazar permanentemente con este título">¶</a></h2>
+<div class="section" id="g-4-9">
+<h3>G++ 4.9<a class="headerlink" href="#g-4-9" title="Enlazar permanentemente con este título">¶</a></h3>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+sudo apt-get update
+sudo apt-get install g++-4.9
+sudo apt-get upgrade
+</pre></div>
+</div>
+</div>
+<div class="section" id="cmake">
+<h3>CMake<a class="headerlink" href="#cmake" title="Enlazar permanentemente con este título">¶</a></h3>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>sudo apt-get update
+sudo apt-get install cmake
+</pre></div>
+</div>
+</div>
+<div class="section" id="rocksdb">
+<h3>RocksDB<a class="headerlink" href="#rocksdb" title="Enlazar permanentemente con este título">¶</a></h3>
+<p>Ver <a class="reference external" href="https://github.com/facebook/rocksdb">RocksDB</a> y su guía de instalación
+(requiere a su vez <strong>libsnappy-dev</strong>, <strong>zlib1g-dev</strong> y <strong>libbz2-dev</strong>).</p>
+<p>Compilar con <code class="docutils literal"><span class="pre">make</span> <span class="pre">static_lib</span> <span class="pre">&amp;&amp;</span> <span class="pre">make</span> <span class="pre">install</span></code></p>
+<p>Alternativamente, ejecutar el script <code class="docutils literal"><span class="pre">docker/rocksdb.sh</span></code> habiendo instalado previamente
+<em>g++-4.9</em>, <em>libsnappy-dev</em>, <em>zlib1g-dev</em> y <em>libbz2-dev</em>.</p>
+</div>
+<div class="section" id="gtest-para-ejecutar-los-tests">
+<h3>GTest (para ejecutar los tests)<a class="headerlink" href="#gtest-para-ejecutar-los-tests" title="Enlazar permanentemente con este título">¶</a></h3>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>sudo apt-get install libgtest-dev
+<span class="nb">cd</span> /usr/src/gtest
+cmake CMakeLists.txt
+make
+cp *.a /usr/lib
+</pre></div>
+</div>
+<p>Alternativamente, ejecutar el script <code class="docutils literal"><span class="pre">docker/gtest.sh</span></code> habiendo instalado previamente <em>CMake</em></p>
+</div>
+<div class="section" id="lcov-para-analizar-coverage">
+<h3>LCOV (para analizar coverage)<a class="headerlink" href="#lcov-para-analizar-coverage" title="Enlazar permanentemente con este título">¶</a></h3>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>sudo apt-get install lcov
+</pre></div>
+</div>
+</div>
+<div class="section" id="python-para-tests-de-integracion-y-coverage">
+<h3>Python (para tests de integración y coverage)<a class="headerlink" href="#python-para-tests-de-integracion-y-coverage" title="Enlazar permanentemente con este título">¶</a></h3>
+<p>Para los test de integración se utilizó la versión 2.7 de python.</p>
+<p>Para saber la versión que tiene instalada en su computadora puede ejecutar:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>python --version
+</pre></div>
+</div>
+</div>
+<div class="section" id="requests-para-tests-de-integracion-y-coverage">
+<h3>Requests (para tests de integración y coverage)<a class="headerlink" href="#requests-para-tests-de-integracion-y-coverage" title="Enlazar permanentemente con este título">¶</a></h3>
+<p>Con <strong>pip</strong> instalado, ejecutar:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>sudo pip install requests
+</pre></div>
+</div>
+<p>De no tener pip, instalarlo anteriormente con:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>sudo apt-get install python-pip
+</pre></div>
+</div>
+</div>
+<div class="section" id="docker-para-compilar-y-ejecutar-el-servidor-automaticamente">
+<h3>Docker (para compilar y ejecutar el servidor automáticamente)<a class="headerlink" href="#docker-para-compilar-y-ejecutar-el-servidor-automaticamente" title="Enlazar permanentemente con este título">¶</a></h3>
+<p>Instalar docker ejecutando:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>wget -qO- https://get.docker.com/ <span class="p">|</span> sh
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="forma_de_uso.html" class="btn btn-neutral float-right" title="Compilación y ejecución" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="get_started.html" class="btn btn-neutral" title="Get Started" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2015, Pablo Ciruzzi, Santiago Fernandez, Francisco Landino, Tobias Lichtig.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'1.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="_static/translations.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

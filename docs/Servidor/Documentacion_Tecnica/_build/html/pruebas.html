@@ -1,0 +1,272 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Pruebas &mdash; documentación de UDrive - 1.0</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="documentación de UDrive - 1.0" href="index.html"/>
+        <link rel="prev" title="Dependencias y Compilación" href="librerias_y_compilacion.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> UDrive
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="ambiente_de_desarrollo.html">Ambiente de desarrollo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api_rest.html">API REST</a></li>
+<li class="toctree-l1"><a class="reference internal" href="disenio.html">Diseño y Clases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="codigo.html">Código</a></li>
+<li class="toctree-l1"><a class="reference internal" href="librerias_y_compilacion.html">Dependencias y Compilación</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Pruebas</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#dependencias">Dependencias</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#tests-unitarios">Tests unitarios</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#tests-de-integracion">Tests de integración</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#code-coverage">Code Coverage</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">UDrive</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>Pruebas</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/pruebas.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="pruebas">
+<h1>Pruebas<a class="headerlink" href="#pruebas" title="Enlazar permanentemente con este título">¶</a></h1>
+<div class="section" id="dependencias">
+<span id="testdeps"></span><h2>Dependencias<a class="headerlink" href="#dependencias" title="Enlazar permanentemente con este título">¶</a></h2>
+<p>Es necesario tener <a class="reference internal" href="librerias_y_compilacion.html#gtest"><span class="std std-ref">GTest (para ejecutar los tests)</span></a>, <a class="reference internal" href="librerias_y_compilacion.html#requests"><span class="std std-ref">Requests (para tests de integración y coverage)</span></a> con Python y <a class="reference internal" href="librerias_y_compilacion.html#lcov"><span class="std std-ref">LCOV (para analizar coverage)</span></a>. También se requieren <a class="reference internal" href="librerias_y_compilacion.html#gpp"><span class="std std-ref">G++ 4.9</span></a> y <a class="reference internal" href="librerias_y_compilacion.html#cmake"><span class="std std-ref">CMake</span></a> para compilar cualquier tipo de test.</p>
+</div>
+<div class="section" id="tests-unitarios">
+<h2>Tests unitarios<a class="headerlink" href="#tests-unitarios" title="Enlazar permanentemente con este título">¶</a></h2>
+<p>Desde la raíz del proyecto, ejecutar:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>./build.sh -t               <span class="c1"># &quot;-t&quot; equivale a &quot;--test&quot;</span>
+</pre></div>
+</div>
+<p>Agregar el flag <code class="docutils literal"><span class="pre">-r</span></code> si se quiere usar bases de datos con <a class="reference internal" href="librerias_y_compilacion.html#rocks"><span class="std std-ref">RocksDB</span></a> en vez de los mocks de bases de datos en memoria y volátiles (ver <a class="reference internal" href="disenio.html#basesdedatos"><span class="std std-ref">Bases de Datos</span></a>).</p>
+<p>Para compilarlos y ejecutarlos manualmente, ejecutar en cambio desde una carpeta <code class="docutils literal"><span class="pre">build</span></code> vacía en la raíz del proyecto:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>mkdir files
+cmake -Dtest<span class="o">=</span>ON ../         <span class="c1"># agregar el flag &quot;-Drocksdb=ON&quot; para usar RocksDB</span>
+make unitTest               <span class="c1"># compila los tests unitarios</span>
+./unitTest                  <span class="c1"># ejecuta los tests unitarios</span>
+</pre></div>
+</div>
+<p>Dentro de la carpeta <code class="docutils literal"><span class="pre">build</span></code> quedarán los <em>filesystems</em> de todos los tests unitarios en su estado final, cada uno en una carpeta con el mismo nombre del test en cuestión. También estará el archivo <code class="docutils literal"><span class="pre">build/files/log.txt</span></code> con un log con información sobre todo lo ocurrido dentro del servidor durante la ejecución de los tests.</p>
+</div>
+<div class="section" id="tests-de-integracion">
+<h2>Tests de integración<a class="headerlink" href="#tests-de-integracion" title="Enlazar permanentemente con este título">¶</a></h2>
+<p>Desde la raíz del proyecto, ejecutar:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>./build.sh                       <span class="c1"># agregar el flag &quot;-r&quot; o &quot;--rocksdb&quot; si se quiere usar rocksdb</span>
+<span class="nb">cd</span> build
+make udrive                      <span class="c1"># compila el servidor</span>
+python ../test/server_test.py    <span class="c1"># ejecuta los tests de integración sin versionado de archivos</span>
+python ../test/version_test.py   <span class="c1"># ejecuta aquellos tests de integración con versionado</span>
+</pre></div>
+</div>
+<p>La carpeta <code class="docutils literal"><span class="pre">build/FileSystem</span></code> <a class="footnote-reference" href="#conf" id="id1">[1]</a> será el <em>filesystem</em> del último test que se haya ejecutado. Al igual que en los test unitario, también estará el archivo <code class="docutils literal"><span class="pre">build/files/log.txt</span></code> con un log con información sobre todo lo ocurrido dentro del servidor durante la ejecución de los tests.</p>
+</div>
+<div class="section" id="code-coverage">
+<span id="coverage"></span><h2>Code Coverage<a class="headerlink" href="#code-coverage" title="Enlazar permanentemente con este título">¶</a></h2>
+<p>Con todas las <a class="reference internal" href="#testdeps"><span class="std std-ref">Dependencias</span></a> instaladas, ejecutar desde la raíz del proyecto:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>./build.sh -c               <span class="c1"># &quot;-c&quot; equivale a &quot;--coverage&quot;</span>
+</pre></div>
+</div>
+<p>Al finalizar (exitosamente) la ejecución, abrir el archivo <code class="docutils literal"><span class="pre">build/coverage/index.html</span></code> con un navegador para ver el reporte de <em>code coverage</em> resultante.</p>
+<p>Alternativamente al script anterior, puede ejecutarse la siguiente secuencia de comandos desde una carpeta <code class="docutils literal"><span class="pre">build</span></code> vacía en la raíz del proyecto, logrando el mismo resultado:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>mkdir files
+cmake -Dcoverage<span class="o">=</span>ON ../    <span class="c1"># prepara un Makefile para compilar y ejecutar el análisis de coverage</span>
+make coverage              <span class="c1"># compila y ejecuta el análisis de coverage</span>
+</pre></div>
+</div>
+<p>Dado que este análisis ejecuta tanto los tests unitarios como los de integración (con y sin versionado), se generaran todos los <em>filesystems</em> y quedará todo registrado en el log.</p>
+<p>Haga click <a class="reference external" href="../../../../../build/coverage/index.html">aquí</a> para ver su último reporte de coverage. <a class="footnote-reference" href="#reportecoverage" id="id2">[2]</a></p>
+<p class="rubric">Footnotes</p>
+<table class="docutils footnote" frame="void" id="conf" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[1]</a></td><td>En caso de utilizar la configuración por default. Ésta puede ser modificada haciendo uso de un archivo de configuración, tal como se explica en el <a class="reference external" href="../../../Manual_de_administrador/_build/html/forma_de_uso.html">Manual del Administrador</a></td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="reportecoverage" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id2">[2]</a></td><td>Si el link está roto, regenere su reporte de coverage ejecutando cualquiera de las alternativas de la sección <a class="reference internal" href="#coverage"><span class="std std-ref">Code Coverage</span></a>.</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="librerias_y_compilacion.html" class="btn btn-neutral" title="Dependencias y Compilación" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2015, Pablo Ciruzzi, Santiago Fernandez, Francisco Landino, Tobias Lichtig.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'1.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="_static/translations.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

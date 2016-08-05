@@ -1,0 +1,367 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>División de tareas &mdash; documentación de UDrive - 1.0</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="documentación de UDrive - 1.0" href="index.html"/>
+        <link rel="next" title="Conclusión" href="conclusion.html"/>
+        <link rel="prev" title="Gestión" href="gestion.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> UDrive
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduccion.html">Introducción</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gestion.html">Gestión</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">División de tareas</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#checkpoint-1-8-10-2015">Checkpoint 1 - 8/10/2015</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#repositorio-del-servidor">Repositorio del servidor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#repositorio-del-cliente">Repositorio del cliente</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#checkpoint-2-29-10-2015">Checkpoint 2 - 29/10/2015</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id30">Repositorio del servidor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id49">Repositorio del cliente</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#entrega-final-19-11-2015">Entrega Final - 19/11/2015</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id62">Repositorio del servidor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id76">Repositorio del cliente</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="conclusion.html">Conclusión</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">UDrive</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>División de tareas</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/division_de_tareas.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="division-de-tareas">
+<h1>División de tareas<a class="headerlink" href="#division-de-tareas" title="Enlazar permanentemente con este título">¶</a></h1>
+<p>Dentro de la división de tareas, se plantearon 3 entregas, 2 intermedias y una final, para ir mostrando el avance del trabajo práctico. Éstas son:</p>
+<blockquote>
+<div><ul class="simple">
+<li><a class="reference internal" href="#checkpoint-1-8-10-2015">Checkpoint 1 - 8/10/2015</a></li>
+<li><a class="reference internal" href="#checkpoint-2-29-10-2015">Checkpoint 2 - 29/10/2015</a></li>
+<li><a class="reference internal" href="#entrega-final-19-11-2015">Entrega Final - 19/11/2015</a></li>
+</ul>
+</div></blockquote>
+<div class="section" id="checkpoint-1-8-10-2015">
+<h2>Checkpoint 1 - 8/10/2015<a class="headerlink" href="#checkpoint-1-8-10-2015" title="Enlazar permanentemente con este título">¶</a></h2>
+<p>En este checkpoint se buscó comenzar con funcionalidades básicas como tener un servidor con <a class="reference external" href="https://github.com/cesanta/mongoose">Mongoose</a>, un manejo de una Base de Datos con <a class="reference external" href="https://rocksdb.org/">RocksDB</a>, comenzar a definir la API REST, empezar a utilizar Code Coverage (Mediante unitTests, con la herramienta <a class="reference external" href="http://ltp.sourceforge.net/coverage/lcov.php">LCov</a>), tener configurado un servidor de Integración Continua como <a class="reference external" href="https://travis-ci-org">Travis-CI</a>, un parser de archivos Json que se utilizaría por todo el proyecto (Utilizando la biblioteca <a class="reference external" href="http://jsoncpp.sourceforge.net/old.html">jsoncpp</a>), armar un script de compilación que permita fácilmente correr la aplicación con diversas opciones, así como también tener ya configurado un <a class="reference external" href="https://www.docker.com/">Docker</a> que permita correr la aplicación de manera simple. Además, todo tipo de testing se llevo a cabo mediante la herramienta <a class="reference external" href="https://code.google.com/p/googletest/">GTest</a> de Google, así como para la compilación se utilizó <a class="reference external" href="https://cmake.org/">CMake</a>. Por último, se tuvo como objetivo empezar con el manejo tanto de Usuarios (Creación y logueo), así como también con el de Archivos y Metadatos.</p>
+<div class="section" id="repositorio-del-servidor">
+<h3>Repositorio del servidor<a class="headerlink" href="#repositorio-del-servidor" title="Enlazar permanentemente con este título">¶</a></h3>
+<blockquote>
+<div><ul class="simple">
+<li><a class="reference external" href="https://github.com/toblich/UDrive/issues/31">(ABIERTO) Extender tests de integración</a> Realizado por <a class="reference external" href="https://github.com/toblich">Tobías</a></li>
+<li><a class="reference external" href="https://github.com/toblich/UDrive/issues/30">Folder: Poder crear una carpeta, obtener la estructura y los archivos de una carpeta y poder eliminarla</a> Realizado por <a class="reference external" href="https://github.com/sfernandez11">Santiago</a></li>
+<li><a class="reference external" href="https://github.com/toblich/UDrive/issues/29">(ABIERTO) Metadata: poder actualizar los metadatos de los archivos</a> Realizado por <a class="reference external" href="https://github.com/sfernandez11">Santiago</a></li>
+<li><a class="reference external" href="https://github.com/toblich/UDrive/issues/28">Automatizar tests Servidor</a> Realizado por <a class="reference external" href="https://github.com/toblich">Tobías</a></li>
+<li><a class="reference external" href="https://github.com/toblich/UDrive/issues/27">Poder descargar archivos, subir archivos y eliminar archivos del servidor</a> Realizado por <a class="reference external" href="https://github.com/sfernandez11">Santiago</a></li>
+<li><a class="reference external" href="https://github.com/toblich/UDrive/issues/26">Crear Dockerfile</a> Realizado por <a class="reference external" href="https://github.com/toblich">Tobías</a></li>
+<li><a class="reference external" href="https://github.com/toblich/UDrive/issues/25">Armar script de compilación</a> Realizado por <a class="reference external" href="https://github.com/toblich">Tobías</a></li>
+<li><a class="reference external" href="https://github.com/toblich/UDrive/issues/24">Validar perfiles Servidor</a> Realizado por <a class="reference external" href="https://github.com/toblich">Tobías</a></li>
+<li><a class="reference external" href="https://github.com/toblich/UDrive/issues/23">Testear parserJson</a> Realizado por <a class="reference external" href="https://github.com/toblich">Tobías</a></li>
+<li><a class="reference external" href="https://github.com/toblich/UDrive/issues/22">Discriminar por URL y verbo HTTP</a> Realizado por <a class="reference external" href="https://github.com/sfernandez11">Santiago</a></li>
+<li><a class="reference external" href="https://github.com/toblich/UDrive/issues/21">API REST</a> Realizado por <a class="reference external" href="https://github.com/toblich">Tobías</a></li>
+<li><a class="reference external" href="https://github.com/toblich/UDrive/issues/20">Completar lista de caracteres inválidos</a> Realizado por <a class="reference external" href="https://github.com/toblich">Tobías</a></li>
+<li><a class="reference external" href="https://github.com/toblich/UDrive/issues/19">Mover base de datos a paquete aparte</a> Realizado por <a class="reference external" href="https://github.com/toblich">Tobías</a></li>
+<li><a class="reference external" href="https://github.com/toblich/UDrive/issues/18">Agregar Code Coverage</a> Realizado por <a class="reference external" href="https://github.com/toblich">Tobías</a></li>
+<li><a class="reference external" href="https://github.com/toblich/UDrive/issues/17">Parser debe poder (des)serializar metadatos de usuario</a> Realizado por <a class="reference external" href="https://github.com/pciruzzi">Pablo</a></li>
+<li><a class="reference external" href="https://github.com/toblich/UDrive/issues/16">Conexión servidor cliente</a> Realizado por <a class="reference external" href="https://github.com/sfernandez11">Santiago</a></li>
+<li><a class="reference external" href="https://github.com/toblich/UDrive/issues/15">Testear sin RocksDB</a> Realizado por <a class="reference external" href="https://github.com/toblich">Tobías</a></li>
+<li><a class="reference external" href="https://github.com/toblich/UDrive/issues/14">Agregar Batch a BD</a> Realizado por <a class="reference external" href="https://github.com/toblich">Tobías</a></li>
+<li><a class="reference external" href="https://github.com/toblich/UDrive/issues/13">Crear alternativa a base de datos</a> Realizado por <a class="reference external" href="https://github.com/toblich">Tobías</a></li>
+<li><a class="reference external" href="https://github.com/toblich/UDrive/issues/12">Hacer que el Server se empiece relacionar con la base de datos y el manejador de usuarios</a> Realizado por <a class="reference external" href="https://github.com/sfernandez11">Santiago</a></li>
+<li><a class="reference external" href="https://github.com/toblich/UDrive/issues/11">Procesar eventos de mongoose</a> Realizado por <a class="reference external" href="https://github.com/sfernandez11">Santiago</a></li>
+<li><a class="reference external" href="https://github.com/toblich/UDrive/issues/10">Crear ManejadorDeArchivosYMetadatos</a> Realizado por <a class="reference external" href="https://github.com/pciruzzi">Pablo</a></li>
+<li><a class="reference external" href="https://github.com/toblich/UDrive/issues/9">Pruebas unitarias de parserJson</a> Realizado por <a class="reference external" href="https://github.com/pciruzzi">Pablo</a></li>
+<li><a class="reference external" href="https://github.com/toblich/UDrive/issues/8">Activar Travis con UnitTests</a> Realizado por <a class="reference external" href="https://github.com/toblich">Tobías</a></li>
+<li><a class="reference external" href="https://github.com/toblich/UDrive/issues/7">No se pueden crear múltiples Bases de Datos</a> Realizado por <a class="reference external" href="https://github.com/toblich">Tobías</a></li>
+<li><a class="reference external" href="https://github.com/toblich/UDrive/issues/6">Implementar Excepciones en BaseDeDatos</a> Realizado por <a class="reference external" href="https://github.com/toblich">Tobías</a></li>
+<li><a class="reference external" href="https://github.com/toblich/UDrive/issues/5">Agregar autenticación de usuarios al servidor</a> Realizado por <a class="reference external" href="https://github.com/sfernandez11">Santiago</a></li>
+<li><a class="reference external" href="https://github.com/toblich/UDrive/issues/4">Crear cliente Android básico</a> Realizado por <a class="reference external" href="https://github.com/plandino">Francisco</a></li>
+<li><a class="reference external" href="https://github.com/toblich/UDrive/issues/3">JSON: Crear (des)serializador</a> Realizado por <a class="reference external" href="https://github.com/pciruzzi">Pablo</a></li>
+<li><a class="reference external" href="https://github.com/toblich/UDrive/issues/2">Crear un manejador básico de RocksDB</a> Realizado por <a class="reference external" href="https://github.com/plandino">Francisco</a></li>
+<li><a class="reference external" href="https://github.com/toblich/UDrive/issues/1">Crear server inicial</a> Realizado por <a class="reference external" href="https://github.com/sfernandez11">Santiago</a></li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="repositorio-del-cliente">
+<h3>Repositorio del cliente<a class="headerlink" href="#repositorio-del-cliente" title="Enlazar permanentemente con este título">¶</a></h3>
+<blockquote>
+<div><ul class="simple">
+<li><a class="reference external" href="https://github.com/plandino/clienteUdrive/issues/2">(ABIERTO) Embellecer la aplicación</a> Realizado por <a class="reference external" href="https://github.com/plandino">Francisco</a></li>
+<li><a class="reference external" href="https://github.com/plandino/clienteUdrive/issues/1">(ABIERTO) Terminar la subida de archivos desde el cliente al servidor</a> Realizado por <a class="reference external" href="https://github.com/plandino">Francisco</a></li>
+</ul>
+</div></blockquote>
+</div>
+</div>
+<div class="section" id="checkpoint-2-29-10-2015">
+<h2>Checkpoint 2 - 29/10/2015<a class="headerlink" href="#checkpoint-2-29-10-2015" title="Enlazar permanentemente con este título">¶</a></h2>
+<p>En este checkpoint se buscó seguir con las funcionalidades empezadas en el primer checkpoint, además de agregar nuevas funcionalidades. Entre ellas se destacan el hecho de poder dar permisos y los distintos tipos de búsquedas, además de poder eliminar, renombrar y restaurar archivos. Por parte del cliente, se implementó la utilización del GPS, además de que se acompañó el desarrollo hecho en el servidor para el compartido, renombrado, restaurado, la eliminación, las búsquedas de archivos. Por último, se comenzó la documentación del código del servidor con <a class="reference external" href="http://www.stack.nl/~dimitri/doxygen/">Doxygen</a>, además de la documentación de la API REST y la compilación e instalación de dependencias.</p>
+<div class="section" id="id30">
+<h3>Repositorio del servidor<a class="headerlink" href="#id30" title="Enlazar permanentemente con este título">¶</a></h3>
+<blockquote>
+<div><ul class="simple">
+<li><a class="reference external" href="https://github.com/toblich/UDrive/issues/49">(ABIERTO) Comenzar con la documentación del código en Doxygen</a> Realizado por <a class="reference external" href="https://github.com/pciruzzi">Pablo</a></li>
+<li><a class="reference external" href="https://github.com/toblich/UDrive/issues/48">Armar Changelog 2do checkpoint</a> Realizado por <a class="reference external" href="https://github.com/toblich">Tobías</a></li>
+<li><a class="reference external" href="https://github.com/toblich/UDrive/issues/47">Buscar usuarios que contengan string en su username</a> Realizado por <a class="reference external" href="https://github.com/toblich">Tobías</a></li>
+<li><a class="reference external" href="https://github.com/toblich/UDrive/issues/46">Actualizar la ultima ubicacion del usuario cuando se sube un archivo</a> Realizado por <a class="reference external" href="https://github.com/sfernandez11">Santiago</a></li>
+<li><a class="reference external" href="https://github.com/toblich/UDrive/issues/45">Agregar Multithreading en el servidor</a> Realizado por <a class="reference external" href="https://github.com/toblich">Tobías</a></li>
+<li><a class="reference external" href="https://github.com/toblich/UDrive/issues/42">Búsquedas en ManejadorArchivosYMetadatos</a> Realizado por <a class="reference external" href="https://github.com/pciruzzi">Pablo</a></li>
+<li><a class="reference external" href="https://github.com/toblich/UDrive/issues/41">TODO Papelera</a> Realizado por <a class="reference external" href="https://github.com/pciruzzi">Pablo</a></li>
+<li><a class="reference external" href="https://github.com/toblich/UDrive/issues/40">Hacer que el usuario pueda actualizar su foto de perfil</a> Realizado por <a class="reference external" href="https://github.com/sfernandez11">Santiago</a></li>
+<li><a class="reference external" href="https://github.com/toblich/UDrive/issues/39">Continuar funcionalidades de ManjeadorArchivosYMetadatos (ver detalle...)</a> Realizado por <a class="reference external" href="https://github.com/pciruzzi">Pablo</a></li>
+<li><a class="reference external" href="https://github.com/toblich/UDrive/issues/38">Hacer el manual de la API REST</a> Realizado por <a class="reference external" href="https://github.com/sfernandez11">Santiago</a></li>
+<li><a class="reference external" href="https://github.com/toblich/UDrive/issues/37">(ABIERTO) Agregar Coverage a Travis</a> Realizado por <a class="reference external" href="https://github.com/toblich">Tobías</a></li>
+<li><a class="reference external" href="https://github.com/toblich/UDrive/issues/36">Búsquedas en Metadata</a> Realizado por <a class="reference external" href="https://github.com/sfernandez11">Santiago</a></li>
+<li><a class="reference external" href="https://github.com/toblich/UDrive/issues/35">Agregar tests de integración a Travis</a> Realizado por <a class="reference external" href="https://github.com/toblich">Tobías</a></li>
+<li><a class="reference external" href="https://github.com/toblich/UDrive/issues/34">Verificar que el perfil actualizado siga siendo valido</a> Realizado por <a class="reference external" href="https://github.com/sfernandez11">Santiago</a></li>
+<li><a class="reference external" href="https://github.com/toblich/UDrive/issues/33">Refactor de los distintos realizadores de eventos</a> Realizado por <a class="reference external" href="https://github.com/toblich">Tobías</a></li>
+<li><a class="reference external" href="https://github.com/toblich/UDrive/issues/32">Agregar la parte de permisos al ManejadorArchivosYMetadatos</a> Realizado por <a class="reference external" href="https://github.com/pciruzzi">Pablo</a></li>
+<li><a class="reference external" href="https://github.com/toblich/UDrive/issues/31">Extender tests de integración</a> Realizado por <a class="reference external" href="https://github.com/toblich">Tobías</a></li>
+<li><a class="reference external" href="https://github.com/toblich/UDrive/issues/29">Metadata: poder actualizar los metadatos de los archivos</a> Realizado por <a class="reference external" href="https://github.com/sfernandez11">Santiago</a></li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="id49">
+<h3>Repositorio del cliente<a class="headerlink" href="#id49" title="Enlazar permanentemente con este título">¶</a></h3>
+<blockquote>
+<div><ul class="simple">
+<li><a class="reference external" href="https://github.com/plandino/clienteUdrive/issues/11">(ABIERTO) Poder buscar archivos por los distintos metadatos</a> Realizado por <a class="reference external" href="https://github.com/plandino">Francisco</a></li>
+<li><a class="reference external" href="https://github.com/plandino/clienteUdrive/issues/10">Hacer el acceso a la carpeta de archivos compartidos</a> Realizado por <a class="reference external" href="https://github.com/plandino">Francisco</a></li>
+<li><a class="reference external" href="https://github.com/plandino/clienteUdrive/issues/9">Hacer que se puedan eliminar y restaurar archivos desde la papelera</a> Realizado por <a class="reference external" href="https://github.com/plandino">Francisco</a></li>
+<li><a class="reference external" href="https://github.com/plandino/clienteUdrive/issues/8">(ABIERTO) Agregar usabilidad</a> Realizado por <a class="reference external" href="https://github.com/plandino">Francisco</a></li>
+<li><a class="reference external" href="https://github.com/plandino/clienteUdrive/issues/7">Mostrar foto de perfil en la activity de perfil</a> Realizado por <a class="reference external" href="https://github.com/plandino">Francisco</a></li>
+<li><a class="reference external" href="https://github.com/plandino/clienteUdrive/issues/6">Usar el GPS del telefono para obtener la ubicacion</a> Realizado por <a class="reference external" href="https://github.com/plandino">Francisco</a></li>
+<li><a class="reference external" href="https://github.com/plandino/clienteUdrive/issues/5">Crear un comportamiento correcto al moverse dentro de las carpetas y archivos</a> Realizado por <a class="reference external" href="https://github.com/plandino">Francisco</a></li>
+<li><a class="reference external" href="https://github.com/plandino/clienteUdrive/issues/4">Poder crear carpetas en el servidor desde el cliente</a> Realizado por <a class="reference external" href="https://github.com/plandino">Francisco</a></li>
+<li><a class="reference external" href="https://github.com/plandino/clienteUdrive/issues/3">Poder visualizar y modificar los metadatos de los archivos</a> Realizado por <a class="reference external" href="https://github.com/plandino">Francisco</a></li>
+<li><a class="reference external" href="https://github.com/plandino/clienteUdrive/issues/2">(ABIERTO) Embellecer la aplicación</a> Realizado por <a class="reference external" href="https://github.com/plandino">Francisco</a></li>
+<li><a class="reference external" href="https://github.com/plandino/clienteUdrive/issues/1">Terminar la subida de archivos desde el cliente al servidor</a> Realizado por <a class="reference external" href="https://github.com/plandino">Francisco</a></li>
+</ul>
+</div></blockquote>
+</div>
+</div>
+<div class="section" id="entrega-final-19-11-2015">
+<h2>Entrega Final - 19/11/2015<a class="headerlink" href="#entrega-final-19-11-2015" title="Enlazar permanentemente con este título">¶</a></h2>
+<p>Las funcionalidades entregadas en esta entrega ya contemplan todas las pedidas en el enunciado. Propiamente dicho, se hizo el versionado de archivos, además de un gran refactor de clases que habían quedado muy grandes. Por otro lado, se terminó de hacer todo lo requerido respecto de documentación (Tanto del servidor como del cliente), así como también se terminaron algunos detalles de funcionalidad que habían quedado a medio hacer.</p>
+<div class="section" id="id62">
+<h3>Repositorio del servidor<a class="headerlink" href="#id62" title="Enlazar permanentemente con este título">¶</a></h3>
+<blockquote>
+<div><ul class="simple">
+<li><a class="reference external" href="https://github.com/toblich/UDrive/issues/59">Tests de stress</a> Realizado por <a class="reference external" href="https://github.com/pciruzzi">Pablo</a></li>
+<li><a class="reference external" href="https://github.com/toblich/UDrive/issues/58">Actualización de una versión vieja</a> Realizado por <a class="reference external" href="https://github.com/toblich">Tobías</a></li>
+<li><a class="reference external" href="https://github.com/toblich/UDrive/issues/57">Cambiar espacios por ~ en los archivos bug</a> Realizado por <a class="reference external" href="https://github.com/plandino">Francisco</a></li>
+<li><a class="reference external" href="https://github.com/toblich/UDrive/issues/56">Hacer Documentación Técnica</a> Realizado por <a class="reference external" href="https://github.com/toblich">Tobías</a></li>
+<li><a class="reference external" href="https://github.com/toblich/UDrive/issues/55">Hacer Documentación de Administrador</a> Realizado por <a class="reference external" href="https://github.com/sfernandez11">Santiago</a></li>
+<li><a class="reference external" href="https://github.com/toblich/UDrive/issues/54">Hacer Documentación de Proyecto</a> Realizado por <a class="reference external" href="https://github.com/pciruzzi">Pablo</a></li>
+<li><a class="reference external" href="https://github.com/toblich/UDrive/issues/53">Hacer Manual de Usuario del Cliente</a> Realizado por <a class="reference external" href="https://github.com/plandino">Francisco</a></li>
+<li><a class="reference external" href="https://github.com/toblich/UDrive/issues/52">Revisar TODO&#8217;s del código enhancement Servidor</a> Realizado por <a class="reference external" href="https://github.com/pciruzzi">Pablo</a></li>
+<li><a class="reference external" href="https://github.com/toblich/UDrive/issues/51">Refactor: extraer paquetes</a> Realizado por <a class="reference external" href="https://github.com/toblich">Tobías</a></li>
+<li><a class="reference external" href="https://github.com/toblich/UDrive/issues/50">Refactor del Server y de las clases de la API REST</a> Realizado por <a class="reference external" href="https://github.com/sfernandez11">Santiago</a></li>
+<li><a class="reference external" href="https://github.com/toblich/UDrive/issues/49">Documentar el código con Doxygen</a> Realizado por <a class="reference external" href="https://github.com/sfernandez11">Santiago</a></li>
+<li><a class="reference external" href="https://github.com/toblich/UDrive/issues/44">Agregar Control de versiones</a> Realizado por <a class="reference external" href="https://github.com/toblich">Tobías</a></li>
+<li><a class="reference external" href="https://github.com/toblich/UDrive/issues/43">Partir ManejadorArchivosYMetadatos en clases más pequeñas</a> Realizado por <a class="reference external" href="https://github.com/pciruzzi">Pablo</a></li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="id76">
+<h3>Repositorio del cliente<a class="headerlink" href="#id76" title="Enlazar permanentemente con este título">¶</a></h3>
+<blockquote>
+<div><ul class="simple">
+<li><a class="reference external" href="https://github.com/plandino/clienteUdrive/issues/15">Generar documentacion</a> Realizado por <a class="reference external" href="https://github.com/plandino">Francisco</a></li>
+<li><a class="reference external" href="https://github.com/plandino/clienteUdrive/issues/14">Versionado de archivos</a> Realizado por <a class="reference external" href="https://github.com/plandino">Francisco</a></li>
+<li><a class="reference external" href="https://github.com/plandino/clienteUdrive/issues/13">Hacer que la sesion persista si no cierro sesion</a> Realizado por <a class="reference external" href="https://github.com/plandino">Francisco</a></li>
+<li><a class="reference external" href="https://github.com/plandino/clienteUdrive/issues/12">Ordenar codigo y repositorio.</a> Realizado por <a class="reference external" href="https://github.com/plandino">Francisco</a></li>
+<li><a class="reference external" href="https://github.com/plandino/clienteUdrive/issues/11">Poder buscar archivos por los distintos metadatos</a> Realizado por <a class="reference external" href="https://github.com/plandino">Francisco</a></li>
+<li><a class="reference external" href="https://github.com/plandino/clienteUdrive/issues/8">Agregar usabilidad</a> Realizado por <a class="reference external" href="https://github.com/plandino">Francisco</a></li>
+<li><a class="reference external" href="https://github.com/plandino/clienteUdrive/issues/2">Embellecer la aplicación</a> Realizado por <a class="reference external" href="https://github.com/plandino">Francisco</a></li>
+</ul>
+</div></blockquote>
+</div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="conclusion.html" class="btn btn-neutral float-right" title="Conclusión" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="gestion.html" class="btn btn-neutral" title="Gestión" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2015, Pablo Ciruzzi, Santiago Fernandez, Francisco Landino, Tobias Lichtig.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'1.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="_static/translations.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

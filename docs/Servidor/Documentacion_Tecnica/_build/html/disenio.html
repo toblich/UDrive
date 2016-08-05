@@ -1,0 +1,301 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Diseño y Clases &mdash; documentación de UDrive - 1.0</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="documentación de UDrive - 1.0" href="index.html"/>
+        <link rel="next" title="Código" href="codigo.html"/>
+        <link rel="prev" title="API REST" href="api_rest.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> UDrive
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="ambiente_de_desarrollo.html">Ambiente de desarrollo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api_rest.html">API REST</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Diseño y Clases</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#introduccion">Introducción</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#servidor">Servidor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#realizadores-de-eventos">Realizadores de Eventos</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#archivos-y-metadatos">Archivos y Metadatos</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#bases-de-datos">Bases de Datos</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#clases-utilitarias">Clases utilitarias</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#librerias-con-codigo-fuente">Librerías con código fuente</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="codigo.html">Código</a></li>
+<li class="toctree-l1"><a class="reference internal" href="librerias_y_compilacion.html">Dependencias y Compilación</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pruebas.html">Pruebas</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">UDrive</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>Diseño y Clases</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/disenio.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="diseno-y-clases">
+<h1>Diseño y Clases<a class="headerlink" href="#diseno-y-clases" title="Enlazar permanentemente con este título">¶</a></h1>
+<div class="section" id="introduccion">
+<h2>Introducción<a class="headerlink" href="#introduccion" title="Enlazar permanentemente con este título">¶</a></h2>
+<p>Inicialmente, se planteó definir un servidor que se apoyara en dos manejadores, el de usuarios y el de archivos y metadatos. A su vez, los manejadores, en la medida que fuese necesario, se volverían el acceso a subsistemas más complejos que resolviesen el manejo de los datos correspondientes. Además, se plantearon distintos realizadores de eventos para resolver pedidos relacionados a distintos tipos de recursos. Se agruparon también ciertas clases utilitarias en un paquete de herramientas, y las librerías externas por otro lado.</p>
+<p>Así se llegó al siguiente diseño de alto nivel:</p>
+<div class="figure align-center" id="id1">
+<a class="reference internal image-reference" href="_images/Paquetes.png"><img alt="_images/Paquetes.png" src="_images/Paquetes.png" style="width: 590.85px; height: 416.0px;" /></a>
+<p class="caption"><span class="caption-text">Relaciones entre clases principales y paquetes</span></p>
+</div>
+<p>A continuación se irán mostrando más en detalle las clases y los paquetes mostrados. Cabe remarcar que los diagramas solo muestran las relaciones principales, pudiendo haber algunas relaciones más entre clases, más débiles. Asimismo, no siempre incluyen todos los métodos y atributos, excluyéndose ocasionalmente los menos relevantes.</p>
+</div>
+<div class="section" id="servidor">
+<span id="server"></span><h2>Servidor<a class="headerlink" href="#servidor" title="Enlazar permanentemente con este título">¶</a></h2>
+<p>Particularmente, el servidor tiene internamente la información y las responsabilidades que se pueden ver en el siguiente diagrama:</p>
+<div class="figure align-center" id="id2">
+<a class="reference internal image-reference" href="_images/Server.png"><img alt="_images/Server.png" src="_images/Server.png" style="width: 339.0px; height: 321.0px;" /></a>
+<p class="caption"><span class="caption-text">Clase Server y su relación con los RealizadorDeEventos</span></p>
+</div>
+<p>También guarda punteros a las distintas bases de datos y manejadores de mayor nivel, únicamente para liberar la memoria usada una sola vez al cerrarse el servidor (e inmediatamente el programa).</p>
+</div>
+<div class="section" id="realizadores-de-eventos">
+<span id="realizadores"></span><h2>Realizadores de Eventos<a class="headerlink" href="#realizadores-de-eventos" title="Enlazar permanentemente con este título">¶</a></h2>
+<p>Para cada tipo de recurso que puede pedir el cliente, hay un tipo de <code class="docutils literal"><span class="pre">RealizadorDeEventos</span></code> específico. Consecuentemetne, el <code class="docutils literal"><span class="pre">Server</span></code> elige en función de la URI accedida a qué realizador le delega la responsabilidad de resolver el pedido en cuestión. La superclase abstracta provee un único método público, que actúa como <strong>template method</strong> usando los métodos protegidos que actúan ante cada verbo HTTP. La implementación default provista es responder al cliente que el método no está soportado en esa instancia, pero cada subclase redefinirá aquellos que le sean relevantes. También provee una variedad de respuestas básicas al cliente que usarán las subclases.</p>
+<p>A continuación se muestran aquellos relizadores de eventos relacionados al manejo de los usuarios, procesando todos los pedidos de registro o búsqueda de usuarios y lo relacionado a la sesión y los perfiles. El realizador de eventos <code class="docutils literal"><span class="pre">Profile</span></code> se asocia también con el <code class="docutils literal"><span class="pre">ManejadorArchivosYMetadatos</span></code> para el manejo de las fotos de perfil.</p>
+<div class="figure align-center" id="id3">
+<a class="reference internal image-reference" href="_images/RealizadoresUsuarios.png"><img alt="_images/RealizadoresUsuarios.png" src="_images/RealizadoresUsuarios.png" style="width: 797.6px; height: 636.8px;" /></a>
+<p class="caption"><span class="caption-text">Realizadores de Eventos que usan intensamente al ManejadorDeUsuarios</span></p>
+</div>
+<p>Para los pedidos más relacionados al <em>filesystem</em> (o sea sobre archivos propios, compartidos, borrados y carpetas) o a los metadatos de los archivos, se tienen otros derivados de <code class="docutils literal"><span class="pre">RealizadorDeEventos</span></code>:</p>
+<div class="figure align-center" id="id4">
+<a class="reference internal image-reference" href="_images/RealizadoresArchivos.png"><img alt="_images/RealizadoresArchivos.png" src="_images/RealizadoresArchivos.png" style="width: 1180.0px; height: 612.0px;" /></a>
+<p class="caption"><span class="caption-text">Realizadores de Eventos que usan intensamente al ManejadorArchivosYMetadatos</span></p>
+</div>
+</div>
+<div class="section" id="archivos-y-metadatos">
+<span id="archivosymetadatos"></span><h2>Archivos y Metadatos<a class="headerlink" href="#archivos-y-metadatos" title="Enlazar permanentemente con este título">¶</a></h2>
+<p>El siguiente diagrama resume las clases del paquete <code class="docutils literal"><span class="pre">archivosYMetadatos</span></code>. El <code class="docutils literal"><span class="pre">ManejadorArchivosYMetadatos</span></code> actúa como <strong>facade</strong> del subsistema, coordinando y delegando las acciones a las demás clases agregando poca funcionalidad pero simplificando considerablemente el manejo de archivos y metadatos conjuntamente.</p>
+<div class="figure align-center" id="id5">
+<a class="reference internal image-reference" href="_images/ArchivosYMetadatos.png"><img alt="_images/ArchivosYMetadatos.png" src="_images/ArchivosYMetadatos.png" style="width: 1232.0px; height: 812.0px;" /></a>
+<p class="caption"><span class="caption-text">Subsistema de archivos y metadatos (paquete archivosYMetadatos)</span></p>
+</div>
+</div>
+<div class="section" id="bases-de-datos">
+<span id="basesdedatos"></span><h2>Bases de Datos<a class="headerlink" href="#bases-de-datos" title="Enlazar permanentemente con este título">¶</a></h2>
+<p>Con una interfaz común (<code class="docutils literal"><span class="pre">BD</span></code>), se hicieron dos implementaciones de las bases de datos: una que encapsula el uso de la librería RocksDB (<code class="docutils literal"><span class="pre">BaseDeDatos</span></code>) y otra que otorga la misma funcionalidad pero en memoria y sin uso de librerías (<code class="docutils literal"><span class="pre">MapDB</span></code>, ampliamente usada para <em>testing</em>). Se vio entonces la necesidad de representar tambien un <em>batch</em> de manera independiente a la base de datos usada, por lo que se creó la clase <code class="docutils literal"><span class="pre">Batch</span></code> con los datos estructurados y enumerados necesarios.</p>
+<div class="figure align-center" id="id6">
+<a class="reference internal image-reference" href="_images/BD.png"><img alt="_images/BD.png" src="_images/BD.png" style="width: 654.4px; height: 475.2px;" /></a>
+<p class="caption"><span class="caption-text">Paquete db</span></p>
+</div>
+</div>
+<div class="section" id="clases-utilitarias">
+<span id="clasesutilitarias"></span><h2>Clases utilitarias<a class="headerlink" href="#clases-utilitarias" title="Enlazar permanentemente con este título">¶</a></h2>
+<p>Además de las clases ya nombradas hay un conjunto de herramientas auxiliares, algunas ampliamente usadas. Por lo tanto, en el paquete <code class="docutils literal"><span class="pre">util</span></code> están definidas:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="35%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Clases estáticas</th>
+<th class="head">Structs</th>
+<th class="head">Excepciones</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>ParserJson</td>
+<td>MetadatoArchivo</td>
+<td>KeyNotFound</td>
+</tr>
+<tr class="row-odd"><td>ParserURI</td>
+<td>MetadatoUsuario</td>
+<td>InvalidDBAction</td>
+</tr>
+<tr class="row-even"><td>Logger</td>
+<td>MetadatoSesion</td>
+<td>InvalidVersion</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="librerias-con-codigo-fuente">
+<span id="libreriasconcodigo"></span><h2>Librerías con código fuente<a class="headerlink" href="#librerias-con-codigo-fuente" title="Enlazar permanentemente con este título">¶</a></h2>
+<p>El paquete <code class="docutils literal"><span class="pre">libs</span></code> simplemente contiene los códigos fuente de aquellas librerías usadas no precompiladas. En particular, contiene los códigos de <code class="docutils literal"><span class="pre">mongoose</span></code> (para el servidor) y <code class="docutils literal"><span class="pre">jsoncpp</span></code> (para serializar y deserializar).</p>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="codigo.html" class="btn btn-neutral float-right" title="Código" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="api_rest.html" class="btn btn-neutral" title="API REST" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2015, Pablo Ciruzzi, Santiago Fernandez, Francisco Landino, Tobias Lichtig.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'1.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="_static/translations.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

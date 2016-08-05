@@ -1,0 +1,302 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Compilación y ejecución &mdash; documentación de UDrive - 1.0</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="documentación de UDrive - 1.0" href="index.html"/>
+        <link rel="next" title="Mantenimiento" href="mantenimiento.html"/>
+        <link rel="prev" title="Instalación y configuración" href="instalacion_y_configuracion.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> UDrive
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="get_started.html">Get Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="instalacion_y_configuracion.html">Instalación y configuración</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Compilación y ejecución</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#compilacion-y-ejecucion-manual-servidor-tests-unitarios-y-code-coverage">Compilación y Ejecución Manual (servidor, tests unitarios y code coverage)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#con-ejecucion-inmediata">Con ejecución inmediata</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sin-ejecucion-inmediata">Sin ejecución inmediata</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#compilacion-y-ejecucion-con-docker-servidor">Compilación y Ejecución con Docker (servidor)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="mantenimiento.html">Mantenimiento</a></li>
+<li class="toctree-l1"><a class="reference internal" href="known_issues_y_troubleshooting.html">Known Issues y Troubleshooting</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">UDrive</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>Compilación y ejecución</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/forma_de_uso.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="compilacion-y-ejecucion">
+<h1>Compilación y ejecución<a class="headerlink" href="#compilacion-y-ejecucion" title="Enlazar permanentemente con este título">¶</a></h1>
+<p>Tanto la compilación como la ejecución del Servidor de UDrive se pueden realizar de forma manual
+o de forma automática.</p>
+<p>De todas formas, para ambos casos se precisa tener un archivo <em>server.conf</em> dentro de donde se vaya a ejecutar <em>udrive</em>. Éste permite configurar algunos aspectos del servidor. El formato del mismo debe ser de tipo Json y debe contener los siguientes campos:</p>
+<blockquote>
+<div><ul class="simple">
+<li>&#8220;Nivel Log&#8221; : Indica con qué nivel de log se quiere ejecutar. Éste es un número entre 0 y 4, siendo 0 el nivel más bajo (Se logueará todo tipo de ) y 4 el nivel más alto (Se loguearán sólo errores graves), donde el resto de los niveles van en escala ascendente. Por defecto, el valor es 0.</li>
+<li>&#8220;Tamano max Log&#8221; : Indica qué tamaño, expresado en KB, será el máximo que soporte el Log. Una vez que supere esta capacidad, el Log se vacía y vuelve a comenzar. Por defecto, el valor es 1024 (Un MB).</li>
+<li>&#8220;FileSystem&#8221; : Indica cuál será la carpeta raíz del FileSystem. Por defecto, el valor es &#8220;FileSystem&#8221;.</li>
+<li>&#8220;Base de datos&#8221; : Indica cuál será la carpeta raíz de las bases de datos. Por defecto, el valor es &#8220;db&#8221;.</li>
+<li>&#8220;Cantidad threads&#8221; : Indica cuál es la cantidad de threads que se quiere que contenga el servidor. Su valor por defecto es 10.</li>
+<li>&#8220;Tiempo Poll Server&#8221; : Indica cuál es el tiempo que el server espera hasta leer próximos eventos. Su valor está en milisegundos, y por defecto es 1.</li>
+</ul>
+<p>A continuación mostramos un ejemplo de cómo quedaría el archivo <em>server.conf</em>:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="o">{</span>
+        <span class="s2">&quot;Nivel Log&quot;</span> : 4,
+        <span class="s2">&quot;Tamano max Log&quot;</span> : 1024,
+        <span class="s2">&quot;FileSystem&quot;</span> : <span class="s2">&quot;FileSystem&quot;</span>,
+        <span class="s2">&quot;Base de datos&quot;</span> : <span class="s2">&quot;db&quot;</span>,
+        <span class="s2">&quot;Cantidad threads&quot;</span> : 10,
+        <span class="s2">&quot;Tiempo Poll Server&quot;</span> : 1
+<span class="o">}</span>
+</pre></div>
+</div>
+</div></blockquote>
+<div class="section" id="compilacion-y-ejecucion-manual-servidor-tests-unitarios-y-code-coverage">
+<h2>Compilación y Ejecución Manual (servidor, tests unitarios y code coverage)<a class="headerlink" href="#compilacion-y-ejecucion-manual-servidor-tests-unitarios-y-code-coverage" title="Enlazar permanentemente con este título">¶</a></h2>
+<div class="section" id="con-ejecucion-inmediata">
+<h3>Con ejecución inmediata<a class="headerlink" href="#con-ejecucion-inmediata" title="Enlazar permanentemente con este título">¶</a></h3>
+<p>Habiendo instalado previamente todas las dependencias necesarias, indicadas en la sección <a class="reference external" href="instalacion_y_configuracion.html">Instalación y configuración</a> , ejecutar el script <code class="docutils literal"><span class="pre">build.sh</span></code> con la opción <em>-h</em> desde la raíz del proyecto. Este comando desplagará las distintas opciones de compilación del <em>Servidor</em> de <em>UDrive</em></p>
+<div class="figure align-center" id="id2">
+<a class="reference internal image-reference" href="_images/buildHelp.png"><img alt="_images/buildHelp.png" src="_images/buildHelp.png" style="width: 552.6px; height: 128.7px;" /></a>
+<p class="caption"><span class="caption-text">Opciones que desplega la opción <em>-h</em> del script <em>build.sh</em></span></p>
+</div>
+</div>
+<div class="section" id="sin-ejecucion-inmediata">
+<h3>Sin ejecución inmediata<a class="headerlink" href="#sin-ejecucion-inmediata" title="Enlazar permanentemente con este título">¶</a></h3>
+<p>Crear una carpeta <code class="docutils literal"><span class="pre">build</span></code> dentro de la raíz del proyecto. Dentro de esa carpeta, crear las carpetas <code class="docutils literal"><span class="pre">files</span></code> y <code class="docutils literal"><span class="pre">db</span></code>.
+Luego, desde allí ejecutar</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>cmake <span class="o">[</span>-D&lt;flag&gt;<span class="o">=</span>&lt;ON<span class="p">|</span>OFF&gt;<span class="o">]</span> ../
+make &lt;target&gt;
+</pre></div>
+</div>
+<dl class="docutils">
+<dt>Donde los <em>flags</em> pueden ser:</dt>
+<dd><ul class="first last simple">
+<li><em>rocksdb</em> - usar bases de datos persistentes en vez de mapas (volátiles) en memoria</li>
+<li><em>test</em> - habilita target <strong>unitTest</strong></li>
+<li><em>coverage</em> - realizar análisis de coverage (habilita targets <strong>unitTest</strong> y <strong>coverage</strong>).    Esta opción desactiva RocksDB y activa los tests unitarios. Prepara la compilación el servidor con mapas en memoria y de los tests unitarios.</li>
+</ul>
+</dd>
+<dt>Los <em>targets</em> pueden ser:</dt>
+<dd><ul class="first last simple">
+<li><em>udrive</em> - compila el servidor</li>
+<li><em>unitTests</em> - compila los tests unitarios</li>
+<li><em>coverage</em> - compila el servidor y los tests unitarios; ejecuta estos últimos y los de integración, guardando los resultados del análisis de coverage en la carpeta <code class="docutils literal"><span class="pre">coverage</span></code> dentro de la carpeta <code class="docutils literal"><span class="pre">build</span></code>.</li>
+</ul>
+</dd>
+</dl>
+</div>
+</div>
+<div class="section" id="compilacion-y-ejecucion-con-docker-servidor">
+<h2>Compilación y Ejecución con Docker (servidor)<a class="headerlink" href="#compilacion-y-ejecucion-con-docker-servidor" title="Enlazar permanentemente con este título">¶</a></h2>
+<p>Una vez que se tiene instalado Docker, tal como se indicada en la sección <a class="reference external" href="instalacion_y_configuracion.html">Instalación y configuración</a>, copiar el archivo <code class="docutils literal"><span class="pre">Dockerfile</span></code> a una carpeta vacía. Desde esa carpeta, ejecutar:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>sudo docker build -t udrive .
+sudo docker run -it -p 8080:8080 udrive
+</pre></div>
+</div>
+<p>La opción <code class="docutils literal"><span class="pre">-p</span></code> redirige el puerto 8080 de la computadora al 8080 de Docker.</p>
+<p>Estos dos comandos inicializan el entorno de Docker y compilan, ejecutan los test unitarios y finalmente lanzan el servidor de UDrive.</p>
+<p>Para poder conectarse con el Servidor, desde otra consola ejecutar:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>sudo docker ps <span class="p">|</span> grep udrive
+sudo docker inspect &lt;containerID&gt; <span class="p">|</span> grep IPAddress
+</pre></div>
+</div>
+<p>donde <code class="docutils literal"><span class="pre">&lt;containerID&gt;</span></code> es el ID del container obtenido en el primer comando.</p>
+<p>Finalmente con la IP obtenida en el último comando se podrá interactuar con el servidor (considerando que se lanza en el puerto 8080).</p>
+<div class="admonition note">
+<p class="first admonition-title">Nota</p>
+<p class="last">Para saber como interactuar con el Servidor ver el <a class="reference external" href="../../../Documentacion_Tecnica/_build/html/api_rest.html">Manual de la API REST</a> dentro de la <a class="reference external" href="../../../Documentacion_Tecnica/_build/html/index.html">Documentación Técnica del Servidor.</a></p>
+</div>
+<p>Para ver el log o el filesystem, o interactuar de cualquier otra forma con el contenedor que ejecuta el servidor, se sugiere iniciar una terminal del container de la siguiente manera:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">docker</span> <span class="n">ps</span> <span class="o">|</span> <span class="n">grep</span> <span class="n">udrive</span>
+<span class="n">sudo</span> <span class="n">docker</span> <span class="n">exec</span> <span class="o">-</span><span class="n">it</span> <span class="o">&lt;</span><span class="n">containerID</span><span class="o">&gt;</span> <span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">bash</span>
+</pre></div>
+</div>
+<p>donde <code class="docutils literal"><span class="pre">&lt;containerID&gt;</span></code> es el ID del container obtenido en el primer comando.</p>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="mantenimiento.html" class="btn btn-neutral float-right" title="Mantenimiento" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="instalacion_y_configuracion.html" class="btn btn-neutral" title="Instalación y configuración" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2015, Pablo Ciruzzi, Santiago Fernandez, Francisco Landino, Tobias Lichtig.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'1.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="_static/translations.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

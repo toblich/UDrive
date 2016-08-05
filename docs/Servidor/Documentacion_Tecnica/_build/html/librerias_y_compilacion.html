@@ -1,0 +1,314 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Dependencias y Compilación &mdash; documentación de UDrive - 1.0</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="documentación de UDrive - 1.0" href="index.html"/>
+        <link rel="next" title="Pruebas" href="pruebas.html"/>
+        <link rel="prev" title="Código" href="codigo.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> UDrive
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="ambiente_de_desarrollo.html">Ambiente de desarrollo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api_rest.html">API REST</a></li>
+<li class="toctree-l1"><a class="reference internal" href="disenio.html">Diseño y Clases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="codigo.html">Código</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Dependencias y Compilación</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#dependencias">Dependencias</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#g-4-9">G++ 4.9</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#cmake">CMake</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rocksdb">RocksDB</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gtest-para-ejecutar-los-tests">GTest (para ejecutar los tests)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#requests-para-tests-de-integracion-y-coverage">Requests (para tests de integración y coverage)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#lcov-para-analizar-coverage">LCOV (para analizar coverage)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#compilacion">Compilación</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#con-ejecucion-inmediata">Con ejecución inmediata</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sin-ejecucion-inmediata">Sin ejecución inmediata</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="pruebas.html">Pruebas</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">UDrive</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>Dependencias y Compilación</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/librerias_y_compilacion.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="dependencias-y-compilacion">
+<span id="dependenciasycompilacion"></span><h1>Dependencias y Compilación<a class="headerlink" href="#dependencias-y-compilacion" title="Enlazar permanentemente con este título">¶</a></h1>
+<p>El servidor en cuestión requiere tener los algunos programas y librerías instalados previamente.
+Esta guía de instalación está pensada para Ubuntu 14.04, aunque debería ser funcionar también
+con otras versiones de Ubuntu y ser análoga (con los manejadores de paquetes correspondientes)
+en otras versiones de Linux.</p>
+<div class="section" id="dependencias">
+<h2>Dependencias<a class="headerlink" href="#dependencias" title="Enlazar permanentemente con este título">¶</a></h2>
+<div class="section" id="g-4-9">
+<span id="gpp"></span><h3>G++ 4.9<a class="headerlink" href="#g-4-9" title="Enlazar permanentemente con este título">¶</a></h3>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+sudo apt-get update
+sudo apt-get install g++-4.9
+sudo apt-get upgrade
+</pre></div>
+</div>
+</div>
+<div class="section" id="cmake">
+<span id="id1"></span><h3>CMake<a class="headerlink" href="#cmake" title="Enlazar permanentemente con este título">¶</a></h3>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>sudo apt-get update
+sudo apt-get install cmake
+</pre></div>
+</div>
+</div>
+<div class="section" id="rocksdb">
+<span id="rocks"></span><h3>RocksDB<a class="headerlink" href="#rocksdb" title="Enlazar permanentemente con este título">¶</a></h3>
+<p>Ver <a class="reference external" href="https://github.com/facebook/rocksdb">RocksDB</a> y su guía de instalación
+(requiere a su vez <strong>libsnappy-dev</strong>, <strong>zlib1g-dev</strong> y <strong>libbz2-dev</strong>).</p>
+<p>Compilar con <code class="docutils literal"><span class="pre">make</span> <span class="pre">static_lib</span> <span class="pre">&amp;&amp;</span> <span class="pre">make</span> <span class="pre">install</span></code></p>
+<p>Alternativamente, ejecutar el script <code class="docutils literal"><span class="pre">docker/rocksdb.sh</span></code> habiendo instalado previamente
+<a class="reference internal" href="#gpp"><span class="std std-ref">G++ 4.9</span></a>, <em>libsnappy-dev</em>, <em>zlib1g-dev</em> y <em>libbz2-dev</em>.</p>
+</div>
+<div class="section" id="gtest-para-ejecutar-los-tests">
+<span id="gtest"></span><h3>GTest (para ejecutar los tests)<a class="headerlink" href="#gtest-para-ejecutar-los-tests" title="Enlazar permanentemente con este título">¶</a></h3>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>sudo apt-get install libgtest-dev
+<span class="nb">cd</span> /usr/src/gtest
+cmake CMakeLists.txt
+make
+cp *.a /usr/lib
+</pre></div>
+</div>
+<p>Alternativamente, ejecutar el script <code class="docutils literal"><span class="pre">docker/gtest.sh</span></code> habiendo instalado previamente <a class="reference internal" href="#cmake"><span class="std std-ref">CMake</span></a></p>
+</div>
+<div class="section" id="requests-para-tests-de-integracion-y-coverage">
+<span id="requests"></span><h3>Requests (para tests de integración y coverage)<a class="headerlink" href="#requests-para-tests-de-integracion-y-coverage" title="Enlazar permanentemente con este título">¶</a></h3>
+<p>Con <strong>pip</strong> instalado, ejecutar:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>sudo pip install requests
+</pre></div>
+</div>
+<p>De no tener pip, instalarlo anteriormente con:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>sudo apt-get install python-pip
+</pre></div>
+</div>
+</div>
+<div class="section" id="lcov-para-analizar-coverage">
+<span id="lcov"></span><h3>LCOV (para analizar coverage)<a class="headerlink" href="#lcov-para-analizar-coverage" title="Enlazar permanentemente con este título">¶</a></h3>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>sudo apt-get install lcov
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="compilacion">
+<h2>Compilación<a class="headerlink" href="#compilacion" title="Enlazar permanentemente con este título">¶</a></h2>
+<div class="section" id="con-ejecucion-inmediata">
+<h3>Con ejecución inmediata<a class="headerlink" href="#con-ejecucion-inmediata" title="Enlazar permanentemente con este título">¶</a></h3>
+<p>Ejecutar <code class="docutils literal"><span class="pre">build.sh</span> <span class="pre">-h</span></code> para ver las distintas opciones de compilación.
+Habiendo instalado previamente todas las dependencias necesarias para la opción elegida,
+ejecutar el script <code class="docutils literal"><span class="pre">build.sh</span></code> desde la raíz del proyecto
+con las opciones en cuestión.</p>
+</div>
+<div class="section" id="sin-ejecucion-inmediata">
+<h3>Sin ejecución inmediata<a class="headerlink" href="#sin-ejecucion-inmediata" title="Enlazar permanentemente con este título">¶</a></h3>
+<p>Crear una carpeta <code class="docutils literal"><span class="pre">build</span></code> dentro de la raíz del proyecto. Dentro de esa carpeta, crear las carpetas <code class="docutils literal"><span class="pre">files</span></code> y <code class="docutils literal"><span class="pre">db</span></code>.
+Luego, desde allí ejecutar</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>cmake <span class="o">[</span>-D&lt;flag&gt;<span class="o">=</span>&lt;ON<span class="p">|</span>OFF&gt;<span class="o">]</span> ../
+make &lt;target&gt;
+</pre></div>
+</div>
+<p>Donde los <em>flags</em> pueden ser:</p>
+<ul class="simple">
+<li><em>rocksdb</em> - usar bases de datos persistentes en vez de mapas (volátiles) en memoria</li>
+<li><em>test</em> - habilita target <strong>unitTest</strong></li>
+<li><em>coverage</em> - realizar análisis de coverage (habilita targets <strong>unitTest</strong> y <strong>coverage</strong>).    Esta opción desactiva RocksDB y activa los tests unitarios. Prepara la compilación el servidor con mapas en memoria y de los tests unitarios.</li>
+</ul>
+<p>Los <em>targets</em> pueden ser:</p>
+<ul class="simple">
+<li><em>udrive</em> - compila el servidor</li>
+<li><em>unitTests</em> - compila los tests unitarios</li>
+<li><em>coverage</em> - compila el servidor y los tests unitarios; ejecuta estos últimos y los de integración, guardando los resultados del análisis de coverage en la carpeta <code class="docutils literal"><span class="pre">coverage</span></code> dentro de la carpeta <code class="docutils literal"><span class="pre">build</span></code>.</li>
+</ul>
+</div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="pruebas.html" class="btn btn-neutral float-right" title="Pruebas" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="codigo.html" class="btn btn-neutral" title="Código" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2015, Pablo Ciruzzi, Santiago Fernandez, Francisco Landino, Tobias Lichtig.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'1.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="_static/translations.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
